@@ -13,12 +13,14 @@ text-align:center;
 padding:20px;
 }
 
-input{
-padding:10px;
+input,select{
+padding:12px;
 width:80%;
-margin:8px;
+max-width:400px;
+margin:8px auto;
 border-radius:6px;
 border:none;
+display:block;
 }
 
 button{
@@ -38,6 +40,7 @@ background:#e03e00;
 
 #status{
 color:#0f0;
+font-weight:bold;
 }
 </style>
 
@@ -45,32 +48,41 @@ color:#0f0;
 
 <body>
 
-<h2>Upload Anime</h2>
+<h2>🔐 ASI Admin Panel</h2>
 
-<input type="text" id="name" placeholder="Anime Name"><br>
-<input type="text" id="genre" placeholder="Genre"><br>
-<input type="text" id="link" placeholder="Short / Telegram Link"><br>
+<!-- Simple Admin Password -->
+<input type="password" id="adminPass" placeholder="Enter Password">
 
-<button onclick="openUpload()">📸 Select Image & Upload</button>
+<div id="adminPanel" style="display:none">
 
+<h3>Upload Anime / Episode</h3>
+
+<select id="animeSelect">
+<option value="">Select Anime</option>
+</select>
+
+<input type="text" id="episode" placeholder="Episode Number">
+<input type="text" id="link" placeholder="Episode Short Link">
+
+<button id="uploadImgBtn">📸 Upload Poster (Optional)</button>
 <p id="imgUrl">No Image Selected</p>
 
-<br>
-
-<button onclick="saveData()">💾 Save Anime Data</button>
+<button id="saveBtn">💾 Save Episode</button>
 
 <p id="status"></p>
+
+</div>
 
 <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc } 
+import { getFirestore, collection, getDocs, doc, updateDoc, arrayUnion } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig={
-apiKey:"AIzaSyA8Z3CvFTL402UF_6z9v1WLP8e_kZo1Q",
+apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
 authDomain:"asi-anime.firebaseapp.com",
 projectId:"asi-anime"
 };
@@ -80,7 +92,37 @@ const db=getFirestore(app);
 
 let uploadedImage="";
 
-window.openUpload=function(){
+/* Password Check */
+const passInput=document.getElementById("adminPass");
+const adminPanel=document.getElementById("adminPanel");
+
+passInput.addEventListener("input",()=>{
+if(passInput.value==="Animestudioio786"){
+adminPanel.style.display="block";
+}else{
+adminPanel.style.display="none";
+}
+});
+
+/* Load Anime List */
+async function loadAnimeList(){
+
+const snap=await getDocs(collection(db,"anime"));
+
+const select=document.getElementById("animeSelect");
+select.innerHTML="<option value=''>Select Anime</option>";
+
+snap.forEach(doc=>{
+let opt=document.createElement("option");
+opt.value=doc.id;
+opt.textContent=doc.data().name || "Unknown";
+select.appendChild(opt);
+});
+
+}
+
+/* Upload Image */
+document.getElementById("uploadImgBtn").addEventListener("click",()=>{
 
 let widget=cloudinary.createUploadWidget({
 cloudName:"dmxqosmk0",
@@ -95,41 +137,54 @@ document.getElementById("imgUrl").innerText="Image Uploaded ✅";
 
 widget.open();
 
-}
+});
 
-window.saveData=async function(){
+/* Save Episode */
+document.getElementById("saveBtn").addEventListener("click",async()=>{
 
-let name=document.getElementById("name").value;
-let genre=document.getElementById("genre").value;
+let animeId=document.getElementById("animeSelect").value;
+let episode=document.getElementById("episode").value;
 let link=document.getElementById("link").value;
 
-if(!name || !genre || !link){
-alert("Fill All Fields!");
-return;
-}
-
-if(!uploadedImage){
-alert("Upload Image First!");
+if(!animeId || !episode || !link){
+alert("Fill All Fields");
 return;
 }
 
 try{
 
-await addDoc(collection(db,"anime"),{
-name,
-genre,
-link,
-image:uploadedImage
-});
+document.getElementById("saveBtn").innerText="Saving...";
+document.getElementById("saveBtn").disabled=true;
 
-document.getElementById("status").innerText="Anime Saved ✅";
+let updateData={
+episodes:arrayUnion({
+ep:episode,
+link:link
+})
+};
+
+if(uploadedImage){
+updateData.image=uploadedImage;
+}
+
+await updateDoc(doc(db,"anime",animeId),updateData);
+
+document.getElementById("status").innerText="Episode Added ✅";
+
+document.getElementById("episode").value="";
+document.getElementById("link").value="";
 
 }catch(e){
-alert("Upload Failed ❌");
+alert("Upload Failed");
 console.error(e);
+}finally{
+document.getElementById("saveBtn").innerText="💾 Save Episode";
+document.getElementById("saveBtn").disabled=false;
 }
 
-}
+});
+
+loadAnimeList();
 
 </script>
 
