@@ -5,34 +5,96 @@
 <title>ASI Anime - Hindi Sub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="keywords" content="Hindi Subbed Anime, Anime hindi sub, Anime hindi subing, Anime hindi Subbed, Hindi subing anime">
-
-<link rel="stylesheet" href="style.css">
-
 <style>
-.anime-card{
-width:180px;
-background:#1e1e1e;
-margin:10px;
-border-radius:10px;
-overflow:hidden;
-cursor:pointer;
-transition:0.3s;
-}
-.anime-card img{
-width:100%;
-height:240px;
-object-fit:cover;
-}
-.anime-card p{
-padding:8px;
-text-align:center;
-}
-.anime-list{
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-}
+    body {
+        background: #121212;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: #ff4500;
+        flex-wrap: wrap; /* Mobile view ke liye */
+        gap: 10px;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .header-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .anime-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .anime-card {
+        width: 180px;
+        margin: 12px;
+        background: #1e1e1e;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .anime-card:hover {
+        transform: scale(1.05);
+    }
+
+    .anime-card img {
+        width: 100%;
+        height: 230px;
+        object-fit: cover;
+    }
+
+    .anime-card p {
+        text-align: center;
+        padding: 6px;
+        margin: 0;
+    }
+
+    .anime-title {
+        font-weight: bold;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    .anime-genre {
+        font-size: 12px;
+        color: #bbb;
+        margin-bottom: 5px;
+    }
+
+    select, input {
+        padding: 8px;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+    }
+
+    .message {
+        text-align: center;
+        margin-top: 50px;
+        font-size: 1.2rem;
+        color: #bbb;
+        width: 100%;
+    }
 </style>
 
 </head>
@@ -40,73 +102,116 @@ justify-content:center;
 <body>
 
 <header>
-<div class="logo">ASI Anime</div>
-<div class="right-menu">
-<input type="text" id="searchInput" placeholder="🔍 Search Anime...">
-<button id="menuBtn">⋮</button>
-</div>
+    <div class="logo">ASI Anime</div>
+    <div class="header-controls">
+        <input type="text" id="searchInput" placeholder="🔍 Search Anime">
+        <select id="genreFilter">
+            <option value="">All Genres</option>
+            <option value="Action">Action</option>
+            <option value="Adventure">Adventure</option>
+            <option value="Fantasy">Fantasy</option>
+            <option value="Romance">Romance</option>
+            <option value="Comedy">Comedy</option>
+            <option value="Horror">Horror</option>
+        </select>
+    </div>
 </header>
 
-<div class="dropdown" id="dropdownMenu">
-<a href="#">Genres</a>
-<a href="https://t.me/hindisubanime_q">Telegram GC</a>
-<a href="https://t.me/hindisubinganime">Telegram Channel</a>
-</div>
-
-<h2 class="sub-title">Anime Sub Io</h2>
-
-<main class="anime-list" id="animeList"></main>
-
-<div class="pagination">
-<button>«««Back</button>
-<button>Next»»»</button>
-</div>
+<main class="anime-list" id="animeList">
+    <div class="message">Loading Anime...</div>
+</main>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
-authDomain: "asi-anime.firebaseapp.com",
-projectId: "asi-anime",
-storageBucket: "asi-anime.firebasestorage.app",
-messagingSenderId: "1029720406470",
-appId: "1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
+    apiKey: "AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
+    authDomain: "asi-anime.firebaseapp.com",
+    projectId: "asi-anime"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const animeList = document.getElementById("animeList");
+const searchInput = document.getElementById("searchInput");
+const genreFilter = document.getElementById("genreFilter");
 
-async function loadAnime(){
+let allAnime = [];
 
-const query = await getDocs(collection(db,"anime"));
+async function loadAnime() {
+    try {
+        const snap = await getDocs(collection(db, "anime"));
+        allAnime = []; // Reset array
+        
+        snap.forEach(doc => {
+            allAnime.push({ id: doc.id, ...doc.data() });
+        });
 
-query.forEach(doc=>{
-let data = doc.data();
-
-let card = document.createElement("div");
-card.className="anime-card";
-
-card.innerHTML=`
-<img src="${data.image}">
-<p>${data.name}</p>
-<p>${data.genre}</p>
-`;
-
-card.onclick=()=>{
-window.open(data.link,"_blank");
-};
-
-animeList.appendChild(card);
-
-});
-
+        displayAnime(allAnime);
+    } catch (error) {
+        console.error("Error fetching data: ", error);
+        animeList.innerHTML = `<div class="message">Error Loading Data. Check Console.</div>`;
+    }
 }
 
+function displayAnime(list) {
+    animeList.innerHTML = "";
+
+    if (list.length === 0) {
+        animeList.innerHTML = `<div class="message">No Anime Found 😢</div>`;
+        return;
+    }
+
+    list.forEach(data => {
+        let card = document.createElement("div");
+        card.className = "anime-card";
+
+        // Agar database me image ya genre nahi hai toh app crash nahi hoga
+        const imgUrl = data.image || 'https://via.placeholder.com/180x230?text=No+Image';
+        const title = data.name || 'Unknown Title';
+        const genre = data.genre || 'Unknown Genre';
+
+        card.innerHTML = `
+            <img src="${imgUrl}" alt="${title}">
+            <p class="anime-title">${title}</p>
+            <p class="anime-genre">${genre}</p>
+        `;
+
+        card.onclick = () => {
+            if (data.link) {
+                window.open(data.link, "_blank");
+            } else {
+                alert("Link not available!");
+            }
+        };
+
+        animeList.appendChild(card);
+    });
+}
+
+// Ek hi function banaya jo Search aur Filter dono check karega
+function applyFilters() {
+    let searchValue = searchInput.value.toLowerCase();
+    let genreValue = genreFilter.value.toLowerCase();
+
+    let filtered = allAnime.filter(a => {
+        // Optional chaining fallback (a.name || "") use kiya gaya hai taki undefined ki wajah se error na aaye
+        let matchesSearch = (a.name || "").toLowerCase().includes(searchValue);
+        let matchesGenre = genreValue === "" || (a.genre || "").toLowerCase().includes(genreValue);
+        
+        return matchesSearch && matchesGenre;
+    });
+
+    displayAnime(filtered);
+}
+
+// "keyup" ki jagah "input" better hai (copy-paste karne par bhi detect karta hai)
+searchInput.addEventListener("input", applyFilters);
+genreFilter.addEventListener("change", applyFilters);
+
+// Initial Load
 loadAnime();
 
 </script>
