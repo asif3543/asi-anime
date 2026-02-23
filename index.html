@@ -86,17 +86,14 @@ text-decoration:none;
 <body>
 
 <header>
-
 <div class="logo">ASI Anime</div>
 
 <div class="right-menu">
 <input type="text" id="searchInput" placeholder="🔍 Search Anime">
 <button onclick="toggleMenu()">⋮</button>
 </div>
-
 </header>
 
-<!-- Tree Dot Menu -->
 <div class="dropdown" id="dropdownMenu">
 
 <h4>Genres</h4>
@@ -118,8 +115,8 @@ text-decoration:none;
 
 <hr>
 
-<a href="https://t.me/hindisubanime_q" target="_blank">📢 GC Link</a>
-<a href="https://t.me/hindisubinganime" target="_blank">📺 Channel Link</a>
+<a href="https://t.me/hindisubanime_q">📢 GC Link</a>
+<a href="https://t.me/hindisubinganime">📺 Channel Link</a>
 
 </div>
 
@@ -131,7 +128,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebas
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig={
-apiKey:"AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
+apiKey:"AIzaSyA8Z3CvFTL402UF_6z9v1iWLP8e_kZo1Q",
 authDomain:"asi-anime.firebaseapp.com",
 projectId:"asi-anime"
 };
@@ -146,8 +143,10 @@ async function loadAnime(){
 
 const snap=await getDocs(collection(db,"anime"));
 
+allAnime=[];
+
 snap.forEach(doc=>{
-allAnime.push(doc.data());
+allAnime.push({id:doc.id,...doc.data()});
 });
 
 displayAnime(allAnime);
@@ -169,7 +168,7 @@ card.innerHTML=`
 `;
 
 card.onclick=()=>{
-window.open(data.link,"_blank");
+window.location.href="anime.html?id="+data.id;
 };
 
 animeList.appendChild(card);
