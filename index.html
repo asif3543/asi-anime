@@ -9,9 +9,9 @@
 
 <!-- SEO -->
 <meta name="description" content="Watch Hindi Subbed Anime Online - ASI Anime">
-<meta name="keywords" content="Hindi Anime, Hindi Sub Anime, Anime Hindi Sub, Watch Anime Hindi">
 <meta name="robots" content="index, follow">
 
+<!-- Google Verification -->
 <meta name="google-site-verification" content="3LX6AtLTBpFLgq2q6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />
 
 <style>
@@ -38,7 +38,7 @@ font-weight:bold;
 }
 
 input{
-padding:8px;
+padding:10px;
 border-radius:6px;
 border:none;
 width:220px;
@@ -91,9 +91,8 @@ color:#aaa;
 <header>
 <div class="logo">ASI Anime</div>
 
-<div>
 <input type="text" id="searchInput" placeholder="🔍 Search Anime">
-</div>
+
 </header>
 
 <main id="animeList">
@@ -107,7 +106,7 @@ import { getFirestore, collection, getDocs }
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig={
-apiKey:"AIzaSyA8Z3CvFTL402UF_6z9v1iWLP8e_kZo1Q",
+apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
 authDomain:"asi-anime.firebaseapp.com",
 projectId:"asi-anime"
 };
@@ -147,10 +146,7 @@ let card=document.createElement("div");
 card.className="anime-card";
 
 card.innerHTML=`
-<img loading="lazy"
-onerror="this.src='https://via.placeholder.com/200'"
-src="${data.image || 'https://via.placeholder.com/200'}">
-
+<img loading="lazy" src="${data.image || 'https://via.placeholder.com/200'}">
 <p><b>${data.name || "Unknown"}</b></p>
 <p style="color:#aaa">${data.genre || ""}</p>
 `;
@@ -165,19 +161,15 @@ animeList.appendChild(card);
 
 }
 
-/* PRO SEARCH SYSTEM */
+/* Search Fix */
 document.getElementById("searchInput").addEventListener("input",e=>{
 
-let value=e.target.value.toLowerCase();
+let val=e.target.value.toLowerCase();
 
-let filtered=allAnime.filter(a=>{
-
-let name=(a.name||"").toLowerCase();
-let genre=(a.genre||"").toLowerCase();
-
-return name.includes(value) || genre.includes(value);
-
-});
+let filtered=allAnime.filter(a=>
+(a.name||"").toLowerCase().includes(val) ||
+(a.genre||"").toLowerCase().includes(val)
+);
 
 renderAnime(filtered);
 
