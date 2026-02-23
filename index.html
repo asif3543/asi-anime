@@ -3,15 +3,10 @@
 <head>
 
 <meta charset="UTF-8">
-<title>ASI Anime | Hindi Subbed Anime Watch Online</title>
+<title>ASI Anime | Hindi Sub</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- SEO -->
-<meta name="description" content="Watch Hindi Subbed Anime Online - ASI Anime">
-<meta name="robots" content="index, follow">
-
-<!-- Google Verification -->
 <meta name="google-site-verification" content="3LX6AtLTBpFLgq2q6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />
 
 <style>
@@ -37,11 +32,16 @@ font-size:24px;
 font-weight:bold;
 }
 
-input{
-padding:10px;
+.right-menu{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+input,select{
+padding:8px;
 border-radius:6px;
 border:none;
-width:220px;
 }
 
 .anime-list{
@@ -67,19 +67,27 @@ transform:scale(1.05);
 width:100%;
 height:220px;
 object-fit:cover;
-display:block;
 }
 
 .anime-card p{
 text-align:center;
 margin:6px;
-font-size:14px;
 }
 
-.loading{
-text-align:center;
-padding:40px;
-color:#aaa;
+.dropdown{
+display:none;
+position:absolute;
+right:20px;
+background:#222;
+padding:15px;
+border-radius:10px;
+}
+
+.dropdown a{
+display:block;
+color:white;
+padding:8px;
+text-decoration:none;
 }
 
 </style>
@@ -89,14 +97,68 @@ color:#aaa;
 <body>
 
 <header>
+
 <div class="logo">ASI Anime</div>
 
+<div class="right-menu">
 <input type="text" id="searchInput" placeholder="🔍 Search Anime">
+<button onclick="toggleMenu()">⋮</button>
+</div>
 
 </header>
 
-<main id="animeList">
-<div class="loading">Loading Anime...</div>
+<!-- Dropdown Menu -->
+<div class="dropdown" id="dropdownMenu">
+
+<h4>Genres</h4>
+
+<a href="#" onclick="filterGenre('Action')">Action</a>
+<a href="#" onclick="filterGenre('Adventure')">Adventure</a>
+<a href="#" onclick="filterGenre('Fantasy')">Fantasy</a>
+<a href="#" onclick="filterGenre('Isekai')">Isekai</a>
+<a href="#" onclick="filterGenre('Romance')">Romance</a>
+<a href="#" onclick="filterGenre('Comedy')">Comedy</a>
+<a href="#" onclick="filterGenre('Drama')">Drama</a>
+<a href="#" onclick="filterGenre('Horror')">Horror</a>
+<a href="#" onclick="filterGenre('Action')">Action</a>
+<a href="#" onclick="filterGenre('Adventure')">Adventure</a>
+<a href="#" onclick="filterGenre('Fantasy')">Fantasy</a>
+<a href="#" onclick="filterGenre('Isekai')">Isekai</a>
+<a href="#" onclick="filterGenre('Romance')">Romance</a>
+<a href="#" onclick="filterGenre('Comedy')">Comedy</a>
+<a href="#" onclick="filterGenre('Drama')">Drama</a>
+<a href="#" onclick="filterGenre('Horror')">Horror</a>
+<a href="#" onclick="filterGenre('Mystery')">Mystery</a>
+<a href="#" onclick="filterGenre('Thriller')">Thriller</a>
+<a href="#" onclick="filterGenre('Superpower')">Superpower</a>
+<a href="#" onclick="filterGenre('Supernatural')">Supernatural</a>
+<a href="#" onclick="filterGenre('School')">School</a>
+<a href="#" onclick="filterGenre('Shounen')">Shounen</a>
+<a href="#" onclick="filterGenre('Shoujo')">Shoujo</a>
+<a href="#" onclick="filterGenre('Seinen')">Seinen</a>
+<a href="#" onclick="filterGenre('Josei')">Josei</a>
+<a href="#" onclick="filterGenre('Slice of Life')">Slice of Life</a>
+<a href="#" onclick="filterGenre('Sports')">Sports</a>
+<a href="#" onclick="filterGenre('Music')">Music</a>
+<a href="#" onclick="filterGenre('Mecha')">Mecha</a>
+<a href="#" onclick="filterGenre('Military')">Military</a>
+<a href="#" onclick="filterGenre('Parody')">Parody</a>
+<a href="#" onclick="filterGenre('Ecchi')">Ecchi</a>
+<a href="#" onclick="filterGenre('Harem')">Harem</a>
+<a href="#" onclick="filterGenre('Psychological')">Psychological</a>
+<a href="#" onclick="filterGenre('Demons')">Demons</a>
+<a href="#" onclick="filterGenre('Vampire')">Vampire</a>
+<a href="#" onclick="filterGenre('Historical')">Historical</a>
+<a href="#" onclick="filterGenre('Martial Arts')">Martial Arts</a>
+<hr>
+
+<a href="https://t.me/hindisubanime_q" target="_blank">📢 GC Link</a>
+<a href="https://t.me/hindisubinganime" target="_blank">📺 Channel Link</a>
+
+</div>
+
+<main class="anime-list" id="animeList">
+<div style="text-align:center">Loading Anime...</div>
 </main>
 
 <script type="module">
@@ -127,18 +189,13 @@ snap.forEach(doc=>{
 allAnime.push({id:doc.id,...doc.data()});
 });
 
-renderAnime(allAnime);
+displayAnime(allAnime);
 }
 
-/* Display Cards */
-function renderAnime(list){
+/* Display */
+function displayAnime(list){
 
 animeList.innerHTML="";
-
-if(list.length===0){
-animeList.innerHTML="<h3 style='text-align:center'>No Anime Found 😢</h3>";
-return;
-}
 
 list.forEach(data=>{
 
@@ -146,9 +203,9 @@ let card=document.createElement("div");
 card.className="anime-card";
 
 card.innerHTML=`
-<img loading="lazy" src="${data.image || 'https://via.placeholder.com/200'}">
-<p><b>${data.name || "Unknown"}</b></p>
-<p style="color:#aaa">${data.genre || ""}</p>
+<img src="${data.image}">
+<p><b>${data.name}</b></p>
+<p style="color:#aaa">${data.genre}</p>
 `;
 
 card.onclick=()=>{
@@ -161,7 +218,7 @@ animeList.appendChild(card);
 
 }
 
-/* Search Fix */
+/* Search */
 document.getElementById("searchInput").addEventListener("input",e=>{
 
 let val=e.target.value.toLowerCase();
@@ -171,9 +228,26 @@ let filtered=allAnime.filter(a=>
 (a.genre||"").toLowerCase().includes(val)
 );
 
-renderAnime(filtered);
+displayAnime(filtered);
 
 });
+
+/* Genre Filter */
+window.filterGenre=function(g){
+
+let filtered=allAnime.filter(a=>
+(a.genre||"").toLowerCase().includes(g.toLowerCase())
+);
+
+displayAnime(filtered);
+toggleMenu();
+}
+
+/* Menu Toggle */
+window.toggleMenu=function(){
+let menu=document.getElementById("dropdownMenu");
+menu.style.display = menu.style.display==="block" ? "none":"block";
+}
 
 loadAnime();
 
