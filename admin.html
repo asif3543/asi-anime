@@ -1,85 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ASI Admin Panel</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASI Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<body>
 
-<script>
-  const password = "Animestudioio786";
-  const userPass = prompt("Enter Admin Password:");
-  if (userPass !== password) {
-    alert("Access Denied");
-    window.location.href = "index.html";
-  }
-</script>
+<body>
 
 <h2>Upload Anime</h2>
 
-<form id="animeForm">
-  <input type="text" id="name" placeholder="Anime Name" required><br><br>
-  <input type="text" id="genre" placeholder="Genre" required><br><br>
-  <input type="text" id="link" placeholder="Telegram / Short Link" required><br><br>
-  <input type="file" id="image" accept="image/*" required><br><br>
-  <button type="submit">Upload</button>
-</form>
+<input type="text" id="name" placeholder="Anime Name"><br><br>
+<input type="text" id="genre" placeholder="Genre"><br><br>
+<input type="text" id="link" placeholder="Telegram / Short Link"><br><br>
+
+<input type="file" id="fileInput" accept="image/*"><br><br>
+
+<button onclick="uploadAnime()">Upload</button>
 
 <p id="status"></p>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
-  authDomain: "asi-anime.firebaseapp.com",
-  projectId: "asi-anime",
-  storageBucket: "asi-anime.firebasestorage.app",
-  messagingSenderId: "1029720406470",
-  appId: "1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
+apiKey:"AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
+authDomain:"asi-anime.firebaseapp.com",
+projectId:"asi-anime",
+storageBucket:"asi-anime.appspot.com",
+messagingSenderId:"1029720406470",
+appId:"1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const form = document.getElementById("animeForm");
-const status = document.getElementById("status");
+window.uploadAnime = async function(){
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  status.innerText = "Uploading...";
+let name = document.getElementById("name").value;
+let genre = document.getElementById("genre").value;
+let link = document.getElementById("link").value;
+let file = document.getElementById("fileInput").files[0];
 
-  const name = document.getElementById("name").value;
-  const genre = document.getElementById("genre").value;
-  const link = document.getElementById("link").value;
-  const file = document.getElementById("image").files[0];
+if(!file){
+alert("Image select karo");
+return;
+}
 
-  const cloudName = "dmxqosmk0";
-  const uploadPreset = "asi_anime_upload";
+document.getElementById("status").innerText="Uploading...";
 
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", uploadPreset);
+let formData = new FormData();
+formData.append("file", file);
+formData.append("upload_preset","asi_anime_upload");
 
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-    method: "POST",
-    body: formData
-  });
-
-  const data = await res.json();
-  const imageUrl = data.secure_url;
-
-  await addDoc(collection(db, "anime"), {
-    name: name,
-    genre: genre,
-    link: link,
-    image: imageUrl
-  });
-
-  status.innerText = "Upload Successful ✅";
-  form.reset();
+let res = await fetch(
+"https://api.cloudinary.com/v1_1/dmxqosmk0/image/upload",
+{
+method:"POST",
+body:formData
 });
+
+let data = await res.json();
+
+await addDoc(collection(db,"anime"),{
+name:name,
+genre:genre,
+link:link,
+image:data.secure_url
+});
+
+document.getElementById("status").innerText="Upload Successful ✅";
+
+}
+
 </script>
 
 </body>
