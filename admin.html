@@ -3,72 +3,86 @@
 <head>
 <title>ASI Admin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+font-family:Arial;
+background:#121212;
+color:white;
+text-align:center;
+padding:20px;
+}
+
+input{
+padding:10px;
+width:80%;
+margin:8px;
+border-radius:6px;
+border:none;
+}
+
+button{
+padding:12px 20px;
+margin:10px;
+background:#ff4500;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#e03e00;
+}
+
+#status{
+color:#0f0;
+}
+</style>
+
 </head>
 
 <body>
 
 <h2>Upload Anime</h2>
 
-<input type="text" id="name" placeholder="Anime Name"><br><br>
-<input type="text" id="genre" placeholder="Genre"><br><br>
-<input type="text" id="link" placeholder="Short Link"><br><br>
+<input type="text" id="name" placeholder="Anime Name"><br>
+<input type="text" id="genre" placeholder="Genre"><br>
+<input type="text" id="link" placeholder="Short / Telegram Link"><br>
 
-<button onclick="openUpload()">Select Image & Upload</button>
+<button onclick="openUpload()">📸 Select Image & Upload</button>
 
-<p id="imgUrl"></p>
+<p id="imgUrl">No Image Selected</p>
 
 <br>
 
-<button onclick="saveData()">Save Anime Data</button>
+<button onclick="saveData()">💾 Save Anime Data</button>
 
 <p id="status"></p>
+
+<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig={
-apiKey:"AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
+apiKey:"AIzaSyA8Z3CvFTL402UF_6z9v1WLP8e_kZo1Q",
 authDomain:"asi-anime.firebaseapp.com",
 projectId:"asi-anime"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
 let uploadedImage="";
 
-window.saveData = async function(){
+window.openUpload=function(){
 
-let name=document.getElementById("name").value;
-let genre=document.getElementById("genre").value;
-let link=document.getElementById("link").value;
-
-if(!uploadedImage){
-alert("Image upload karo");
-return;
-}
-
-await addDoc(collection(db,"anime"),{
-name,
-genre,
-link,
-image:uploadedImage
-});
-
-document.getElementById("status").innerText="Saved ✅";
-
-}
-
-</script>
-
-<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
-
-<script>
-window.openUpload = function(){
-
-let widget = cloudinary.createUploadWidget({
+let widget=cloudinary.createUploadWidget({
 cloudName:"dmxqosmk0",
 uploadPreset:"asi_anime_upload"
 },
@@ -80,7 +94,43 @@ document.getElementById("imgUrl").innerText="Image Uploaded ✅";
 });
 
 widget.open();
+
 }
+
+window.saveData=async function(){
+
+let name=document.getElementById("name").value;
+let genre=document.getElementById("genre").value;
+let link=document.getElementById("link").value;
+
+if(!name || !genre || !link){
+alert("Fill All Fields!");
+return;
+}
+
+if(!uploadedImage){
+alert("Upload Image First!");
+return;
+}
+
+try{
+
+await addDoc(collection(db,"anime"),{
+name,
+genre,
+link,
+image:uploadedImage
+});
+
+document.getElementById("status").innerText="Anime Saved ✅";
+
+}catch(e){
+alert("Upload Failed ❌");
+console.error(e);
+}
+
+}
+
 </script>
 
 </body>
