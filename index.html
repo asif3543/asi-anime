@@ -9,12 +9,10 @@
 
 <!-- SEO -->
 <meta name="description" content="Watch Hindi Subbed Anime Online - ASI Anime">
+<meta name="keywords" content="Hindi Anime, Hindi Sub Anime, Anime Hindi Sub, Watch Anime Hindi">
 <meta name="robots" content="index, follow">
 
-<!-- Google Verification -->
 <meta name="google-site-verification" content="3LX6AtLTBpFLgq2q6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />
-
-</head>
 
 <style>
 
@@ -149,7 +147,10 @@ let card=document.createElement("div");
 card.className="anime-card";
 
 card.innerHTML=`
-<img loading="lazy" src="${data.image || 'https://via.placeholder.com/200'}">
+<img loading="lazy"
+onerror="this.src='https://via.placeholder.com/200'"
+src="${data.image || 'https://via.placeholder.com/200'}">
+
 <p><b>${data.name || "Unknown"}</b></p>
 <p style="color:#aaa">${data.genre || ""}</p>
 `;
@@ -164,14 +165,19 @@ animeList.appendChild(card);
 
 }
 
-/* Search */
+/* PRO SEARCH SYSTEM */
 document.getElementById("searchInput").addEventListener("input",e=>{
 
-let val=e.target.value.toLowerCase();
+let value=e.target.value.toLowerCase();
 
-let filtered=allAnime.filter(a=>
-(a.name||"").toLowerCase().includes(val)
-);
+let filtered=allAnime.filter(a=>{
+
+let name=(a.name||"").toLowerCase();
+let genre=(a.genre||"").toLowerCase();
+
+return name.includes(value) || genre.includes(value);
+
+});
 
 renderAnime(filtered);
 
