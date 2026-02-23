@@ -1,1 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ASI Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
 
+<script>
+  const password = "Animestudioio786";
+  const userPass = prompt("Enter Admin Password:");
+  if (userPass !== password) {
+    alert("Access Denied");
+    window.location.href = "index.html";
+  }
+</script>
+
+<h2>Upload Anime</h2>
+
+<form id="animeForm">
+  <input type="text" id="name" placeholder="Anime Name" required><br><br>
+  <input type="text" id="genre" placeholder="Genre" required><br><br>
+  <input type="text" id="link" placeholder="Telegram / Short Link" required><br><br>
+  <input type="file" id="image" accept="image/*" required><br><br>
+  <button type="submit">Upload</button>
+</form>
+
+<p id="status"></p>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
+  authDomain: "asi-anime.firebaseapp.com",
+  projectId: "asi-anime",
+  storageBucket: "asi-anime.firebasestorage.app",
+  messagingSenderId: "1029720406470",
+  appId: "1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const form = document.getElementById("animeForm");
+const status = document.getElementById("status");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  status.innerText = "Uploading...";
+
+  const name = document.getElementById("name").value;
+  const genre = document.getElementById("genre").value;
+  const link = document.getElementById("link").value;
+  const file = document.getElementById("image").files[0];
+
+  const cloudName = "dmxqosmk0";
+  const uploadPreset = "asi_anime_upload";
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+  const imageUrl = data.secure_url;
+
+  await addDoc(collection(db, "anime"), {
+    name: name,
+    genre: genre,
+    link: link,
+    image: imageUrl
+  });
+
+  status.innerText = "Upload Successful ✅";
+  form.reset();
+});
+</script>
+
+</body>
+</html>
