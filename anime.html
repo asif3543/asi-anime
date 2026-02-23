@@ -1,9 +1,3 @@
-code
-Html
-play_circle
-download
-content_copy
-expand_less
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,51 +6,64 @@ expand_less
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-    body {
-        background: #121212;
-        color: white;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 20px;
-        margin: 0;
-    }
+body{
+background:#121212;
+color:white;
+font-family:Arial;
+text-align:center;
+padding:20px;
+margin:0;
+}
 
-    img {
-        width: 250px;
-        border-radius: 10px;
-        margin-top: 20px;
-        display: none; /* Image load hone se pehle broken icon na dikhe */
-        object-fit: cover;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
+img{
+width:250px;
+border-radius:10px;
+margin-top:20px;
+display:none;
+object-fit:cover;
+box-shadow:0 4px 10px rgba(0,0,0,0.5);
+}
 
-    button {
-        padding: 12px 20px;
-        margin-top: 20px;
-        background: #ff4500;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: bold;
-        transition: 0.3s;
-    }
+button{
+padding:12px 20px;
+margin-top:20px;
+background:#ff4500;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-size:16px;
+font-weight:bold;
+transition:0.3s;
+}
 
-    button:hover {
-        background: #e03e00;
-    }
+button:hover{
+background:#e03e00;
+}
 
-    /* Agar button disable ho */
-    button:disabled {
-        background: #555;
-        cursor: not-allowed;
-    }
+button:disabled{
+background:#555;
+cursor:not-allowed;
+}
 
-    .info-text {
-        color: #bbb;
-        margin-top: 10px;
-    }
+.info-text{
+color:#bbb;
+margin-top:10px;
+}
+
+#episodeList{
+margin-top:30px;
+}
+
+.epBtn{
+padding:10px 15px;
+margin:6px;
+background:#ff4500;
+border:none;
+border-radius:6px;
+color:white;
+cursor:pointer;
+}
 </style>
 </head>
 
@@ -64,75 +71,100 @@ expand_less
 
 <h2 id="animeName">Loading Anime...</h2>
 
-<img id="animeImg" alt="Anime Poster">
+<img id="animeImg">
 
 <p id="animeGenre" class="info-text"></p>
 <p id="animeDesc" class="info-text"></p>
 
-<button id="watchBtn" style="display: none;">▶ Watch Anime</button>
+<button id="watchBtn" style="display:none;">▶ Watch Anime</button>
+
+<div id="episodeList"></div>
 
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
-    authDomain: "asi-anime.firebaseapp.com",
-    projectId: "asi-anime"
+const firebaseConfig={
+apiKey:"AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
+authDomain:"asi-anime.firebaseapp.com",
+projectId:"asi-anime"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
 
-const params = new URLSearchParams(window.location.search);
-const id = params.get("id");
+const params=new URLSearchParams(window.location.search);
+const id=params.get("id");
 
-async function loadDetail() {
-    // Agar URL me ID hi nahi hai toh process yahi rok do
-    if (!id) {
-        document.getElementById("animeName").innerText = "Anime ID Missing!";
-        return;
-    }
+async function loadDetail(){
 
-    try {
-        const snap = await getDoc(doc(db, "anime", id));
+if(!id){
+document.getElementById("animeName").innerText="Anime ID Missing!";
+return;
+}
 
-        // Check karte hain ki us ID ka data firebase me hai ya nahi
-        if (snap.exists()) {
-            let data = snap.data();
+try{
 
-            document.getElementById("animeName").innerText = data.name || "Unknown Anime";
-            
-            // Image handle karna
-            const imgElement = document.getElementById("animeImg");
-            imgElement.src = data.image || "https://via.placeholder.com/250x350?text=No+Image";
-            imgElement.style.display = "inline-block"; // Image milne par hi show karo
+const snap=await getDoc(doc(db,"anime",id));
 
-            document.getElementById("animeGenre").innerText = data.genre ? `Genre: ${data.genre}` : "Genre: Unknown";
-            document.getElementById("animeDesc").innerText = data.description || "No Description available.";
+if(!snap.exists()){
+document.getElementById("animeName").innerText="Anime Not Found 😢";
+return;
+}
 
-            // Button handle karna
-            const watchBtn = document.getElementById("watchBtn");
-            watchBtn.style.display = "inline-block"; // Button ab dikhao
-            
-            if (data.link) {
-                watchBtn.onclick = () => {
-                    window.open(data.link, "_blank");
-                };
-            } else {
-                watchBtn.innerText = "Link Not Available";
-                watchBtn.disabled = true;
-            }
+let data=snap.data();
 
-        } else {
-            // Agar Database me vo Anime delete ho gaya ho
-            document.getElementById("animeName").innerText = "Anime Not Found 😢";
-        }
-        
-    } catch (error) {
-        console.error("Error loading data:", error);
-        document.getElementById("animeName").innerText = "Error Loading Details!";
-    }
+/* Basic Info */
+document.getElementById("animeName").innerText=data.name||"Unknown Anime";
+
+const img=document.getElementById("animeImg");
+img.src=data.image||"https://via.placeholder.com/250x350";
+img.style.display="inline-block";
+
+document.getElementById("animeGenre").innerText="Genre: "+(data.genre||"Unknown");
+document.getElementById("animeDesc").innerText=data.description||"No Description";
+
+/* Watch Button */
+const watchBtn=document.getElementById("watchBtn");
+watchBtn.style.display="inline-block";
+
+if(data.link){
+watchBtn.onclick=()=>{
+window.open(data.link,"_blank");
+};
+}
+else{
+watchBtn.innerText="Link Not Available";
+watchBtn.disabled=true;
+}
+
+/* ⭐ Episode System */
+const episodeList=document.getElementById("episodeList");
+
+if(data.episodes){
+
+data.episodes.forEach(ep=>{
+
+let btn=document.createElement("button");
+btn.className="epBtn";
+btn.innerText="Episode "+ep.ep;
+
+btn.onclick=()=>{
+window.open(ep.link,"_blank");
+};
+
+episodeList.appendChild(btn);
+
+});
+
+}
+
+}catch(error){
+console.error(error);
+document.getElementById("animeName").innerText="Error Loading Data";
+}
+
 }
 
 loadDetail();
@@ -141,18 +173,3 @@ loadDetail();
 
 </body>
 </html>
-Note for Home Page Integration (Pichle code ke liye)
-
-Aapke pehle wale (Home Page) code me jab user kisi card par click kare, toh link me id bhejna padega tabhi ye detail page open hoga.
-
-Aapke pichle home page code me card ke onClick me ye hona chahiye:
-
-code
-JavaScript
-download
-content_copy
-expand_less
-card.onclick = () => {
-    // Yahan "detail.html" ko aapke is naye page ka naam maan liya hai
-    window.location.href = `detail.html?id=${data.id}`; 
-};
