@@ -38,9 +38,9 @@ button:hover{
 background:#e03e00;
 }
 
-#status{
-color:#0f0;
-font-weight:bold;
+h3{
+color:#ff9800;
+margin-top:40px;
 }
 </style>
 
@@ -50,24 +50,33 @@ font-weight:bold;
 
 <h2>🔐 ASI Admin Panel</h2>
 
-<!-- Simple Admin Password -->
 <input type="password" id="adminPass" placeholder="Enter Password">
 
 <div id="adminPanel" style="display:none">
 
-<h3>Upload Anime / Episode</h3>
+<h3>🟢 Add New Anime</h3>
+
+<input id="newName" placeholder="Anime Name">
+<input id="newGenre" placeholder="Genre">
+<input id="newLink" placeholder="Anime Redirect Link">
+
+<button id="uploadImgBtn">📸 Upload Image</button>
+<p id="imgText">No Image</p>
+
+<button id="addAnimeBtn">💾 Save New Anime</button>
+
+<hr>
+
+<h3>🔴 Add Episode</h3>
 
 <select id="animeSelect">
 <option value="">Select Anime</option>
 </select>
 
-<input type="text" id="episode" placeholder="Episode Number">
-<input type="text" id="link" placeholder="Episode Short Link">
+<input id="episode" placeholder="Episode Number">
+<input id="episodeLink" placeholder="Episode Link">
 
-<button id="uploadImgBtn">📸 Upload Poster (Optional)</button>
-<p id="imgUrl">No Image Selected</p>
-
-<button id="saveBtn">💾 Save Episode</button>
+<button id="saveEpisodeBtn">Save Episode</button>
 
 <p id="status"></p>
 
@@ -78,7 +87,7 @@ font-weight:bold;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, arrayUnion } 
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -115,14 +124,14 @@ select.innerHTML="<option value=''>Select Anime</option>";
 snap.forEach(doc=>{
 let opt=document.createElement("option");
 opt.value=doc.id;
-opt.textContent=doc.data().name || "Unknown";
+opt.textContent=doc.data().name;
 select.appendChild(opt);
 });
 
 }
 
 /* Upload Image */
-document.getElementById("uploadImgBtn").addEventListener("click",()=>{
+document.getElementById("uploadImgBtn").onclick=()=>{
 
 let widget=cloudinary.createUploadWidget({
 cloudName:"dmxqosmk0",
@@ -131,58 +140,60 @@ uploadPreset:"asi_anime_upload"
 (error,result)=>{
 if(!error && result && result.event==="success"){
 uploadedImage=result.info.secure_url;
-document.getElementById("imgUrl").innerText="Image Uploaded ✅";
+document.getElementById("imgText").innerText="Image Uploaded ✅";
 }
 });
 
 widget.open();
 
+};
+
+/* Add New Anime */
+document.getElementById("addAnimeBtn").onclick=async()=>{
+
+let name=document.getElementById("newName").value;
+let genre=document.getElementById("newGenre").value;
+let link=document.getElementById("newLink").value;
+
+if(!name || !genre || !uploadedImage){
+alert("Fill All Fields + Upload Image");
+return;
+}
+
+await addDoc(collection(db,"anime"),{
+name,
+genre,
+link,
+image:uploadedImage,
+episodes:[]
 });
 
-/* Save Episode */
-document.getElementById("saveBtn").addEventListener("click",async()=>{
+alert("Anime Added ✅");
+
+};
+
+/* Add Episode */
+document.getElementById("saveEpisodeBtn").onclick=async()=>{
 
 let animeId=document.getElementById("animeSelect").value;
-let episode=document.getElementById("episode").value;
-let link=document.getElementById("link").value;
+let ep=document.getElementById("episode").value;
+let link=document.getElementById("episodeLink").value;
 
-if(!animeId || !episode || !link){
+if(!animeId || !ep || !link){
 alert("Fill All Fields");
 return;
 }
 
-try{
-
-document.getElementById("saveBtn").innerText="Saving...";
-document.getElementById("saveBtn").disabled=true;
-
-let updateData={
+await updateDoc(doc(db,"anime",animeId),{
 episodes:arrayUnion({
-ep:episode,
+ep:ep,
 link:link
 })
-};
-
-if(uploadedImage){
-updateData.image=uploadedImage;
-}
-
-await updateDoc(doc(db,"anime",animeId),updateData);
+});
 
 document.getElementById("status").innerText="Episode Added ✅";
 
-document.getElementById("episode").value="";
-document.getElementById("link").value="";
-
-}catch(e){
-alert("Upload Failed");
-console.error(e);
-}finally{
-document.getElementById("saveBtn").innerText="💾 Save Episode";
-document.getElementById("saveBtn").disabled=false;
-}
-
-});
+};
 
 loadAnimeList();
 
