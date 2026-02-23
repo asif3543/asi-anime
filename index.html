@@ -1,67 +1,115 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>ASI Anime - Hindi Sub</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>ASI Anime - Hindi Sub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- SEO Keywords -->
-    <meta name="keywords" content="Hindi Subbed Anime, Anime hindi sub, Anime hindi subing, Anime hindi Subbed, Hindi subing anime">
+<meta name="keywords" content="Hindi Subbed Anime, Anime hindi sub, Anime hindi subing, Anime hindi Subbed, Hindi subing anime">
 
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
+
+<style>
+.anime-card{
+width:180px;
+background:#1e1e1e;
+margin:10px;
+border-radius:10px;
+overflow:hidden;
+cursor:pointer;
+transition:0.3s;
+}
+.anime-card img{
+width:100%;
+height:240px;
+object-fit:cover;
+}
+.anime-card p{
+padding:8px;
+text-align:center;
+}
+.anime-list{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+}
+</style>
+
 </head>
+
 <body>
 
 <header>
-    <div class="logo">ASI Anime</div>
-
-    <div class="right-menu">
-        <input type="text" id="searchInput" placeholder="🔍 Search Anime...">
-        <button id="menuBtn">⋮</button>
-    </div>
+<div class="logo">ASI Anime</div>
+<div class="right-menu">
+<input type="text" id="searchInput" placeholder="🔍 Search Anime...">
+<button id="menuBtn">⋮</button>
+</div>
 </header>
 
-<!-- Dropdown Menu -->
 <div class="dropdown" id="dropdownMenu">
-    <a href="#">Genres</a>
-    <a href="https://t.me/hindisubanime_q" target="_blank">Telegram GC</a>
-    <a href="https://t.me/hindisubinganime" target="_blank">Telegram Channel</a>
+<a href="#">Genres</a>
+<a href="https://t.me/hindisubanime_q">Telegram GC</a>
+<a href="https://t.me/hindisubinganime">Telegram Channel</a>
 </div>
 
 <h2 class="sub-title">Anime Sub Io</h2>
 
-<main class="anime-list" id="animeList">
-    <!-- Anime cards yaha load honge -->
-</main>
+<main class="anime-list" id="animeList"></main>
 
 <div class="pagination">
-    <button>«««Back</button>
-    <button>Next»»»</button>
+<button>«««Back</button>
+<button>Next»»»</button>
 </div>
 
-<script src="script.js"></script>
+<script type="module">
 
-    <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
-    authDomain: "asi-anime.firebaseapp.com",
-    projectId: "asi-anime",
-    storageBucket: "asi-anime.firebasestorage.app",
-    messagingSenderId: "1029720406470",
-    appId: "1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
-  };
+const firebaseConfig = {
+apiKey: "AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
+authDomain: "asi-anime.firebaseapp.com",
+projectId: "asi-anime",
+storageBucket: "asi-anime.firebasestorage.app",
+messagingSenderId: "1029720406470",
+appId: "1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-    </script>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    
+const animeList = document.getElementById("animeList");
+
+async function loadAnime(){
+
+const query = await getDocs(collection(db,"anime"));
+
+query.forEach(doc=>{
+let data = doc.data();
+
+let card = document.createElement("div");
+card.className="anime-card";
+
+card.innerHTML=`
+<img src="${data.image}">
+<p>${data.name}</p>
+<p>${data.genre}</p>
+`;
+
+card.onclick=()=>{
+window.open(data.link,"_blank");
+};
+
+animeList.appendChild(card);
+
+});
+
+}
+
+loadAnime();
+
+</script>
+
 </body>
 </html>
