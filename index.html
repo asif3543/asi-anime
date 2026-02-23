@@ -1,94 +1,198 @@
+code
+Html
+play_circle
+download
+content_copy
+expand_less
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-<title>ASI Anime | Hindi SubAnime</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<meta name="google-site-verification" content="8ccEP02G2qGq8AAWYJWm09rO3e9JuxWRaQogSCpBN8g" />
+<!-- ================= SEO & GOOGLE RANKING TAGS ================= -->
+<title>ASI Anime | Hindi Subbed Anime</title>
+<meta name="description" content="ASI Anime par dekhiye apne favourite anime Hindi Subbed me. Watch top Action, Romance, and Fantasy Hindi Subbed Anime for free.">
+<meta name="keywords" content="hindi anime, hindi subbed anime, asi anime, watch anime hindi Sub, free anime hindi dub, anime in hindi, isekai hindi sub">
+
+<!-- AAPKA GOOGLE VERIFICATION CODE -->
+<meta name="google-site-verification" content="3LX6AtLTBpFLgq2qg6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />
+
+<!-- ================= SOCIAL MEDIA SHARE TAGS ================= -->
+<meta property="og:title" content="ASI Anime - Watch Hindi Subbed Anime">
+<meta property="og:description" content="Watch your favorite anime with Hindi subtitles for free! High Quality Episodes.">
+<meta property="og:image" content="https://via.placeholder.com/600x300?text=ASI+Anime+Free+Hindi+Sub">
+<meta property="og:url" content="https://asif3543.github.io/asi-anime/">
 
 <style>
+    /* Modern UI Design */
+    body {
+        background: #0f0f0f;
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-body{
-background:#0f0f0f;
-color:white;
-font-family:Arial;
-margin:0;
-}
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: #ff4500;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
 
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px;
-background:#ff4500;
-flex-wrap:wrap;
-}
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-.logo{
-font-size:24px;
-font-weight:bold;
-}
+    .right-menu {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
 
-.right-menu{
-display:flex;
-gap:10px;
-align-items:center;
-}
+    input {
+        padding: 10px;
+        border-radius: 6px;
+        border: none;
+        outline: none;
+        background: #222;
+        color: white;
+        transition: 0.3s;
+    }
 
-input,select{
-padding:8px;
-border-radius:6px;
-border:none;
-}
+    input:focus {
+        background: #333;
+        box-shadow: 0 0 5px rgba(255,255,255,0.5);
+    }
 
-.anime-list{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-gap:15px;
-padding:20px;
-}
+    .menu-btn {
+        background: #222;
+        color: white;
+        border: none;
+        padding: 10px 14px;
+        font-size: 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
 
-.anime-card{
-background:#1c1c1c;
-border-radius:10px;
-overflow:hidden;
-cursor:pointer;
-transition:0.3s;
-}
+    .menu-btn:hover {
+        background: #444;
+    }
 
-.anime-card:hover{
-transform:scale(1.05);
-}
+    /* Dropdown Styling */
+    .dropdown {
+        display: none;
+        position: absolute;
+        top: 65px;
+        right: 20px;
+        background: #1c1c1c;
+        width: 200px;
+        max-height: 400px; /* Jada lamba hone par scroll aayega */
+        overflow-y: auto;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+        z-index: 200;
+        border: 1px solid #333;
+    }
 
-.anime-card img{
-width:100%;
-height:220px;
-object-fit:cover;
-}
+    /* Custom Scrollbar for dropdown */
+    .dropdown::-webkit-scrollbar { width: 6px; }
+    .dropdown::-webkit-scrollbar-thumb { background: #ff4500; border-radius: 10px; }
 
-.anime-card p{
-text-align:center;
-margin:6px;
-}
+    .dropdown h4 {
+        margin: 0;
+        padding: 15px;
+        background: #2a2a2a;
+        text-align: center;
+        border-bottom: 1px solid #444;
+    }
 
-.dropdown{
-display:none;
-position:absolute;
-right:20px;
-background:#222;
-padding:15px;
-border-radius:10px;
-}
+    .dropdown a {
+        display: block;
+        color: #ddd;
+        padding: 12px 15px;
+        text-decoration: none;
+        transition: 0.2s;
+        border-bottom: 1px solid #2a2a2a;
+    }
 
-.dropdown a{
-display:block;
-color:white;
-padding:8px;
-text-decoration:none;
-}
+    .dropdown a:hover {
+        background: #ff4500;
+        color: white;
+        padding-left: 20px;
+    }
+
+    /* Anime Grid */
+    .anime-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 20px;
+        padding: 25px;
+        justify-items: center;
+    }
+
+    .anime-card {
+        width: 100%;
+        max-width: 200px;
+        background: #1c1c1c;
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .anime-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(255,69,0,0.4);
+    }
+
+    .anime-card img {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+        border-bottom: 2px solid #ff4500;
+    }
+
+    .anime-info {
+        padding: 10px;
+        text-align: center;
+    }
+
+    .anime-info b {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Bada naam cut ho jayega */
+    }
+
+    .anime-info span {
+        font-size: 12px;
+        color: #aaa;
+        background: #2a2a2a;
+        padding: 3px 8px;
+        border-radius: 10px;
+    }
+
+    .loading {
+        grid-column: 1 / -1;
+        text-align: center;
+        font-size: 1.2rem;
+        color: #aaa;
+        margin-top: 50px;
+    }
 
 </style>
 
@@ -97,158 +201,164 @@ text-decoration:none;
 <body>
 
 <header>
-
-<div class="logo">ASI Anime</div>
-
-<div class="right-menu">
-<input type="text" id="searchInput" placeholder="🔍 Search Anime">
-<button onclick="toggleMenu()">⋮</button>
-</div>
-
+    <div class="logo">ASI Anime</div>
+    <div class="right-menu">
+        <input type="text" id="searchInput" placeholder="🔍 Search...">
+        <button class="menu-btn" onclick="toggleMenu()" id="menuBtn">⋮</button>
+    </div>
 </header>
 
 <!-- Dropdown Menu -->
 <div class="dropdown" id="dropdownMenu">
-
-<h4>Genres</h4>
-
-<a href="#" onclick="filterGenre('Action')">Action</a>
-<a href="#" onclick="filterGenre('Adventure')">Adventure</a>
-<a href="#" onclick="filterGenre('Fantasy')">Fantasy</a>
-<a href="#" onclick="filterGenre('Isekai')">Isekai</a>
-<a href="#" onclick="filterGenre('Romance')">Romance</a>
-<a href="#" onclick="filterGenre('Comedy')">Comedy</a>
-<a href="#" onclick="filterGenre('Drama')">Drama</a>
-<a href="#" onclick="filterGenre('Horror')">Horror</a>
-<a href="#" onclick="filterGenre('Action')">Action</a>
-<a href="#" onclick="filterGenre('Adventure')">Adventure</a>
-<a href="#" onclick="filterGenre('Fantasy')">Fantasy</a>
-<a href="#" onclick="filterGenre('Isekai')">Isekai</a>
-<a href="#" onclick="filterGenre('Romance')">Romance</a>
-<a href="#" onclick="filterGenre('Comedy')">Comedy</a>
-<a href="#" onclick="filterGenre('Drama')">Drama</a>
-<a href="#" onclick="filterGenre('Horror')">Horror</a>
-<a href="#" onclick="filterGenre('Mystery')">Mystery</a>
-<a href="#" onclick="filterGenre('Thriller')">Thriller</a>
-<a href="#" onclick="filterGenre('Superpower')">Superpower</a>
-<a href="#" onclick="filterGenre('Supernatural')">Supernatural</a>
-<a href="#" onclick="filterGenre('School')">School</a>
-<a href="#" onclick="filterGenre('Shounen')">Shounen</a>
-<a href="#" onclick="filterGenre('Shoujo')">Shoujo</a>
-<a href="#" onclick="filterGenre('Seinen')">Seinen</a>
-<a href="#" onclick="filterGenre('Josei')">Josei</a>
-<a href="#" onclick="filterGenre('Slice of Life')">Slice of Life</a>
-<a href="#" onclick="filterGenre('Sports')">Sports</a>
-<a href="#" onclick="filterGenre('Music')">Music</a>
-<a href="#" onclick="filterGenre('Mecha')">Mecha</a>
-<a href="#" onclick="filterGenre('Military')">Military</a>
-<a href="#" onclick="filterGenre('Parody')">Parody</a>
-<a href="#" onclick="filterGenre('Ecchi')">Ecchi</a>
-<a href="#" onclick="filterGenre('Harem')">Harem</a>
-<a href="#" onclick="filterGenre('Psychological')">Psychological</a>
-<a href="#" onclick="filterGenre('Demons')">Demons</a>
-<a href="#" onclick="filterGenre('Vampire')">Vampire</a>
-<a href="#" onclick="filterGenre('Historical')">Historical</a>
-<a href="#" onclick="filterGenre('Martial Arts')">Martial Arts</a>
-<hr>
-
-<a href="https://t.me/hindisubanime_q" target="_blank">📢 GC Link</a>
-<a href="https://t.me/hindisubinganime" target="_blank">📺 Channel Link</a>
-
+    <h4>Filter Genres</h4>
+    <a href="#" onclick="filterGenre('')">🌟 All Genres</a> <!-- Reset Option -->
+    
+    <!-- Cleaned duplicate genres -->
+    <a href="#" onclick="filterGenre('Action')">Action</a>
+    <a href="#" onclick="filterGenre('Adventure')">Adventure</a>
+    <a href="#" onclick="filterGenre('Comedy')">Comedy</a>
+    <a href="#" onclick="filterGenre('Demons')">Demons</a>
+    <a href="#" onclick="filterGenre('Drama')">Drama</a>
+    <a href="#" onclick="filterGenre('Ecchi')">Ecchi</a>
+    <a href="#" onclick="filterGenre('Fantasy')">Fantasy</a>
+    <a href="#" onclick="filterGenre('Harem')">Harem</a>
+    <a href="#" onclick="filterGenre('Historical')">Historical</a>
+    <a href="#" onclick="filterGenre('Horror')">Horror</a>
+    <a href="#" onclick="filterGenre('Isekai')">Isekai</a>
+    <a href="#" onclick="filterGenre('Josei')">Josei</a>
+    <a href="#" onclick="filterGenre('Martial Arts')">Martial Arts</a>
+    <a href="#" onclick="filterGenre('Mecha')">Mecha</a>
+    <a href="#" onclick="filterGenre('Military')">Military</a>
+    <a href="#" onclick="filterGenre('Music')">Music</a>
+    <a href="#" onclick="filterGenre('Mystery')">Mystery</a>
+    <a href="#" onclick="filterGenre('Parody')">Parody</a>
+    <a href="#" onclick="filterGenre('Psychological')">Psychological</a>
+    <a href="#" onclick="filterGenre('Romance')">Romance</a>
+    <a href="#" onclick="filterGenre('School')">School</a>
+    <a href="#" onclick="filterGenre('Sci-Fi')">Sci-Fi</a>
+    <a href="#" onclick="filterGenre('Seinen')">Seinen</a>
+    <a href="#" onclick="filterGenre('Shoujo')">Shoujo</a>
+    <a href="#" onclick="filterGenre('Shounen')">Shounen</a>
+    <a href="#" onclick="filterGenre('Slice of Life')">Slice of Life</a>
+    <a href="#" onclick="filterGenre('Sports')">Sports</a>
+    <a href="#" onclick="filterGenre('Supernatural')">Supernatural</a>
+    <a href="#" onclick="filterGenre('Superpower')">Superpower</a>
+    <a href="#" onclick="filterGenre('Thriller')">Thriller</a>
+    <a href="#" onclick="filterGenre('Vampire')">Vampire</a>
+    
+    <hr style="border-color: #444; margin: 0;">
+    <a href="https://t.me/hindisubanime_q" target="_blank" style="color: #00d2ff;">📢 GC Link</a>
+    <a href="https://t.me/hindisubinganime" target="_blank" style="color: #00d2ff;">📺 Channel Link</a>
 </div>
 
 <main class="anime-list" id="animeList">
-<div style="text-align:center">Loading Anime...</div>
+    <div class="loading">Loading Anime Data...</div>
 </main>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, getDocs } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig={
-apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
-authDomain:"asi-anime.firebaseapp.com",
-projectId:"asi-anime"
+const firebaseConfig = {
+    apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
+    authDomain: "asi-anime.firebaseapp.com",
+    projectId: "asi-anime"
 };
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-let allAnime=[];
-const animeList=document.getElementById("animeList");
+let allAnime = [];
+const animeList = document.getElementById("animeList");
 
-/* Load Anime */
-async function loadAnime(){
+/* Load Anime from Firebase */
+async function loadAnime() {
+    try {
+        const snap = await getDocs(collection(db, "anime"));
+        allAnime = [];
+        snap.forEach(doc => {
+            allAnime.push({ id: doc.id, ...doc.data() });
+        });
+        displayAnime(allAnime);
+    } catch (error) {
+        console.error("Error loading data: ", error);
+        animeList.innerHTML = `<div class="loading" style="color:red;">Error loading anime! Check console.</div>`;
+    }
+}
 
-const snap=await getDocs(collection(db,"anime"));
+/* Display Cards Function */
+function displayAnime(list) {
+    animeList.innerHTML = "";
 
-allAnime=[];
-snap.forEach(doc=>{
-allAnime.push({id:doc.id,...doc.data()});
+    if (list.length === 0) {
+        animeList.innerHTML = `<div class="loading">No Anime Found 😢</div>`;
+        return;
+    }
+
+    list.forEach(data => {
+        let card = document.createElement("div");
+        card.className = "anime-card";
+
+        const imgUrl = data.image || "https://via.placeholder.com/200x260?text=No+Image";
+        const title = data.name || "Unknown";
+        const genre = data.genre || "Unknown";
+
+        card.innerHTML = `
+            <img src="${imgUrl}" loading="lazy" alt="${title}">
+            <div class="anime-info">
+                <b>${title}</b>
+                <span>${genre}</span>
+            </div>
+        `;
+
+        // Click karne par detail page pe jayega
+        card.onclick = () => {
+            window.location.href = "anime.html?id=" + data.id;
+        };
+
+        animeList.appendChild(card);
+    });
+}
+
+/* Search Function */
+document.getElementById("searchInput").addEventListener("input", e => {
+    let val = e.target.value.toLowerCase().trim();
+    let filtered = allAnime.filter(a =>
+        (a.name || "").toLowerCase().includes(val) ||
+        (a.genre || "").toLowerCase().includes(val)
+    );
+    displayAnime(filtered);
 });
 
-displayAnime(allAnime);
+/* Genre Filter Function */
+window.filterGenre = function(g) {
+    if (g === '') {
+        displayAnime(allAnime); // All Genres filter
+    } else {
+        let filtered = allAnime.filter(a =>
+            (a.genre || "").toLowerCase().includes(g.toLowerCase())
+        );
+        displayAnime(filtered);
+    }
+    document.getElementById("dropdownMenu").style.display = "none"; // Close menu after click
 }
 
-/* Display */
-function displayAnime(list){
+/* Dropdown Toggle Logic */
+const menu = document.getElementById("dropdownMenu");
+const menuBtn = document.getElementById("menuBtn");
 
-animeList.innerHTML="";
+window.toggleMenu = function() {
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
 
-list.forEach(data=>{
-
-let card=document.createElement("div");
-card.className="anime-card";
-
-card.innerHTML=`
-<img src="${data.image}">
-<p><b>${data.name}</b></p>
-<p style="color:#aaa">${data.genre}</p>
-`;
-
-card.onclick=()=>{
-window.location.href="anime.html?id="+data.id;
-};
-
-animeList.appendChild(card);
-
+/* Screen pe kahin aur click karne par menu band ho jayega */
+document.addEventListener("click", function(event) {
+    if (menu.style.display === "block" && !menu.contains(event.target) && event.target !== menuBtn) {
+        menu.style.display = "none";
+    }
 });
 
-}
-
-/* Search */
-document.getElementById("searchInput").addEventListener("input",e=>{
-
-let val=e.target.value.toLowerCase();
-
-let filtered=allAnime.filter(a=>
-(a.name||"").toLowerCase().includes(val) ||
-(a.genre||"").toLowerCase().includes(val)
-);
-
-displayAnime(filtered);
-
-});
-
-/* Genre Filter */
-window.filterGenre=function(g){
-
-let filtered=allAnime.filter(a=>
-(a.genre||"").toLowerCase().includes(g.toLowerCase())
-);
-
-displayAnime(filtered);
-toggleMenu();
-}
-
-/* Menu Toggle */
-window.toggleMenu=function(){
-let menu=document.getElementById("dropdownMenu");
-menu.style.display = menu.style.display==="block" ? "none":"block";
-}
-
+/* Initialize Data */
 loadAnime();
 
 </script>
