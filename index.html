@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>ASI Anime - Hindi Sub</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 
@@ -20,6 +20,15 @@ justify-content:space-between;
 padding:15px;
 background:#ff4500;
 flex-wrap:wrap;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+}
+
+.right-menu{
+display:flex;
 gap:10px;
 }
 
@@ -52,15 +61,23 @@ object-fit:cover;
 
 .anime-card p{
 text-align:center;
-padding:5px;
-margin:0;
+margin:5px;
 }
 
-select,input{
+.dropdown{
+display:none;
+position:absolute;
+right:20px;
+background:#222;
+padding:15px;
+border-radius:10px;
+}
+
+.dropdown a{
+display:block;
+color:white;
 padding:8px;
-border-radius:6px;
-border:none;
-outline:none;
+text-decoration:none;
 }
 
 </style>
@@ -69,25 +86,44 @@ outline:none;
 <body>
 
 <header>
-<div>ASI Anime</div>
 
+<div class="logo">ASI Anime</div>
+
+<div class="right-menu">
 <input type="text" id="searchInput" placeholder="🔍 Search Anime">
-
-<select id="genreFilter">
-<option value="">All Genres</option>
-<option>Action</option>
-<option>Adventure</option>
-<option>Fantasy</option>
-<option>Romance</option>
-<option>Comedy</option>
-<option>Horror</option>
-</select>
+<button onclick="toggleMenu()">⋮</button>
+</div>
 
 </header>
 
-<main class="anime-list" id="animeList">
-<div>Loading Anime...</div>
-</main>
+<!-- Tree Dot Menu -->
+<div class="dropdown" id="dropdownMenu">
+
+<h4>Genres</h4>
+
+<a href="#" onclick="filterGenre('Action')">Action</a>
+<a href="#" onclick="filterGenre('Adventure')">Adventure</a>
+<a href="#" onclick="filterGenre('Fantasy')">Fantasy</a>
+<a href="#" onclick="filterGenre('Isekai')">Isekai</a>
+<a href="#" onclick="filterGenre('Romance')">Romance</a>
+<a href="#" onclick="filterGenre('Comedy')">Comedy</a>
+<a href="#" onclick="filterGenre('Drama')">Drama</a>
+<a href="#" onclick="filterGenre('Horror')">Horror</a>
+<a href="#" onclick="filterGenre('Mystery')">Mystery</a>
+<a href="#" onclick="filterGenre('Thriller')">Thriller</a>
+<a href="#" onclick="filterGenre('Superpower')">Superpower</a>
+<a href="#" onclick="filterGenre('Supernatural')">Supernatural</a>
+<a href="#" onclick="filterGenre('Harem')">Harem</a>
+<a href="#" onclick="filterGenre('School')">School</a>
+
+<hr>
+
+<a href="https://t.me/hindisubanime_q" target="_blank">📢 GC Link</a>
+<a href="https://t.me/hindisubinganime" target="_blank">📺 Channel Link</a>
+
+</div>
+
+<main class="anime-list" id="animeList"></main>
 
 <script type="module">
 
@@ -97,23 +133,18 @@ import { getFirestore, collection, getDocs } from "https://www.gstatic.com/fireb
 const firebaseConfig={
 apiKey:"AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
 authDomain:"asi-anime.firebaseapp.com",
-projectId:"asi-anime",
+projectId:"asi-anime"
 };
 
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 
-const animeList=document.getElementById("animeList");
-const searchInput=document.getElementById("searchInput");
-const genreFilter=document.getElementById("genreFilter");
-
 let allAnime=[];
+const animeList=document.getElementById("animeList");
 
 async function loadAnime(){
 
 const snap=await getDocs(collection(db,"anime"));
-
-allAnime=[];
 
 snap.forEach(doc=>{
 allAnime.push(doc.data());
@@ -126,52 +157,51 @@ function displayAnime(list){
 
 animeList.innerHTML="";
 
-if(list.length===0){
-animeList.innerHTML="<p>No Anime Found 😢</p>";
-return;
-}
-
 list.forEach(data=>{
 
 let card=document.createElement("div");
 card.className="anime-card";
 
-let title=data.name || "Unknown";
-let genre=data.genre || "Unknown";
-let img=data.image || "https://via.placeholder.com/180x230";
-
 card.innerHTML=`
-<img src="${img}">
-<p>${title}</p>
-<p>${genre}</p>
+<img src="${data.image}">
+<p>${data.name}</p>
+<p>${data.genre}</p>
 `;
 
 card.onclick=()=>{
-if(data.link) window.open(data.link,"_blank");
+window.open(data.link,"_blank");
 };
 
 animeList.appendChild(card);
 
 });
+
 }
 
-function applyFilter(){
+document.getElementById("searchInput").addEventListener("input",()=>{
+let val=document.getElementById("searchInput").value.toLowerCase();
 
-let search=searchInput.value.toLowerCase();
-let genre=genreFilter.value.toLowerCase();
-
-let filtered=allAnime.filter(a=>{
-let name=(a.name||"").toLowerCase();
-let g=(a.genre||"").toLowerCase();
-
-return name.includes(search) && (genre==="" || g.includes(genre));
-});
+let filtered=allAnime.filter(a=>
+(a.name||"").toLowerCase().includes(val)
+);
 
 displayAnime(filtered);
+});
+
+window.filterGenre=function(g){
+
+let filtered=allAnime.filter(a=>
+(a.genre||"").toLowerCase().includes(g.toLowerCase())
+);
+
+displayAnime(filtered);
+toggleMenu();
 }
 
-searchInput.addEventListener("input",applyFilter);
-genreFilter.addEventListener("change",applyFilter);
+window.toggleMenu=function(){
+let menu=document.getElementById("dropdownMenu");
+menu.style.display = menu.style.display==="block" ? "none":"block";
+}
 
 loadAnime();
 
