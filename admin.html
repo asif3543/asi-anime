@@ -11,11 +11,15 @@
 
 <input type="text" id="name" placeholder="Anime Name"><br><br>
 <input type="text" id="genre" placeholder="Genre"><br><br>
-<input type="text" id="link" placeholder="Telegram / Short Link"><br><br>
+<input type="text" id="link" placeholder="Short Link"><br><br>
 
-<input type="file" id="fileInput" accept="image/*"><br><br>
+<button onclick="openUpload()">Select Image & Upload</button>
 
-<button onclick="uploadAnime()">Upload</button>
+<p id="imgUrl"></p>
+
+<br>
+
+<button onclick="saveData()">Save Anime Data</button>
 
 <p id="status"></p>
 
@@ -24,56 +28,59 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig = {
+const firebaseConfig={
 apiKey:"AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
 authDomain:"asi-anime.firebaseapp.com",
-projectId:"asi-anime",
-storageBucket:"asi-anime.appspot.com",
-messagingSenderId:"1029720406470",
-appId:"1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
+projectId:"asi-anime"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.uploadAnime = async function(){
+let uploadedImage="";
 
-let name = document.getElementById("name").value;
-let genre = document.getElementById("genre").value;
-let link = document.getElementById("link").value;
-let file = document.getElementById("fileInput").files[0];
+window.saveData = async function(){
 
-if(!file){
-alert("Image select karo");
+let name=document.getElementById("name").value;
+let genre=document.getElementById("genre").value;
+let link=document.getElementById("link").value;
+
+if(!uploadedImage){
+alert("Image upload karo");
 return;
 }
 
-document.getElementById("status").innerText="Uploading...";
-
-let formData = new FormData();
-formData.append("file", file);
-formData.append("upload_preset","asi_anime_upload");
-
-let res = await fetch(
-"https://api.cloudinary.com/v1_1/dmxqosmk0/image/upload",
-{
-method:"POST",
-body:formData
-});
-
-let data = await res.json();
-
 await addDoc(collection(db,"anime"),{
-name:name,
-genre:genre,
-link:link,
-image:data.secure_url
+name,
+genre,
+link,
+image:uploadedImage
 });
 
-document.getElementById("status").innerText="Upload Successful ✅";
+document.getElementById("status").innerText="Saved ✅";
 
 }
 
+</script>
+
+<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+
+<script>
+window.openUpload = function(){
+
+let widget = cloudinary.createUploadWidget({
+cloudName:"dmxqosmk0",
+uploadPreset:"asi_anime_upload"
+},
+(error,result)=>{
+if(!error && result && result.event==="success"){
+uploadedImage=result.info.secure_url;
+document.getElementById("imgUrl").innerText="Image Uploaded ✅";
+}
+});
+
+widget.open();
+}
 </script>
 
 </body>
