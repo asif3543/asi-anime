@@ -19,7 +19,7 @@
 body {
     background-color: var(--bg-dark);
     color: var(--text-light);
-    padding-bottom: 70px; /* Space for footer */
+    padding-bottom: 70px; 
 }
 
 /* --- HEADER --- */
@@ -41,10 +41,7 @@ header {
     font-weight: 800;
     color: var(--primary);
     letter-spacing: 1px;
-}
-
-.search-box {
-    position: relative;
+    text-decoration: none;
 }
 
 .search-box input {
@@ -89,7 +86,6 @@ header {
     background: var(--primary);
     border-color: var(--primary);
     color: white;
-    box-shadow: 0 4px 10px rgba(255, 69, 0, 0.3);
 }
 
 /* --- ANIME GRID --- */
@@ -133,7 +129,6 @@ header {
     font-weight: 700;
     border-radius: 6px;
     text-transform: uppercase;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
 .anime-info {
@@ -154,6 +149,83 @@ header {
     color: var(--text-muted);
     font-size: 12px;
     text-transform: capitalize;
+}
+
+/* --- DETAIL PAGE CSS --- */
+.back-btn {
+    display: inline-block;
+    margin: 20px 5% 0;
+    padding: 10px 20px;
+    background: #333;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+.back-btn:hover { background: var(--primary); }
+
+.detail-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.detail-img {
+    width: 280px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.detail-info {
+    flex: 1;
+    min-width: 300px;
+}
+
+.detail-info h1 { color: var(--primary); margin-bottom: 10px; font-size: 28px;}
+.detail-info p { color: var(--text-muted); line-height: 1.6; margin-top: 10px;}
+.detail-info .badge {
+    background: #333;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 13px;
+    color: white;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.episodes-box { margin-top: 30px; }
+.episodes-box h3 { color: white; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px;}
+
+.episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+}
+
+.ep-btn {
+    background: #2a2a35;
+    color: white;
+    padding: 12px;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ep-btn:hover {
+    background: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255,69,0,0.4);
 }
 
 /* --- FOOTER TG/GC LINKS --- */
@@ -190,50 +262,27 @@ header {
 .btn-gc:hover { background: var(--primary-hover); box-shadow: 0 0 10px rgba(255, 69, 0, 0.5); }
 
 /* --- ADMIN PANEL CSS --- */
-.admin-container {
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 0 15px;
-}
+.admin-container { max-width: 500px; margin: 40px auto; padding: 0 15px; }
 .admin-title { text-align: center; margin-bottom: 20px; font-size: 28px;}
 .box {
-    background: var(--card-bg);
-    padding: 25px;
-    border-radius: 15px;
-    margin-bottom: 25px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--card-bg); padding: 25px; border-radius: 15px; margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05);
 }
 .box h3 { text-align: center; margin-bottom: 15px; color: var(--primary); }
 .box input, .box select, .box textarea {
-    width: 100%;
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: #121216;
-    color: white;
-    outline: none;
+    width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1); background: #121216; color: white; outline: none;
 }
 .box input:focus, .box select:focus, .box textarea:focus { border-color: var(--primary); }
 .box button {
-    width: 100%;
-    padding: 12px;
-    background: var(--primary);
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-weight: bold;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: 0.3s;
+    width: 100%; padding: 12px; background: var(--primary); border: none;
+    border-radius: 8px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; transition: 0.3s;
 }
 .box button:hover { background: var(--primary-hover); }
 
-/* Mobile Responsive */
 @media (max-width: 600px) {
     header { flex-direction: column; gap: 15px; padding: 15px; }
     .search-box input { width: 100%; }
     .social-footer a { padding: 8px 12px; font-size: 12px; }
+    .detail-container { flex-direction: column; align-items: center; text-align: center; }
 }
