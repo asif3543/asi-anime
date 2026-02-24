@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ASI Anime | Premium Anime Streaming</title>
     <meta name="description" content="Watch Hindi Subbed & Dubbed Anime Free">
-    <meta name="google-site-verification" content="3LX6AtLTBpFLgq2q6ZCIpMOwJp8ZU1KPcK-u-jUMDk">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <header>
-        <a href="#" class="logo">ASI Anime</a>
+        <a href="index.html" class="logo">ASI Anime</a>
         <div class="search-box">
             <input id="searchInput" placeholder="Search Anime...">
         </div>
@@ -38,8 +37,8 @@
 
     <!-- GC & Telegram Footer Links -->
     <div class="social-footer">
-        <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg">✈️ Telegram Channel</a>
-        <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc">💬 Join Group Chat</a>
+        <a href="YOUR_TELEGRAM_LINK_HERE" target="_blank" class="btn-tg">✈️ Telegram Channel</a>
+        <a href="YOUR_GC_LINK_HERE" target="_blank" class="btn-gc">💬 Join Group Chat</a>
     </div>
 
     <script type="module">
@@ -66,6 +65,10 @@
                 snap.forEach(d => {
                     allAnime.push({ id: d.id, ...d.data() });
                 });
+
+                // YAHAN FIX KIYA HAI - NEW ANIME YA NEW EPISODE WALA ANIME TOP PE AAYEGA!
+                allAnime.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
                 applyFilter();
             } catch (e) {
                 document.getElementById("animeList").innerHTML = "<h3 style='text-align:center;width:100%;'>Error loading anime! Check connection.</h3>";
@@ -108,24 +111,14 @@
                 `;
 
                 card.onclick = () => {
-                    // MAIN LINK FIX: Agar aapne link dala hai toh directly open hoga, aur "https://" auto-add ho jayega taaki tut na jaye!
-                    let finalLink = a.animeLink || a.link;
-
-                    if (finalLink) {
-                        if (!finalLink.match(/^https?:\/\//i)) {
-                            finalLink = "https://" + finalLink;
-                        }
-                        window.open(finalLink, "_blank");
-                    } else {
-                        location.href = "detail.html?id=" + a.id;
-                    }
+                    // FIX: PHOTO PE CLICK KARTE HI SEEDHA DETAIL PAGE (EPISODES WALA PAGE) KHULEGA
+                    location.href = "detail.html?id=" + a.id;
                 };
 
                 box.appendChild(card);
             });
         }
 
-        /* Set Filters Logic */
         window.setType = function(type, btn) {
             currentType = type;
             document.querySelectorAll(".filter-container button").forEach(b => {
