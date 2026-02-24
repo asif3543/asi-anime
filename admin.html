@@ -22,6 +22,7 @@
             <h3>Add New Anime</h3>
 
             <input id="newName" placeholder="Anime Name (e.g. Solo Leveling)">
+            <input id="newSeason" placeholder="Season (e.g. 1, 2, Movie)">
             <input id="newGenre" placeholder="Genre (Action, Fantasy, etc.)">
             
             <select id="newType">
@@ -54,9 +55,9 @@
 <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion } 
-    from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
     const app = initializeApp({
         apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
@@ -110,6 +111,7 @@
     /* SAVE NEW ANIME */
     addAnimeBtn.onclick = async () => {
         let name = newName.value.trim();
+        let season = newSeason.value.trim(); // Get season value
         let genre = newGenre.value.trim();
         let type = newType.value;
         let desc = newDesc.value.trim();
@@ -119,9 +121,9 @@
             return;
         }
 
-        // updatedAt: Date.now() ki wajah se anime TOP pe aayega site me
         await addDoc(collection(db, "anime"), {
             name: name,
+            season: season, // Save season to Firestore
             genre: genre,
             type: type,
             description: desc,
@@ -132,7 +134,7 @@
 
         alert("Anime Added Successfully ✅");
         
-        newName.value = ""; newGenre.value = ""; newDesc.value = "";
+        newName.value = ""; newSeason.value = ""; newGenre.value = ""; newDesc.value = "";
         uploadedImage = ""; imgText.innerText = "No Image Selected"; imgText.style.color = "#ff4500";
         loadList();
     }
@@ -148,12 +150,10 @@
             return;
         }
 
-        // Link Format Fix (auto adds https)
         if(link && !link.match(/^https?:\/\//i)) {
             link = "https://" + link;
         }
 
-        // updatedAt: Date.now() - Jis anime me naya episode add hoga vo bhi TOP pe aayega
         await updateDoc(doc(db, "anime", id), {
             episodes: arrayUnion({
                 ep: ep,
