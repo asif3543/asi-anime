@@ -1,13 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+code
+Html
+play_circle
+download
+content_copy
+expand_less
 
-<title>ASI Anime</title>
-
-<meta name="description" content="Watch Hindi Subbed & Dubbed Anime">
-<meta name="google-site-verification" content="3LX6AtLTBpFLgq2q6ZCIpMOwJp8ZU1KPcK-u-jUMDk">
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1">  <!-- ================= SEO & GOOGLE RANKING TAGS ================= -->  <title>ASI Anime | Hindi Subbed Anime</title>  
+<meta name="description" content="ASI Anime par dekhiye apne favourite anime Hindi Subbed me. Watch top Action, Romance, and Fantasy Hindi Subbed Anime for free.">  
+<meta name="keywords" content="hindi anime, hindi subbed anime, asi anime, watch anime hindi Sub, free anime hindi dub, anime in hindi, isekai hindi sub">  <!-- AAPKA GOOGLE VERIFICATION CODE -->  <meta name="google-site-verification" content="3LX6AtLTBpFLgq2qg6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />  <!-- ================= SOCIAL MEDIA SHARE TAGS ================= -->  <meta property="og:title" content="ASI Anime - Watch Hindi Subbed Anime">  
+<meta property="og:description" content="Watch your favorite anime with Hindi subtitles for free! High Quality Episodes.">  
+<meta property="og:image" content="https://via.placeholder.com/600x300?text=ASI+Anime+Free+Hindi+Sub">  
+<meta property="og:url" content="https://asif3543.github.io/asi-anime/">
 
 <style>
 
@@ -26,6 +32,11 @@ align-items:center;
 padding:15px;
 background:#ff4500;
 flex-wrap:wrap;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
 }
 
 input{
@@ -94,12 +105,13 @@ padding:10px;
 <body>
 
 <header>
-<div>ASI Anime</div>
+<div class="logo">ASI Anime</div>
 <input id="searchInput" placeholder="Search Anime">
 </header>
 
 <!-- Filters -->
 <div class="filter-box">
+
 <button onclick="setType('all',this)" class="active">All</button>
 <button onclick="setType('sub',this)">Sub</button>
 <button onclick="setType('dub',this)">Dub</button>
@@ -110,6 +122,7 @@ padding:10px;
 <button onclick="setGenre('fantasy',this)">Fantasy</button>
 <button onclick="setGenre('comedy',this)">Comedy</button>
 <button onclick="setGenre('isekai',this)">Isekai</button>
+
 </div>
 
 <main id="animeList" class="anime-list">
@@ -177,8 +190,10 @@ list.forEach(a=>{
 let card=document.createElement("div");
 card.className="anime-card";
 
+let img=a.image || "https://via.placeholder.com/200x250";
+
 card.innerHTML=`
-<img src="${a.image}">
+<img src="${img}">
 <div class="anime-info">
 <b>${a.name}</b><br>
 <span>${a.genre||""}</span>
@@ -198,7 +213,12 @@ box.appendChild(card);
 /* Filters */
 window.setType=function(type,btn){
 currentType=type;
-document.querySelectorAll(".filter-box button").forEach(b=>b.classList.remove("active"));
+
+document.querySelectorAll(".filter-box button").forEach(b=>{
+if(!b.onclick.toString().includes("setGenre"))
+b.classList.remove("active");
+});
+
 btn.classList.add("active");
 applyFilter();
 }
