@@ -1,31 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-
     <meta name="title" content="ASI Anime | Hindi Sub & Dub Anime Free">
-<meta name="description" content="Watch Hindi Subbed and Dubbed Anime Free Online | ASI Anime Streaming">
-<meta name="keywords" content="anime hindi sub, anime hindi dub, watch anime free, hindi anime, asi anime, anime streaming free">
+    <meta name="description" content="Watch Hindi Subbed and Dubbed Anime Free Online | ASI Anime Streaming">
+    <meta name="keywords" content="anime hindi sub, anime hindi dub, watch anime free, hindi anime, asi anime, anime streaming free">
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="ASI Anime | Free Anime Streaming">
-<meta property="og:description" content="Watch Latest Hindi Sub & Dub Anime Free">
-<meta property="og:image" content="https://asif3543.github.io/asi-anime/logo.png">
-<meta property="og:url" content="https://asif3543.github.io/asi-anime/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="ASI Anime | Free Anime Streaming">
+    <meta property="og:description" content="Watch Latest Hindi Sub & Dub Anime Free">
+    <meta property="og:image" content="https://asif3543.github.io/asi-anime/logo.png">
+    <meta property="og:url" content="https://asif3543.github.io/asi-anime/">
 
-<meta name="robots" content="index, follow">
-<meta name="author" content="ASI Anime">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="ASI Anime">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ASI Anime | Premium Anime Streaming</title>
-    <meta name="description" content="Watch Hindi Subbed & Dubbed Anime Free">
     <link rel="stylesheet" href="style.css">
+</head>
 <body>
 
     <header>
         <a href="index.html" class="logo">ASI Anime</a>
         <div class="search-box">
-            <input id="searchInput" placeholder="Search Anime...">
+            <!-- Search placeholder updated -->
+            <input id="searchInput" placeholder="Search Anime or Genre...">
         </div>
     </header>
 
@@ -42,6 +41,22 @@
         <button onclick="setGenre('fantasy',this)">Fantasy</button>
         <button onclick="setGenre('comedy',this)">Comedy</button>
         <button onclick="setGenre('isekai',this)">Isekai</button>
+        <button onclick="setGenre('shonen',this)">Shonen</button>
+        <button onclick="setGenre('shojo',this)">Shojo</button>
+        <button onclick="setGenre('seinen',this)">Seinen</button>
+        <button onclick="setGenre('josei',this)">Josei</button>
+        <button onclick="setGenre('Harem',this)"Harem</button>
+        <button onclick="setGenre('Reincarnation',this)">Reincarnation</button>
+        <button onclick="setGenre('sliceoflife',this)">Slice of Life</button>
+        <button onclick="setGenre('horror',this)">Horror</button>
+        <button onclick="setGenre('mecha',this)">Mecha</button>
+        <button onclick="setGenre('sports',this)">Sports</button>
+        <button onclick="setGenre('mystery',this)">Mystery</button>
+        <button onclick="setGenre('ecchi',this)">Ecchi</button>
+        <button onclick="setGenre('adventure',this)">Adventure</button>
+        <button onclick="setGenre('supernatural',this)">Supernatural</button>
+        <button onclick="setGenre('scifi',this)">Sci-Fi</button>
+
     </div>
 
     <main id="animeList" class="anime-list">
@@ -79,7 +94,7 @@
                     allAnime.push({ id: d.id, ...d.data() });
                 });
 
-                // YAHAN FIX KIYA HAI - NEW ANIME YA NEW EPISODE WALA ANIME TOP PE AAYEGA!
+                // NEW ANIME YA NEW EPISODE WALA ANIME TOP PE AAYEGA!
                 allAnime.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 
                 applyFilter();
@@ -90,9 +105,18 @@
 
         function applyFilter() {
             let filtered = allAnime.filter(a => {
-                let nameMatch = (a.name || "").toLowerCase().includes(currentSearch);
-                let genreMatch = currentGenre == "" || (a.genre || "").toLowerCase().split(/[,|]+/).map(g => g.trim()).includes(currentGenre);
-                let typeMatch = currentType == "all" || (a.type || "sub").toLowerCase() == currentType;
+                // Strings ko pehle se lowercase kar liya aasan matching ke liye
+                let nameStr = (a.name || "").toLowerCase();
+                let genreStr = (a.genre || "").toLowerCase();
+
+                // 1. FIXED: Search Bar me ab Name ke sath Genre bhi search hoga
+                let nameMatch = nameStr.includes(currentSearch) || genreStr.includes(currentSearch);
+                
+                // 2. FIXED: Button se genre select karne ka logic ab simple aur jyada powerful hai
+                let genreMatch = currentGenre === "" || genreStr.includes(currentGenre);
+                
+                let typeMatch = currentType === "all" || (a.type || "sub").toLowerCase() === currentType;
+                
                 return nameMatch && genreMatch && typeMatch;
             });
             render(filtered);
@@ -124,7 +148,7 @@
                 `;
 
                 card.onclick = () => {
-                    // FIX: PHOTO PE CLICK KARTE HI SEEDHA DETAIL PAGE (EPISODES WALA PAGE) KHULEGA
+                    // PHOTO PE CLICK KARTE HI SEEDHA DETAIL PAGE KHULEGA
                     location.href = "detail.html?id=" + a.id;
                 };
 
