@@ -5,15 +5,6 @@
     <meta name="description" content="Watch Hindi Subbed and Dubbed Anime Free Online | ASI Anime Streaming">
     <meta name="keywords" content="anime hindi sub, anime hindi dub, watch anime free, hindi anime, asi anime, anime streaming free">
     <meta name="google-site-verification" content="3LX6AtLTBpFLgq2qg6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />
-
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="ASI Anime | Free Anime Streaming">
-    <meta property="og:description" content="Watch Latest Hindi Sub & Dub Anime Free">
-    <meta property="og:image" content="https://asif3543.github.io/asi-anime/logo.png">
-    <meta property="og:url" content="https://asif3543.github.io/asi-anime/">
-
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="ASI Anime">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ASI Anime | Premium Anime Streaming</title>
@@ -21,65 +12,76 @@
 </head>
 <body>
 
+    <!-- Sidebar Menu (Hidden by default) -->
+    <div id="sidebar" class="sidebar">
+        <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">×</a>
+        <div class="sidebar-content">
+            <!-- Genres will be populated here -->
+            <div id="genre-links">
+                 <h3>Genres</h3>
+                 <div class="genre-list-sidebar">
+                    <!-- JS will add genres here -->
+                 </div>
+            </div>
+            <hr>
+            <!-- All Anime List -->
+            <div id="all-anime-list-menu">
+                <h3>All Anime List</h3>
+                <a href="#" onclick="showAzList('sub')">Hindi Sub (A-Z)</a>
+                <a href="#" onclick="showAzList('dub')">Hindi Dub (A-Z)</a>
+            </div>
+        </div>
+    </div>
+    <div id="overlay" onclick="closeNav()"></div>
+
     <header>
-        <a href="index.html" class="logo">ASI Anime</a>
+        <div class="header-left">
+            <span class="menu-icon" onclick="openNav()">☰</span>
+            <a href="index.html" class="logo">ASI Anime</a>
+        </div>
         <div class="search-box">
-            <!-- Search placeholder updated -->
             <input id="searchInput" placeholder="Search Anime or Genre...">
         </div>
     </header>
 
     <div class="filter-container">
         <!-- Sub / Dub Filter -->
-        <button onclick="setType('all',this)" class="active">All Type</button>
+        <button onclick="setType('all',this)" class="active">All</button>
         <button onclick="setType('sub',this)">Hindi Sub</button>
         <button onclick="setType('dub',this)">Hindi Dub</button>
-
-        <!-- Genre Filter -->
-        <button onclick="setGenre('',this)" class="active">All Genres</button>
-        <button onclick="setGenre('action',this)">Action</button>
-        <button onclick="setGenre('romance',this)">Romance</button>
-        <button onclick="setGenre('fantasy',this)">Fantasy</button>
-        <button onclick="setGenre('comedy',this)">Comedy</button>
-        <button onclick="setGenre('isekai',this)">Isekai</button>
-        <button onclick="setGenre('shonen',this)">Shonen</button>
-        <button onclick="setGenre('shojo',this)">Shojo</button>
-        <button onclick="setGenre('seinen',this)">Seinen</button>
-        <button onclick="setGenre('josei',this)">Josei</button>
-        <button onclick="setGenre('Harem',this)"Harem</button>
-        <button onclick="setGenre('Reincarnation',this)">Reincarnation</button>
-        <button onclick="setGenre('sliceoflife',this)">Slice of Life</button>
-        <button onclick="setGenre('horror',this)">Horror</button>
-        <button onclick="setGenre('mecha',this)">Mecha</button>
-        <button onclick="setGenre('sports',this)">Sports</button>
-        <button onclick="setGenre('mystery',this)">Mystery</button>
-        <button onclick="setGenre('ecchi',this)">Ecchi</button>
-        <button onclick="setGenre('adventure',this)">Adventure</button>
-        <button onclick="setGenre('supernatural',this)">Supernatural</button>
-        <button onclick="setGenre('scifi',this)">Sci-Fi</button>
-
     </div>
 
+    <!-- Main Anime Grid -->
     <main id="animeList" class="anime-list">
         <h3 style="text-align: center; width: 100%; color: #ff4500;">Loading Anime...</h3>
     </main>
+    
+    <!-- A-Z List View (Hidden by default) -->
+    <div id="azListView" class="az-list-view" style="display: none;">
+        <button class="back-to-home-btn" onclick="showHome()">⬅️ Back to Home</button>
+        <h2 id="azListTitle"></h2>
+        <div id="az-alphabet-box" class="az-alphabet-box"></div>
+        <div id="az-results" class="az-results">
+            <p>Select an alphabet to see the list.</p>
+        </div>
+    </div>
 
-    <!-- GC & Telegram Footer Links -->
+
+    <!-- Social Footer Links -->
     <div class="social-footer">
         <a href="YOUR_TELEGRAM_LINK_HERE" target="_blank" class="btn-tg">✈️ Telegram Channel</a>
         <a href="YOUR_GC_LINK_HERE" target="_blank" class="btn-gc">💬 Join Group Chat</a>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const app = initializeApp({
             apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
             authDomain: "asi-anime.firebaseapp.com",
             projectId: "asi-anime"
         });
-
         const db = getFirestore(app);
 
         let allAnime = [];
@@ -87,35 +89,66 @@
         let currentGenre = "";
         let currentSearch = "";
 
+        // --- Sidebar Navigation ---
+        window.openNav = () => {
+            document.getElementById("sidebar").style.width = "250px";
+            document.getElementById("overlay").style.display = "block";
+        }
+        window.closeNav = () => {
+            document.getElementById("sidebar").style.width = "0";
+            document.getElementById("overlay").style.display = "none";
+        }
+
+        // --- View Management ---
+        window.showHome = () => {
+            document.getElementById("animeList").style.display = "grid";
+            document.getElementById("azListView").style.display = "none";
+            document.querySelector(".filter-container").style.display = "flex";
+            applyFilter();
+        }
+
         async function loadAnime() {
             try {
                 const snap = await getDocs(collection(db, "anime"));
                 allAnime = [];
-                snap.forEach(d => {
-                    allAnime.push({ id: d.id, ...d.data() });
-                });
-
-                // NEW ANIME YA NEW EPISODE WALA ANIME TOP PE AAYEGA!
+                snap.forEach(d => allAnime.push({ id: d.id, ...d.data() }));
                 allAnime.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-
+                
+                populateGenres();
                 applyFilter();
             } catch (e) {
-                document.getElementById("animeList").innerHTML = "<h3 style='text-align:center;width:100%;'>Error loading anime! Check connection.</h3>";
+                document.getElementById("animeList").innerHTML = "<h3 style='text-align:center;width:100%;'>Error loading anime!</h3>";
             }
+        }
+        
+        function populateGenres() {
+            const genres = new Set();
+            allAnime.forEach(a => {
+                if (a.genre) {
+                    a.genre.split(',').forEach(g => genres.add(g.trim().toLowerCase()));
+                }
+            });
+
+            const genreContainer = document.querySelector(".genre-list-sidebar");
+            genreContainer.innerHTML = `<a href="#" onclick="setGenre('', this)">All Genres</a>`; // Add All Genres option
+            
+            [...genres].sort().forEach(genre => {
+                 const genreLink = document.createElement('a');
+                 genreLink.href = "#";
+                 genreLink.textContent = genre.charAt(0).toUpperCase() + genre.slice(1);
+                 genreLink.onclick = () => setGenre(genre, genreLink);
+                 genreContainer.appendChild(genreLink);
+            });
         }
 
         function applyFilter() {
             let filtered = allAnime.filter(a => {
-                // Strings ko pehle se lowercase kar liya aasan matching ke liye
                 let nameStr = (a.name || "").toLowerCase();
                 let genreStr = (a.genre || "").toLowerCase();
+                let searchStr = currentSearch.toLowerCase();
 
-                // 1. FIXED: Search Bar me ab Name ke sath Genre bhi search hoga
-                let nameMatch = nameStr.includes(currentSearch) || genreStr.includes(currentSearch);
-                
-                // 2. FIXED: Button se genre select karne ka logic ab simple aur jyada powerful hai
+                let nameMatch = nameStr.includes(searchStr) || genreStr.includes(searchStr);
                 let genreMatch = currentGenre === "" || genreStr.includes(currentGenre);
-                
                 let typeMatch = currentType === "all" || (a.type || "sub").toLowerCase() === currentType;
                 
                 return nameMatch && genreMatch && typeMatch;
@@ -127,58 +160,98 @@
             let box = document.getElementById("animeList");
             box.innerHTML = "";
 
-            if (list.length == 0) {
-                box.innerHTML = "<h3 style='text-align:center;width:100%; color:#a0a0b0;'>No Anime Found matching criteria.</h3>";
+            if (list.length === 0) {
+                box.innerHTML = "<h3 style='text-align:center;width:100%; color:#a0a0b0;'>No Anime Found.</h3>";
                 return;
             }
 
             list.forEach(a => {
                 let card = document.createElement("div");
                 card.className = "anime-card";
-
                 let imgSrc = a.image || "https://via.placeholder.com/200x250";
                 let typeText = a.type ? a.type.toUpperCase() : "SUB";
 
                 card.innerHTML = `
                     <div class="badge-type">${typeText}</div>
-                    <img src="${imgSrc}">
+                    <img src="${imgSrc}" alt="${a.name}">
                     <div class="anime-info">
                         <h4>${a.name || "Unknown"}</h4>
                         <span class="genre-tag">${a.genre || "No Genre"}</span>
                     </div>
                 `;
-
-                card.onclick = () => {
-                    // PHOTO PE CLICK KARTE HI SEEDHA DETAIL PAGE KHULEGA
-                    location.href = "detail.html?id=" + a.id;
-                };
-
+                card.onclick = () => location.href = "detail.html?id=" + a.id;
                 box.appendChild(card);
             });
         }
 
-        window.setType = function(type, btn) {
+        window.setType = (type, btn) => {
             currentType = type;
-            document.querySelectorAll(".filter-container button").forEach(b => {
-                if(b.innerText.includes("Sub") || b.innerText.includes("Dub") || b.innerText.includes("Type")) b.classList.remove("active");
-            });
+            document.querySelectorAll(".filter-container button").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             applyFilter();
         }
 
-        window.setGenre = function(genre, btn) {
+        window.setGenre = (genre, el) => {
             currentGenre = genre.toLowerCase();
-            document.querySelectorAll(".filter-container button").forEach(b => {
-                if(!b.innerText.includes("Sub") && !b.innerText.includes("Dub") && !b.innerText.includes("Type")) b.classList.remove("active");
-            });
-            btn.classList.add("active");
+            document.querySelectorAll('.genre-list-sidebar a').forEach(a => a.classList.remove('active'));
+            if(el) el.classList.add('active');
+            
+            showHome(); // Ensure main view is visible
+            closeNav();
             applyFilter();
         }
 
-        document.getElementById("searchInput").addEventListener("input", e => {
-            currentSearch = e.target.value.toLowerCase().trim();
+        searchInput.addEventListener("input", e => {
+            currentSearch = e.target.value.trim();
             applyFilter();
         });
+        
+        // --- A-Z List Logic ---
+        window.showAzList = (type) => {
+            closeNav();
+            document.getElementById("animeList").style.display = "none";
+            document.querySelector(".filter-container").style.display = "none";
+            document.getElementById("azListView").style.display = "block";
+            
+            const title = type === 'sub' ? 'Hindi Sub Anime (A-Z)' : 'Hindi Dub Anime (A-Z)';
+            document.getElementById("azListTitle").textContent = title;
+            
+            const alphabetBox = document.getElementById("az-alphabet-box");
+            alphabetBox.innerHTML = '';
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(letter => {
+                let btn = document.createElement('button');
+                btn.textContent = letter;
+                btn.onclick = () => renderAzResults(type, letter);
+                alphabetBox.appendChild(btn);
+            });
+            
+            document.getElementById("az-results").innerHTML = "<p>Select an alphabet to see the list.</p>";
+        };
+        
+        window.renderAzResults = (type, letter) => {
+             document.querySelectorAll('#az-alphabet-box button').forEach(b => b.classList.remove('active'));
+             event.target.classList.add('active');
+
+            const resultsBox = document.getElementById("az-results");
+            resultsBox.innerHTML = '';
+            
+            const filtered = allAnime
+                .filter(a => a.type === type && a.name.toUpperCase().startsWith(letter))
+                .sort((a,b) => a.name.localeCompare(b.name));
+            
+            if(filtered.length === 0) {
+                resultsBox.innerHTML = '<p>No anime found starting with this letter.</p>';
+                return;
+            }
+            
+            filtered.forEach(a => {
+                let p = document.createElement('a');
+                p.className = 'az-result-item';
+                p.textContent = a.name;
+                p.href = `detail.html?id=${a.id}`;
+                resultsBox.appendChild(p);
+            });
+        };
 
         loadAnime();
     </script>
