@@ -21,18 +21,15 @@
         <div class="box">
             <h3>Add New Anime</h3>
 
-            <input id="newName" placeholder="Anime Name">
-            <input id="newGenre" placeholder="Genre (Action, Romance, etc.)">
+            <input id="newName" placeholder="Anime Name (e.g. Solo Leveling)">
+            <input id="newGenre" placeholder="Genre (Action, Fantasy, etc.)">
             
             <select id="newType">
                 <option value="sub">Hindi Sub</option>
                 <option value="dub">Hindi Dub</option>
             </select>
 
-            <!-- YAHAN LINK FIX KIYA HAI -->
-            <input id="newLink" placeholder="Direct Anime Link / Shortener (Optional)">
-
-            <textarea id="newDesc" placeholder="Anime Description"></textarea>
+            <textarea id="newDesc" placeholder="Description (Superpower wala aadmi...)"></textarea>
 
             <button id="uploadImgBtn" style="background:#333;">📸 Select Image</button>
             <p id="imgText" style="text-align:center; margin-top:10px; font-size:13px; color:#ff4500;">No Image Selected</p>
@@ -42,11 +39,11 @@
 
         <!-- EPISODE ADDITION -->
         <div class="box">
-            <h3>Add Episode</h3>
+            <h3>Add Episode (Link Here)</h3>
 
             <select id="animeSelect"></select>
-            <input id="epNum" placeholder="Episode Number">
-            <input id="epLink" placeholder="Episode / Shortener Link">
+            <input id="epNum" placeholder="Episode Number (e.g. 01, 02)">
+            <input id="epLink" placeholder="Shortener Link Here">
 
             <button id="addEpBtn">Save Episode</button>
         </div>
@@ -82,10 +79,15 @@
     async function loadList(){
         const snap = await getDocs(collection(db, "anime"));
         animeSelect.innerHTML = "<option>Select Anime To Add Episode</option>";
-        snap.forEach(d => {
+        
+        let tempList = [];
+        snap.forEach(d => tempList.push({id: d.id, ...d.data()}));
+        tempList.sort((a,b) => a.name.localeCompare(b.name)); // Alphabetical dropdown
+
+        tempList.forEach(a => {
             let opt = document.createElement("option");
-            opt.value = d.id;
-            opt.textContent = d.data().name;
+            opt.value = a.id;
+            opt.textContent = a.name;
             animeSelect.appendChild(opt);
         });
     }
@@ -111,32 +113,26 @@
         let genre = newGenre.value.trim();
         let type = newType.value;
         let desc = newDesc.value.trim();
-        let aLink = newLink.value.trim();
 
         if(!name || !uploadedImage){
             alert("Please fill Anime Name and Upload Image!");
             return;
         }
 
-        // Link Format Fix
-        if(aLink && !aLink.match(/^https?:\/\//i)) {
-            aLink = "https://" + aLink;
-        }
-
+        // updatedAt: Date.now() ki wajah se anime TOP pe aayega site me
         await addDoc(collection(db, "anime"), {
             name: name,
             genre: genre,
             type: type,
             description: desc,
             image: uploadedImage,
-            animeLink: aLink,  // SHORTENER LINK SAVED HERE!
+            updatedAt: Date.now(), 
             episodes: []
         });
 
         alert("Anime Added Successfully ✅");
         
-        // Reset Inputs
-        newName.value = ""; newGenre.value = ""; newDesc.value = ""; newLink.value = "";
+        newName.value = ""; newGenre.value = ""; newDesc.value = "";
         uploadedImage = ""; imgText.innerText = "No Image Selected"; imgText.style.color = "#ff4500";
         loadList();
     }
@@ -152,16 +148,18 @@
             return;
         }
 
-        // Link Format Fix
+        // Link Format Fix (auto adds https)
         if(link && !link.match(/^https?:\/\//i)) {
             link = "https://" + link;
         }
 
+        // updatedAt: Date.now() - Jis anime me naya episode add hoga vo bhi TOP pe aayega
         await updateDoc(doc(db, "anime", id), {
             episodes: arrayUnion({
                 ep: ep,
                 link: link
-            })
+            }),
+            updatedAt: Date.now() 
         });
 
         alert("Episode Added Successfully ✅");
