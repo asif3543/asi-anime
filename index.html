@@ -1,242 +1,255 @@
-code
-Html
-play_circle
-download
-content_copy
-expand_less
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ASI Anime | Hindi Subbed Anime</title>
+    <meta name="description" content="ASI Anime Hindi Sub Anime Watch Free">
+    <meta name="keywords" content="hindi anime, anime hindi sub, asi anime">
+    <meta name="google-site-verification" content="3LX6AtLTBpFLgq2q6ZCIpMOwJp8ZU1KPcK-u-jUMDk">
 
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1">  <!-- ================= SEO & GOOGLE RANKING TAGS ================= -->  <title>ASI Anime | Hindi Subbed Anime</title>  
-<meta name="description" content="ASI Anime par dekhiye apne favourite anime Hindi Subbed me. Watch top Action, Romance, and Fantasy Hindi Subbed Anime for free.">  
-<meta name="keywords" content="hindi anime, hindi subbed anime, asi anime, watch anime hindi Sub, free anime hindi dub, anime in hindi, isekai hindi sub">  <!-- AAPKA GOOGLE VERIFICATION CODE -->  <meta name="google-site-verification" content="3LX6AtLTBpFLgq2qg6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />  <!-- ================= SOCIAL MEDIA SHARE TAGS ================= -->  <meta property="og:title" content="ASI Anime - Watch Hindi Subbed Anime">  
-<meta property="og:description" content="Watch your favorite anime with Hindi subtitles for free! High Quality Episodes.">  
-<meta property="og:image" content="https://via.placeholder.com/600x300?text=ASI+Anime+Free+Hindi+Sub">  
-<meta property="og:url" content="https://asif3543.github.io/asi-anime/">
+    <style>
+        body {
+            background: #0b0b0e;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
 
-<style>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #ff4500;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-body{
-background:#0b0b0e;
-color:white;
-font-family:Arial;
-margin:0;
-}
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+        }
 
-/* Header */
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px;
-background:#ff4500;
-flex-wrap:wrap;
-}
+        input {
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: none;
+            width: 220px;
+            max-width: 100%;
+        }
 
-.logo{
-font-size:22px;
-font-weight:bold;
-}
+        .filter-box {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-input{
-padding:8px;
-border-radius:20px;
-border:none;
-width:200px;
-}
+        .filter-box button {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            background: #1e1e1e;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
 
-/* Filter Buttons */
-.filter-box{
-display:flex;
-gap:10px;
-padding:15px;
-flex-wrap:wrap;
-justify-content:center;
-}
+        .filter-box button.active {
+            background: #ff4500;
+        }
 
-.filter-box button{
-padding:6px 14px;
-border-radius:20px;
-border:none;
-background:#1e1e1e;
-color:white;
-cursor:pointer;
-}
+        .anime-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            padding: 25px;
+        }
 
-.filter-box button.active{
-background:#ff4500;
-}
+        .anime-card {
+            background: #16161e;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
 
-/* Cards */
-.anime-list{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-gap:20px;
-padding:25px;
-}
+        .anime-card:hover {
+            transform: scale(1.05);
+        }
 
-.anime-card{
-background:#16161e;
-border-radius:12px;
-overflow:hidden;
-cursor:pointer;
-transition:0.3s;
-}
+        .anime-card img {
+            width: 100%;
+            height: 230px;
+            object-fit: cover;
+        }
 
-.anime-card:hover{
-transform:scale(1.05);
-}
+        .anime-info {
+            text-align: center;
+            padding: 10px;
+        }
 
-.anime-card img{
-width:100%;
-height:230px;
-object-fit:cover;
-}
+        .genre-tag {
+            font-size: 0.85em;
+            color: #bbb;
+            display: block;
+            margin-top: 4px;
+        }
 
-.anime-info{
-text-align:center;
-padding:10px;
-}
-
-</style>
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #888;
+        }
+    </style>
 </head>
 
 <body>
 
-<header>
-<div class="logo">ASI Anime</div>
-<input id="searchInput" placeholder="Search Anime">
-</header>
+    <header>
+        <div class="logo">ASI Anime</div>
+        <input id="searchInput" placeholder="Search Anime...">
+    </header>
 
-<!-- Filters -->
-<div class="filter-box">
+    <div class="filter-box">
+        <button onclick="setType('all', this)" class="active">All</button>
+        <button onclick="setType('sub', this)">Sub</button>
+        <button onclick="setType('dub', this)">Dub</button>
 
-<button onclick="setType('all',this)" class="active">All</button>
-<button onclick="setType('sub',this)">Sub</button>
-<button onclick="setType('dub',this)">Dub</button>
+        <button onclick="setGenre('', this)" class="active">All Genre</button>
+        <button onclick="setGenre('action', this)">Action</button>
+        <button onclick="setGenre('romance', this)">Romance</button>
+        <button onclick="setGenre('fantasy', this)">Fantasy</button>
+        <button onclick="setGenre('comedy', this)">Comedy</button>
+        <button onclick="setGenre('isekai', this)">Isekai</button>
+    </div>
 
-<button onclick="setGenre('',this)" class="active">All Genre</button>
-<button onclick="setGenre('action',this)">Action</button>
-<button onclick="setGenre('romance',this)">Romance</button>
-<button onclick="setGenre('fantasy',this)">Fantasy</button>
-<button onclick="setGenre('comedy',this)">Comedy</button>
-<button onclick="setGenre('isekai',this)">Isekai</button>
+    <main id="animeList" class="anime-list">
+        Loading Anime...
+    </main>
 
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } 
+        from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-<main id="animeList" class="anime-list">
-Loading Anime...
-</main>
+        const app = initializeApp({
+            apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
+            authDomain: "asi-anime.firebaseapp.com",
+            projectId: "asi-anime"
+        });
 
-<script type="module">
+        const db = getFirestore(app);
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, getDocs } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        let allAnime = [];
+        let currentType = "all";
+        let currentGenre = "";
+        let currentSearch = "";
 
-const app=initializeApp({
-apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
-authDomain:"asi-anime.firebaseapp.com",
-projectId:"asi-anime"
-});
+        async function loadAnime() {
+            try {
+                const snap = await getDocs(collection(db, "anime"));
+                allAnime = [];
+                snap.forEach(d => {
+                    allAnime.push({ id: d.id, ...d.data() });
+                });
+                applyFilter();
+            } catch (err) {
+                console.error("Firebase error:", err);
+                document.getElementById("animeList").innerHTML = "Error loading anime. Please try again later.";
+            }
+        }
 
-const db=getFirestore(app);
+        function applyFilter() {
+            let filtered = allAnime.filter(a => {
+                let nameMatch = (a.name || "").toLowerCase().includes(currentSearch);
 
-let allAnime=[];
-let currentType="all";
-let currentGenre="";
-let currentSearch="";
+                // Genre match - better handling for comma-separated genres
+                let genreMatch = currentGenre === "" ||
+                    (a.genre || "").toLowerCase()
+                        .split(/[,|]+/)           // comma ya pipe se split
+                        .map(g => g.trim())
+                        .includes(currentGenre);
 
-/* Load Data */
-async function loadAnime(){
-const snap=await getDocs(collection(db,"anime"));
+                // Type match - agar type missing hai to "" treat karo
+                let typeMatch = currentType === "all" ||
+                    (a.type || "").toLowerCase() === currentType;
 
-allAnime=[];
-snap.forEach(d=>allAnime.push({id:d.id,...d.data()}));
+                return nameMatch && genreMatch && typeMatch;
+            });
 
-applyFilter();
-}
+            render(filtered);
+        }
 
-/* Filter Logic */
-function applyFilter(){
+        function render(list) {
+            const box = document.getElementById("animeList");
+            box.innerHTML = "";
 
-let filtered=allAnime.filter(a=>{
+            if (list.length === 0) {
+                box.innerHTML = '<div class="no-results">No Anime Found</div>';
+                return;
+            }
 
-let nameMatch=(a.name||"").toLowerCase().includes(currentSearch);
-let genreMatch=currentGenre=="" || (a.genre||"").toLowerCase().includes(currentGenre);
-let typeMatch=currentType=="all" || (a.type||"sub").toLowerCase()==currentType;
+            list.forEach(a => {
+                const card = document.createElement("div");
+                card.className = "anime-card";
 
-return nameMatch && genreMatch && typeMatch;
+                const imgSrc = a.image || "https://via.placeholder.com/200x250?text=No+Image";
+                const genreText = a.genre ? a.genre : "";
 
-});
+                card.innerHTML = `
+                    <img src="\( {imgSrc}" loading="lazy" alt=" \){a.name || 'Anime poster'}">
+                    <div class="anime-info">
+                        <b>${a.name || 'Unknown'}</b>
+                        <span class="genre-tag">${genreText}</span>
+                    </div>
+                `;
 
-render(filtered);
-}
+                card.onclick = () => {
+                    if (a.link) {
+                        window.open(a.link, "_blank");
+                    } else if (a.id) {
+                        location.href = "detail.html?id=" + a.id;
+                    }
+                };
 
-/* Render Cards */
-function render(list){
+                box.appendChild(card);
+            });
+        }
 
-let box=document.getElementById("animeList");
-box.innerHTML="";
+        window.setType = function(type, btn) {
+            currentType = type;
 
-if(list.length==0){
-box.innerHTML="No Anime Found";
-return;
-}
+            document.querySelectorAll(".filter-box button").forEach(b => {
+                b.classList.remove("active");
+            });
+            btn.classList.add("active");
 
-list.forEach(a=>{
+            applyFilter();
+        };
 
-let card=document.createElement("div");
-card.className="anime-card";
+        window.setGenre = function(genre, btn) {
+            currentGenre = genre.toLowerCase();
 
-let img=a.image || "https://via.placeholder.com/200x250";
+            document.querySelectorAll(".filter-box button").forEach(b => {
+                b.classList.remove("active");
+            });
+            btn.classList.add("active");
 
-card.innerHTML=`
-<img src="${img}">
-<div class="anime-info">
-<b>${a.name}</b><br>
-<span>${a.genre||""}</span>
-</div>
-`;
+            applyFilter();
+        };
 
-card.onclick=()=>{
-location.href="detail.html?id="+a.id;
-};
+        document.getElementById("searchInput").addEventListener("input", e => {
+            currentSearch = e.target.value.toLowerCase().trim();
+            applyFilter();
+        });
 
-box.appendChild(card);
-
-});
-
-}
-
-/* Filters */
-window.setType=function(type,btn){
-currentType=type;
-
-document.querySelectorAll(".filter-box button").forEach(b=>{
-if(!b.onclick.toString().includes("setGenre"))
-b.classList.remove("active");
-});
-
-btn.classList.add("active");
-applyFilter();
-}
-
-window.setGenre=function(genre,btn){
-currentGenre=genre.toLowerCase();
-applyFilter();
-}
-
-/* Search */
-searchInput.addEventListener("input",e=>{
-currentSearch=e.target.value.toLowerCase();
-applyFilter();
-});
-
-loadAnime();
-
-</script>
+        // Start loading
+        loadAnime();
+    </script>
 
 </body>
 </html>
