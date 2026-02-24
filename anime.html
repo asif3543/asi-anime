@@ -2,83 +2,107 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Anime Detail</title>
+<title>Watch Anime</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
+
 body{
-background:#121212;
+background:#0b0b0e;
 color:white;
 font-family:Arial;
-text-align:center;
-padding:20px;
 margin:0;
+padding:20px;
+}
+
+.detail-card{
+background:#16161e;
+max-width:600px;
+margin:auto;
+padding:25px;
+border-radius:15px;
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
 }
 
 img{
 width:250px;
+max-width:100%;
 border-radius:10px;
-margin-top:20px;
+margin-top:15px;
 display:none;
-object-fit:cover;
-box-shadow:0 4px 10px rgba(0,0,0,0.5);
 }
 
-button{
-padding:12px 20px;
-margin-top:20px;
+.badge{
+display:inline-block;
 background:#ff4500;
-color:white;
-border:none;
-border-radius:6px;
+padding:5px 12px;
+border-radius:20px;
+font-size:12px;
+margin-top:10px;
+}
+
+.desc{
+color:#bbb;
+font-size:14px;
+margin:20px 0;
+line-height:1.6;
+text-align:justify;
+}
+
+#episodeList{
+margin-top:25px;
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:10px;
+}
+
+.epBtn{
+padding:10px 18px;
+background:rgba(255,69,0,0.1);
+border:1px solid #ff4500;
+border-radius:8px;
+color:#ff4500;
 cursor:pointer;
-font-size:16px;
 font-weight:bold;
 transition:0.3s;
 }
 
-button:hover{
-background:#e03e00;
+.epBtn:hover{
+background:#ff4500;
+color:white;
 }
 
 button:disabled{
 background:#555;
+color:white;
 cursor:not-allowed;
 }
 
-.info-text{
-color:#bbb;
-margin-top:10px;
-}
-
-#episodeList{
-margin-top:30px;
-}
-
-.epBtn{
-padding:10px 15px;
-margin:6px;
-background:#ff4500;
-border:none;
-border-radius:6px;
-color:white;
-cursor:pointer;
-}
 </style>
 </head>
 
 <body>
 
-<h2 id="animeName">Loading Anime...</h2>
+<div class="detail-card">
+
+<h2 id="animeName">Loading...</h2>
+
+<div id="typeBadge" class="badge" style="display:none"></div>
+
+<br>
 
 <img id="animeImg">
 
-<p id="animeGenre" class="info-text"></p>
-<p id="animeDesc" class="info-text"></p>
+<p id="animeGenre" style="color:#aaa;font-weight:bold"></p>
 
-<button id="watchBtn" style="display:none;">▶ Watch Anime</button>
+<div class="desc" id="animeDesc"></div>
+
+<button id="watchBtn" style="display:none">▶ Watch Anime</button>
 
 <div id="episodeList"></div>
+
+</div>
 
 <script type="module">
 
@@ -86,7 +110,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebas
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 const firebaseConfig={
-apiKey:"AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
+apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
 authDomain:"asi-anime.firebaseapp.com",
 projectId:"asi-anime"
 };
@@ -94,13 +118,12 @@ projectId:"asi-anime"
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
 
-const params=new URLSearchParams(window.location.search);
-const id=params.get("id");
+const id=new URLSearchParams(window.location.search).get("id");
 
 async function loadDetail(){
 
 if(!id){
-document.getElementById("animeName").innerText="Anime ID Missing!";
+document.getElementById("animeName").innerText="ID Missing!";
 return;
 }
 
@@ -116,52 +139,55 @@ return;
 let data=snap.data();
 
 /* Basic Info */
-document.getElementById("animeName").innerText=data.name||"Unknown Anime";
+document.getElementById("animeName").innerText=data.name || "Unknown Anime";
 
 const img=document.getElementById("animeImg");
-img.src=data.image||"https://via.placeholder.com/250x350";
-img.style.display="inline-block";
+img.src=data.image || "https://via.placeholder.com/250x350";
+img.style.display="block";
 
-document.getElementById("animeGenre").innerText="Genre: "+(data.genre||"Unknown");
-document.getElementById("animeDesc").innerText=data.description||"No Description";
+/* Type Badge */
+const badge=document.getElementById("typeBadge");
+badge.innerText=(data.type || "SUB").toUpperCase();
+badge.style.display="inline-block";
+
+/* Genre + Description */
+document.getElementById("animeGenre").innerText="Genre: "+(data.genre || "Unknown");
+
+document.getElementById("animeDesc").innerText=
+data.description ||
+"Description not added. Enjoy watching episodes below!";
 
 /* Watch Button */
 const watchBtn=document.getElementById("watchBtn");
-watchBtn.style.display="inline-block";
 
 if(data.link){
-watchBtn.onclick=()=>{
-window.open(data.link,"_blank");
-};
+watchBtn.style.display="inline-block";
+watchBtn.onclick=()=>window.open(data.link,"_blank");
 }
 else{
+watchBtn.style.display="inline-block";
 watchBtn.innerText="Link Not Available";
 watchBtn.disabled=true;
 }
 
-/* ⭐ Episode System */
+/* Episode System */
 const episodeList=document.getElementById("episodeList");
+episodeList.innerHTML="";
 
 if(data.episodes){
 
 data.episodes.forEach(ep=>{
-
 let btn=document.createElement("button");
 btn.className="epBtn";
 btn.innerText="Episode "+ep.ep;
-
-btn.onclick=()=>{
-window.open(ep.link,"_blank");
-};
-
+btn.onclick=()=>window.open(ep.link,"_blank");
 episodeList.appendChild(btn);
-
 });
 
 }
 
-}catch(error){
-console.error(error);
+}catch(e){
+console.error(e);
 document.getElementById("animeName").innerText="Error Loading Data";
 }
 
