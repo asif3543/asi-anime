@@ -12,7 +12,7 @@
         <a href="index.html" class="logo">ASI Anime</a>
     </header>
 
-    <a href="index.html" class="back-btn">⬅ Back to Home</a>
+    <a href="index.html" class="back-btn">⬅️ Back to Home</a>
 
     <div id="detailBox" style="text-align:center; margin-top:50px; color:#ff4500;">
         <h2>Loading Anime Details...</h2>
@@ -25,8 +25,8 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
         const app = initializeApp({
             apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
@@ -36,7 +36,6 @@
 
         const db = getFirestore(app);
         
-        // URL se ID lena
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
 
@@ -53,10 +52,10 @@
                     let a = docSnap.data();
                     let imgSrc = a.image || "https://via.placeholder.com/250x350";
                     let typeText = a.type ? a.type.toUpperCase() : "SUB";
+                    let seasonText = a.season ? `Season ${a.season}` : "";
 
                     let episodesHTML = "";
                     
-                    // Sort Episodes by Number (01, 02, etc.)
                     let eps = a.episodes || [];
                     eps.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
 
@@ -65,7 +64,6 @@
                     } else {
                         eps.forEach(episode => {
                             let link = episode.link;
-                            // Add https:// if missing so shortener works properly
                             if(link && !link.match(/^https?:\/\//i)) {
                                 link = "https://" + link;
                             }
@@ -83,6 +81,7 @@
                             <img src="${imgSrc}" class="detail-img">
                             <div class="detail-info">
                                 <h1>${a.name}</h1>
+                                ${seasonText ? `<h4 class="detail-season">${seasonText}</h4>` : ''}
                                 <span class="badge" style="background:var(--primary)">${typeText}</span>
                                 <span class="badge">${a.genre || "No Genre"}</span>
                                 <p class="detail-desc">${a.description || "No description available."}</p>
@@ -100,6 +99,7 @@
                     document.getElementById("detailBox").innerHTML = "<h2>Anime Not Found!</h2>";
                 }
             } catch (error) {
+                console.error(error);
                 document.getElementById("detailBox").innerHTML = "<h2>Error loading details!</h2>";
             }
         }
