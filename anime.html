@@ -2,81 +2,47 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Watch Anime</title>
+<title>ASI Admin Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 
 body{
-background:#0b0b0e;
+background:#121212;
 color:white;
 font-family:Arial;
-margin:0;
+text-align:center;
 padding:20px;
 }
 
-.detail-card{
-background:#16161e;
-max-width:600px;
-margin:auto;
-padding:25px;
-border-radius:15px;
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
-}
-
-img{
-width:250px;
-max-width:100%;
+.box{
+background:#1e1e1e;
+padding:20px;
 border-radius:10px;
-margin-top:15px;
-display:none;
+max-width:420px;
+margin:auto;
+margin-bottom:25px;
 }
 
-.badge{
-display:inline-block;
+input,select,textarea{
+width:90%;
+padding:10px;
+margin:8px 0;
+border-radius:6px;
+border:none;
+background:#333;
+color:white;
+}
+
+button{
+padding:12px;
+width:90%;
 background:#ff4500;
-padding:5px 12px;
-border-radius:20px;
-font-size:12px;
-margin-top:10px;
-}
-
-.desc{
-color:#bbb;
-font-size:14px;
-margin:20px 0;
-line-height:1.6;
-text-align:justify;
-}
-
-#episodeList{
-margin-top:25px;
-display:flex;
-flex-wrap:wrap;
-justify-content:center;
-gap:10px;
-}
-
-.epBtn{
-padding:10px 18px;
-background:rgba(255,69,0,0.1);
-border:1px solid #ff4500;
-border-radius:8px;
-color:#ff4500;
-cursor:pointer;
+border:none;
+border-radius:6px;
+color:white;
 font-weight:bold;
-transition:0.3s;
-}
-
-.epBtn:hover{
-background:#ff4500;
-color:white;
-}
-
-button:disabled{
-background:#555;
-color:white;
-cursor:not-allowed;
+cursor:pointer;
 }
 
 </style>
@@ -84,116 +50,156 @@ cursor:not-allowed;
 
 <body>
 
-<div class="detail-card">
+<h2>🔥 ASI Admin Panel</h2>
 
-<h2 id="animeName">Loading...</h2>
+<!-- PASSWORD -->
+<input type="password" id="adminPass" placeholder="Enter Password">
 
-<div id="typeBadge" class="badge" style="display:none"></div>
+<div id="adminPanel" style="display:none">
 
-<br>
+<!-- NEW ANIME -->
+<div class="box">
+<h3>Add New Anime</h3>
 
-<img id="animeImg">
+<input id="newName" placeholder="Anime Name">
+<input id="newGenre" placeholder="Genre">
 
-<p id="animeGenre" style="color:#aaa;font-weight:bold"></p>
+<select id="newType">
+<option value="sub">Hindi Sub</option>
+<option value="dub">Hindi Dub</option>
+</select>
 
-<div class="desc" id="animeDesc"></div>
+<textarea id="newDesc" placeholder="Description"></textarea>
 
-<button id="watchBtn" style="display:none">▶ Watch Anime</button>
+<button id="uploadImgBtn">📸 Select Image</button>
+<p id="imgText">No Image Selected</p>
 
-<div id="episodeList"></div>
+<button id="addAnimeBtn">Save Anime</button>
+</div>
+
+<!-- EPISODE -->
+<div class="box">
+<h3>Add Episode</h3>
+
+<select id="animeSelect"></select>
+
+<input id="epNum" placeholder="Episode Number">
+<input id="epLink" placeholder="Episode Link">
+
+<button id="addEpBtn">Save Episode</button>
+</div>
 
 </div>
+
+<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const firebaseConfig={
+const app=initializeApp({
 apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
 authDomain:"asi-anime.firebaseapp.com",
 projectId:"asi-anime"
-};
-
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
-
-const id=new URLSearchParams(window.location.search).get("id");
-
-async function loadDetail(){
-
-if(!id){
-document.getElementById("animeName").innerText="ID Missing!";
-return;
-}
-
-try{
-
-const snap=await getDoc(doc(db,"anime",id));
-
-if(!snap.exists()){
-document.getElementById("animeName").innerText="Anime Not Found 😢";
-return;
-}
-
-let data=snap.data();
-
-/* Basic Info */
-document.getElementById("animeName").innerText=data.name || "Unknown Anime";
-
-const img=document.getElementById("animeImg");
-img.src=data.image || "https://via.placeholder.com/250x350";
-img.style.display="block";
-
-/* Type Badge */
-const badge=document.getElementById("typeBadge");
-badge.innerText=(data.type || "SUB").toUpperCase();
-badge.style.display="inline-block";
-
-/* Genre + Description */
-document.getElementById("animeGenre").innerText="Genre: "+(data.genre || "Unknown");
-
-document.getElementById("animeDesc").innerText=
-data.description ||
-"Description not added. Enjoy watching episodes below!";
-
-/* Watch Button */
-const watchBtn=document.getElementById("watchBtn");
-
-if(data.link){
-watchBtn.style.display="inline-block";
-watchBtn.onclick=()=>window.open(data.link,"_blank");
-}
-else{
-watchBtn.style.display="inline-block";
-watchBtn.innerText="Link Not Available";
-watchBtn.disabled=true;
-}
-
-/* Episode System */
-const episodeList=document.getElementById("episodeList");
-episodeList.innerHTML="";
-
-if(data.episodes){
-
-data.episodes.forEach(ep=>{
-let btn=document.createElement("button");
-btn.className="epBtn";
-btn.innerText="Episode "+ep.ep;
-btn.onclick=()=>window.open(ep.link,"_blank");
-episodeList.appendChild(btn);
 });
 
+const db=getFirestore(app);
+
+let uploadedImage="";
+
+/* PASSWORD */
+adminPass.addEventListener("input",()=>{
+adminPanel.style.display =
+adminPass.value==="Animestudioio786" ? "block" : "none";
+});
+
+/* LOAD ANIME LIST */
+async function loadList(){
+const snap=await getDocs(collection(db,"anime"));
+
+animeSelect.innerHTML="<option>Select Anime</option>";
+
+snap.forEach(d=>{
+let opt=document.createElement("option");
+opt.value=d.id;
+opt.textContent=d.data().name;
+animeSelect.appendChild(opt);
+});
 }
 
-}catch(e){
-console.error(e);
-document.getElementById("animeName").innerText="Error Loading Data";
+/* IMAGE UPLOAD */
+uploadImgBtn.onclick=()=>{
+
+let widget=cloudinary.createUploadWidget({
+cloudName:"dmxqosmk0",
+uploadPreset:"asi_anime_upload"
+},
+(error,result)=>{
+if(!error && result && result.event==="success"){
+uploadedImage=result.info.secure_url;
+imgText.innerText="Image Uploaded ✅";
 }
+});
+
+widget.open();
+}
+
+/* ADD NEW ANIME */
+addAnimeBtn.onclick=async()=>{
+
+let name=newName.value;
+let genre=newGenre.value;
+let type=newType.value;
+let desc=newDesc.value;
+
+if(!name || !uploadedImage){
+alert("Fill Name + Upload Image");
+return;
+}
+
+await addDoc(collection(db,"anime"),{
+name,
+genre,
+type,
+description:desc,
+image:uploadedImage,
+episodes:[]
+});
+
+alert("Anime Added ✅");
+loadList();
 
 }
 
-loadDetail();
+/* ADD EPISODE */
+addEpBtn.onclick=async()=>{
+
+let id=animeSelect.value;
+let ep=epNum.value;
+let link=epLink.value;
+
+if(!id || !ep || !link){
+alert("Fill Episode Data");
+return;
+}
+
+await updateDoc(doc(db,"anime",id),{
+episodes:arrayUnion({
+ep:ep,
+link:link
+})
+});
+
+alert("Episode Added ✅");
+
+epNum.value="";
+epLink.value="";
+
+}
+
+loadList();
 
 </script>
 
