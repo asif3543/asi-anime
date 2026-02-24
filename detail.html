@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Anime Details | ASI Anime</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">ASI Anime</a>
+    </header>
+
+    <a href="index.html" class="back-btn">⬅ Back to Home</a>
+
+    <div id="detailBox" style="text-align:center; margin-top:50px; color:#ff4500;">
+        <h2>Loading Anime Details...</h2>
+    </div>
+
+    <!-- Social Footer -->
+    <div class="social-footer">
+        <a href="YOUR_TELEGRAM_LINK_HERE" target="_blank" class="btn-tg">✈️ Telegram Channel</a>
+        <a href="YOUR_GC_LINK_HERE" target="_blank" class="btn-gc">💬 Join Group Chat</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        const app = initializeApp({
+            apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
+            authDomain: "asi-anime.firebaseapp.com",
+            projectId: "asi-anime"
+        });
+
+        const db = getFirestore(app);
+        
+        // URL se ID lena
+        const urlParams = new URLSearchParams(window.location.search);
+        const animeId = urlParams.get('id');
+
+        async function loadDetail() {
+            if (!animeId) {
+                document.getElementById("detailBox").innerHTML = "<h2>Anime Not Found!</h2>";
+                return;
+            }
+
+            try {
+                const docSnap = await getDoc(doc(db, "anime", animeId));
+                
+                if (docSnap.exists()) {
+                    let a = docSnap.data();
+                    let imgSrc = a.image || "https://via.placeholder.com/250x350";
+                    let typeText = a.type ? a.type.toUpperCase() : "SUB";
+
+                    let episodesHTML = "";
+                    
+                    // Sort Episodes by Number (01, 02, etc.)
+                    let eps = a.episodes || [];
+                    eps.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
+
+                    if(eps.length === 0){
+                        episodesHTML = "<p style='color:#a0a0b0;'>No episodes uploaded yet.</p>";
+                    } else {
+                        eps.forEach(episode => {
+                            let link = episode.link;
+                            // Add https:// if missing so shortener works properly
+                            if(link && !link.match(/^https?:\/\//i)) {
+                                link = "https://" + link;
+                            }
+                            
+                            episodesHTML += `
+                                <div class="ep-btn" onclick="window.open('${link}', '_blank')">
+                                    Episode ${episode.ep}
+                                </div>
+                            `;
+                        });
+                    }
+
+                    document.getElementById("detailBox").outerHTML = `
+                        <div class="detail-container">
+                            <img src="${imgSrc}" class="detail-img">
+                            <div class="detail-info">
+                                <h1>${a.name}</h1>
+                                <span class="badge" style="background:var(--primary)">${typeText}</span>
+                                <span class="badge">${a.genre || "No Genre"}</span>
+                                <p class="detail-desc">${a.description || "No description available."}</p>
+                                
+                                <div class="episodes-box">
+                                    <h3>Watch Episodes</h3>
+                                    <div class="episodes-grid">
+                                        ${episodesHTML}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById("detailBox").innerHTML = "<h2>Anime Not Found!</h2>";
+                }
+            } catch (error) {
+                document.getElementById("detailBox").innerHTML = "<h2>Error loading details!</h2>";
+            }
+        }
+
+        loadDetail();
+    </script>
+</body>
+</html>
