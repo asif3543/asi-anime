@@ -36,226 +36,152 @@ header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.logo {
-    font-size: 26px;
-    font-weight: 800;
-    color: var(--primary);
-    letter-spacing: 1px;
-    text-decoration: none;
-}
+.header-left { display: flex; align-items: center; gap: 20px; }
+.menu-icon { font-size: 24px; cursor: pointer; color: var(--text-light); }
+.logo { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: 1px; text-decoration: none; }
 
 .search-box input {
-    padding: 10px 20px;
-    border-radius: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    width: 260px;
-    outline: none;
-    transition: 0.3s;
-    font-size: 14px;
+    padding: 10px 20px; border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3); color: white; width: 260px;
+    outline: none; transition: 0.3s; font-size: 14px;
 }
+.search-box input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(255, 69, 0, 0.3); }
 
-.search-box input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 10px rgba(255, 69, 0, 0.3);
+/* --- SIDEBAR MENU --- */
+.sidebar {
+    height: 100%; width: 0; position: fixed; z-index: 2000;
+    top: 0; left: 0; background-color: var(--card-bg);
+    overflow-x: hidden; transition: 0.5s; padding-top: 60px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+.sidebar-content { padding: 20px; }
+.sidebar h3 { color: var(--primary); margin-bottom: 15px; }
+.sidebar a {
+    padding: 8px 8px 8px 0; text-decoration: none; font-size: 15px;
+    color: var(--text-muted); display: block; transition: 0.3s;
+    text-transform: capitalize;
+}
+.sidebar a:hover, .sidebar a.active { color: var(--primary); }
+.sidebar .close-btn { position: absolute; top: 15px; right: 25px; font-size: 36px; }
+.sidebar hr { border-color: rgba(255,255,255,0.1); margin: 20px 0; }
+.genre-list-sidebar { display: flex; flex-direction: column; gap: 5px; }
+#overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.7); z-index: 1999; display: none;
 }
 
 /* --- FILTERS --- */
 .filter-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 25px 5%;
-    justify-content: center;
+    display: flex; flex-wrap: wrap; gap: 12px;
+    padding: 25px 5%; justify-content: center;
 }
-
 .filter-container button {
-    padding: 8px 18px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: var(--card-bg);
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: 0.3s ease;
-    font-weight: 500;
+    padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--card-bg); color: var(--text-muted); cursor: pointer;
+    transition: 0.3s ease; font-weight: 500;
 }
-
-.filter-container button:hover, 
-.filter-container button.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
+.filter-container button:hover, .filter-container button.active {
+    background: var(--primary); border-color: var(--primary); color: white;
 }
 
 /* --- ANIME GRID --- */
 .anime-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 20px;
-    padding: 10px 5% 40px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 20px; padding: 10px 5% 40px;
 }
-
 .anime-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-    position: relative;
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--card-bg); border-radius: 12px; overflow: hidden;
+    cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;
+    position: relative; border: 1px solid rgba(255,255,255,0.05);
 }
-
-.anime-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.6);
-}
-
-.anime-card img {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-    border-bottom: 2px solid var(--primary);
-}
-
+.anime-card:hover { transform: translateY(-8px); box-shadow: 0 12px 20px rgba(0, 0, 0, 0.6); }
+.anime-card img { width: 100%; height: 250px; object-fit: cover; border-bottom: 2px solid var(--primary); }
 .badge-type {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: var(--primary);
-    color: white;
-    padding: 4px 8px;
-    font-size: 11px;
-    font-weight: 700;
-    border-radius: 6px;
-    text-transform: uppercase;
+    position: absolute; top: 10px; left: 10px; background: var(--primary);
+    color: white; padding: 4px 8px; font-size: 11px;
+    font-weight: 700; border-radius: 6px; text-transform: uppercase;
 }
-
-.anime-info {
-    padding: 12px;
-    text-align: center;
-}
-
-.anime-info h4 {
-    font-size: 14px;
-    margin-bottom: 5px;
-    color: var(--text-light);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.genre-tag {
-    color: var(--text-muted);
-    font-size: 12px;
-    text-transform: capitalize;
-}
+.anime-info { padding: 12px; text-align: center; }
+.anime-info h4 { font-size: 14px; margin-bottom: 5px; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.genre-tag { color: var(--text-muted); font-size: 12px; text-transform: capitalize; }
 
 /* --- DETAIL PAGE CSS --- */
 .back-btn {
-    display: inline-block;
-    margin: 20px 5% 0;
-    padding: 10px 20px;
-    background: #333;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: bold;
-    transition: 0.3s;
+    display: inline-block; margin: 20px 5% 0; padding: 10px 20px;
+    background: #333; color: white; text-decoration: none;
+    border-radius: 8px; font-weight: bold; transition: 0.3s;
 }
 .back-btn:hover { background: var(--primary); }
-
 .detail-container {
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 20px;
-    background: var(--card-bg);
-    border-radius: 15px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 25px;
-    border: 1px solid rgba(255,255,255,0.05);
+    max-width: 1000px; margin: 20px auto; padding: 20px;
+    background: var(--card-bg); border-radius: 15px; display: flex;
+    flex-wrap: wrap; gap: 25px; border: 1px solid rgba(255,255,255,0.05);
 }
-
-.detail-img {
-    width: 280px;
-    border-radius: 12px;
-    object-fit: cover;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-}
-
-.detail-info {
-    flex: 1;
-    min-width: 300px;
-}
-
-.detail-info h1 { color: var(--primary); margin-bottom: 10px; font-size: 28px;}
+.detail-img { width: 280px; border-radius: 12px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+.detail-info { flex: 1; min-width: 300px; }
+.detail-info h1 { color: var(--primary); margin-bottom: 5px; font-size: 28px;}
+.detail-season { font-size: 18px; color: var(--text-muted); margin-bottom: 10px; font-weight: 500;}
 .detail-info p { color: var(--text-muted); line-height: 1.6; margin-top: 10px;}
 .detail-info .badge {
-    background: #333;
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-size: 13px;
-    color: white;
-    margin-right: 10px;
-    display: inline-block;
+    background: #333; padding: 5px 12px; border-radius: 15px;
+    font-size: 13px; color: white; margin-right: 10px; display: inline-block;
 }
-
 .episodes-box { margin-top: 30px; }
 .episodes-box h3 { color: white; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px;}
-
-.episodes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 15px;
-}
-
+.episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
 .ep-btn {
-    background: #2a2a35;
-    color: white;
-    padding: 12px;
-    text-align: center;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: #2a2a35; color: white; padding: 12px; text-align: center;
+    border-radius: 8px; font-weight: bold; cursor: pointer;
+    transition: 0.3s; border: 1px solid rgba(255,255,255,0.1);
 }
+.ep-btn:hover { background: var(--primary); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255,69,0,0.4); }
 
-.ep-btn:hover {
-    background: var(--primary);
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(255,69,0,0.4);
+/* --- A-Z ANIME LIST VIEW --- */
+.az-list-view { padding: 20px 5%; }
+.back-to-home-btn {
+    margin-bottom: 20px; padding: 10px 20px; background: var(--primary);
+    color: white; border: none; border-radius: 8px; font-weight: bold;
+    cursor: pointer; transition: 0.3s;
 }
+.back-to-home-btn:hover { background: var(--primary-hover); }
+.az-list-view h2 { text-align: center; margin-bottom: 20px; color: var(--primary); }
+.az-alphabet-box {
+    display: flex; flex-wrap: wrap; justify-content: center;
+    gap: 10px; margin-bottom: 25px;
+}
+.az-alphabet-box button {
+    width: 40px; height: 40px; font-size: 16px; font-weight: bold;
+    cursor: pointer; background: var(--card-bg); color: var(--text-light);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; transition: 0.3s;
+}
+.az-alphabet-box button:hover, .az-alphabet-box button.active {
+    background: var(--primary); border-color: var(--primary);
+}
+.az-results {
+    background: var(--card-bg); padding: 20px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05); min-height: 100px;
+}
+.az-result-item {
+    display: block; padding: 10px; color: var(--text-muted);
+    text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: 0.3s;
+}
+.az-result-item:hover { background: rgba(255,69,0,0.1); color: var(--primary); }
+.az-result-item:last-child { border-bottom: none; }
+
 
 /* --- FOOTER TG/GC LINKS --- */
 .social-footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background: rgba(20, 20, 26, 0.95);
-    backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    padding: 12px;
-    z-index: 1000;
+    position: fixed; bottom: 0; width: 100%; background: rgba(20, 20, 26, 0.95);
+    backdrop-filter: blur(10px); display: flex; justify-content: center;
+    gap: 15px; padding: 12px; z-index: 1000;
     border-top: 1px solid rgba(255,255,255,0.05);
 }
-
 .social-footer a {
-    text-decoration: none;
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    padding: 8px 20px;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.3s;
+    text-decoration: none; color: white; font-weight: 600; font-size: 14px;
+    padding: 8px 20px; border-radius: 20px; display: flex;
+    align-items: center; gap: 8px; transition: 0.3s;
 }
-
 .btn-tg { background: #0088cc; }
 .btn-tg:hover { background: #0077b5; box-shadow: 0 0 10px rgba(0, 136, 204, 0.5); }
 .btn-gc { background: var(--primary); }
@@ -276,12 +202,16 @@ header {
 .box input:focus, .box select:focus, .box textarea:focus { border-color: var(--primary); }
 .box button {
     width: 100%; padding: 12px; background: var(--primary); border: none;
-    border-radius: 8px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; transition: 0.3s;
+    border-radius: 8px; color: white; font-weight: bold; font-size: 16px;
+    cursor: pointer; margin-top: 10px; transition: 0.3s;
 }
 .box button:hover { background: var(--primary-hover); }
 
+/* --- RESPONSIVE DESIGN --- */
 @media (max-width: 600px) {
     header { flex-direction: column; gap: 15px; padding: 15px; }
+    .header-left { width: 100%; justify-content: space-between; }
+    .logo { order: -1; } /* Puts logo between icon and search */
     .search-box input { width: 100%; }
     .social-footer a { padding: 8px 12px; font-size: 12px; }
     .detail-container { flex-direction: column; align-items: center; text-align: center; }
