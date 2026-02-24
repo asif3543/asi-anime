@@ -1,96 +1,239 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #121212;
-    color: white;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800&display=swap');
+
+:root {
+    --bg-dark: #0f0f13;
+    --card-bg: #1c1c24;
+    --primary: #ff4500;
+    --primary-hover: #e03e00;
+    --text-light: #ffffff;
+    --text-muted: #9aa0a6;
 }
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    padding-bottom: 70px; /* Space for footer */
+}
+
+/* --- HEADER --- */
 header {
-    background: #ff3c00;
-    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 15px 5%;
+    background: rgba(28, 28, 36, 0.85);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .logo {
-    font-size: 22px;
-    font-weight: bold;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: 1px;
 }
 
-.right-menu {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.search-box {
+    position: relative;
 }
 
-#searchInput {
-    padding: 6px;
-    border-radius: 5px;
-    border: none;
-}
-
-#menuBtn {
-    background: none;
-    border: none;
-    font-size: 22px;
+.search-box input {
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.3);
     color: white;
-    cursor: pointer;
+    width: 260px;
+    outline: none;
+    transition: 0.3s;
+    font-size: 14px;
 }
 
-.dropdown {
-    display: none;
-    background: #1e1e1e;
-    padding: 10px;
+.search-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(255, 69, 0, 0.3);
 }
 
-.dropdown a {
-    display: block;
-    padding: 8px;
-    color: white;
-    text-decoration: none;
-}
-
-.dropdown a:hover {
-    background: #333;
-}
-
-.sub-title {
-    padding: 15px 20px;
-}
-
-.anime-list {
+/* --- FILTERS --- */
+.filter-container {
     display: flex;
     flex-wrap: wrap;
+    gap: 12px;
+    padding: 25px 5%;
+    justify-content: center;
+}
+
+.filter-container button {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-weight: 500;
+}
+
+.filter-container button:hover, 
+.filter-container button.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 4px 10px rgba(255, 69, 0, 0.3);
+}
+
+/* --- ANIME GRID --- */
+.anime-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 20px;
-    padding: 20px;
+    padding: 10px 5% 40px;
 }
 
 .anime-card {
-    width: 180px;
-    background: #1e1e1e;
-    border-radius: 8px;
+    background: var(--card-bg);
+    border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
-    transition: 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
 .anime-card:hover {
-    transform: scale(1.05);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.6);
 }
 
 .anime-card img {
     width: 100%;
     height: 250px;
     object-fit: cover;
+    border-bottom: 2px solid var(--primary);
 }
 
-.anime-card p {
-    padding: 10px;
+.badge-type {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--primary);
+    color: white;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.anime-info {
+    padding: 12px;
     text-align: center;
 }
 
-.pagination {
-    text-align: center;
-    padding: 20px;
+.anime-info h4 {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.genre-tag {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: capitalize;
+}
+
+/* --- FOOTER TG/GC LINKS --- */
+.social-footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: rgba(20, 20, 26, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 12px;
+    z-index: 1000;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.social-footer a {
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+}
+
+.btn-tg { background: #0088cc; }
+.btn-tg:hover { background: #0077b5; box-shadow: 0 0 10px rgba(0, 136, 204, 0.5); }
+.btn-gc { background: var(--primary); }
+.btn-gc:hover { background: var(--primary-hover); box-shadow: 0 0 10px rgba(255, 69, 0, 0.5); }
+
+/* --- ADMIN PANEL CSS --- */
+.admin-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 0 15px;
+}
+.admin-title { text-align: center; margin-bottom: 20px; font-size: 28px;}
+.box {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.box h3 { text-align: center; margin-bottom: 15px; color: var(--primary); }
+.box input, .box select, .box textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: #121216;
+    color: white;
+    outline: none;
+}
+.box input:focus, .box select:focus, .box textarea:focus { border-color: var(--primary); }
+.box button {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+.box button:hover { background: var(--primary-hover); }
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    header { flex-direction: column; gap: 15px; padding: 15px; }
+    .search-box input { width: 100%; }
+    .social-footer a { padding: 8px 12px; font-size: 12px; }
 }
