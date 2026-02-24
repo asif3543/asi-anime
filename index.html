@@ -1,264 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>ASI Anime | Hindi Subbed Anime</title>
-
-<meta name="description" content="Watch Hindi Subbed Anime Free">
-<meta name="google-site-verification" content="3LX6AtLTBpFLgq2q6ZCIpMOwJp8ZU1KPcK-u-jUMDk">
-
-<style>
-
-body{
-background:#0b0b0e;
-color:white;
-font-family:Arial;
-margin:0;
-}
-
-/* Header */
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px;
-background:#ff4500;
-flex-wrap:wrap;
-}
-
-.logo{
-font-size:22px;
-font-weight:bold;
-}
-
-input{
-padding:8px;
-border-radius:20px;
-border:none;
-width:220px;
-max-width:100%;
-}
-
-/* Filter */
-.filter-box{
-display:flex;
-gap:10px;
-padding:15px;
-flex-wrap:wrap;
-justify-content:center;
-}
-
-.filter-box button{
-padding:8px 16px;
-border-radius:20px;
-border:none;
-background:#1e1e1e;
-color:white;
-cursor:pointer;
-}
-
-.filter-box button.active{
-background:#ff4500;
-}
-
-/* Cards */
-.anime-list{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-gap:20px;
-padding:25px;
-}
-
-.anime-card{
-background:#16161e;
-border-radius:12px;
-overflow:hidden;
-cursor:pointer;
-transition:0.3s;
-}
-
-.anime-card:hover{
-transform:scale(1.05);
-}
-
-.anime-card img{
-width:100%;
-height:230px;
-object-fit:cover;
-}
-
-.anime-info{
-text-align:center;
-padding:10px;
-}
-
-.genre-tag{
-color:#bbb;
-font-size:13px;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ASI Anime | Premium Anime Streaming</title>
+    <meta name="description" content="Watch Hindi Subbed & Dubbed Anime Free">
+    <meta name="google-site-verification" content="3LX6AtLTBpFLgq2q6ZCIpMOwJp8ZU1KPcK-u-jUMDk">
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<header>
-<div class="logo">ASI Anime</div>
-<input id="searchInput" placeholder="Search Anime...">
-</header>
+    <header>
+        <a href="#" class="logo">ASI Anime</a>
+        <div class="search-box">
+            <input id="searchInput" placeholder="Search Anime...">
+        </div>
+    </header>
 
-<div class="filter-box">
+    <div class="filter-container">
+        <!-- Sub / Dub Filter -->
+        <button onclick="setType('all',this)" class="active">All Type</button>
+        <button onclick="setType('sub',this)">Hindi Sub</button>
+        <button onclick="setType('dub',this)">Hindi Dub</button>
 
-<button onclick="setType('all',this)" class="active">All</button>
-<button onclick="setType('sub',this)">Sub</button>
-<button onclick="setType('dub',this)">Dub</button>
+        <!-- Genre Filter -->
+        <button onclick="setGenre('',this)" class="active">All Genres</button>
+        <button onclick="setGenre('action',this)">Action</button>
+        <button onclick="setGenre('romance',this)">Romance</button>
+        <button onclick="setGenre('fantasy',this)">Fantasy</button>
+        <button onclick="setGenre('comedy',this)">Comedy</button>
+        <button onclick="setGenre('isekai',this)">Isekai</button>
+    </div>
 
-<button onclick="setGenre('',this)" class="active">All Genre</button>
-<button onclick="setGenre('action',this)">Action</button>
-<button onclick="setGenre('romance',this)">Romance</button>
-<button onclick="setGenre('fantasy',this)">Fantasy</button>
-<button onclick="setGenre('comedy',this)">Comedy</button>
-<button onclick="setGenre('isekai',this)">Isekai</button>
+    <main id="animeList" class="anime-list">
+        <h3 style="text-align: center; width: 100%; color: #ff4500;">Loading Anime...</h3>
+    </main>
 
-</div>
+    <!-- GC & Telegram Footer Links -->
+    <div class="social-footer">
+        <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg">✈️ Telegram Channel</a>
+        <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc">💬 Join Group Chat</a>
+    </div>
 
-<main id="animeList" class="anime-list">
-Loading Anime...
-</main>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-<script type="module">
+        const app = initializeApp({
+            apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
+            authDomain: "asi-anime.firebaseapp.com",
+            projectId: "asi-anime"
+        });
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, getDocs } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+        const db = getFirestore(app);
 
-const app = initializeApp({
-apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
-authDomain:"asi-anime.firebaseapp.com",
-projectId:"asi-anime"
-});
+        let allAnime = [];
+        let currentType = "all";
+        let currentGenre = "";
+        let currentSearch = "";
 
-const db = getFirestore(app);
+        async function loadAnime() {
+            try {
+                const snap = await getDocs(collection(db, "anime"));
+                allAnime = [];
+                snap.forEach(d => {
+                    allAnime.push({ id: d.id, ...d.data() });
+                });
+                applyFilter();
+            } catch (e) {
+                document.getElementById("animeList").innerHTML = "<h3 style='text-align:center;width:100%;'>Error loading anime! Check connection.</h3>";
+            }
+        }
 
-let allAnime=[];
-let currentType="all";
-let currentGenre="";
-let currentSearch="";
+        function applyFilter() {
+            let filtered = allAnime.filter(a => {
+                let nameMatch = (a.name || "").toLowerCase().includes(currentSearch);
+                let genreMatch = currentGenre == "" || (a.genre || "").toLowerCase().split(/[,|]+/).map(g => g.trim()).includes(currentGenre);
+                let typeMatch = currentType == "all" || (a.type || "sub").toLowerCase() == currentType;
+                return nameMatch && genreMatch && typeMatch;
+            });
+            render(filtered);
+        }
 
-async function loadAnime(){
-try{
-const snap = await getDocs(collection(db,"anime"));
+        function render(list) {
+            let box = document.getElementById("animeList");
+            box.innerHTML = "";
 
-allAnime=[];
-snap.forEach(d=>{
-allAnime.push({id:d.id,...d.data()});
-});
+            if (list.length == 0) {
+                box.innerHTML = "<h3 style='text-align:center;width:100%; color:#a0a0b0;'>No Anime Found matching criteria.</h3>";
+                return;
+            }
 
-applyFilter();
+            list.forEach(a => {
+                let card = document.createElement("div");
+                card.className = "anime-card";
 
-}catch(e){
-document.getElementById("animeList").innerHTML="Error loading anime";
-}
-}
+                let imgSrc = a.image || "https://via.placeholder.com/200x250";
+                let typeText = a.type ? a.type.toUpperCase() : "SUB";
 
-function applyFilter(){
+                card.innerHTML = `
+                    <div class="badge-type">${typeText}</div>
+                    <img src="${imgSrc}">
+                    <div class="anime-info">
+                        <h4>${a.name || "Unknown"}</h4>
+                        <span class="genre-tag">${a.genre || "No Genre"}</span>
+                    </div>
+                `;
 
-let filtered = allAnime.filter(a=>{
+                card.onclick = () => {
+                    // MAIN LINK FIX: Agar aapne link dala hai toh directly open hoga, aur "https://" auto-add ho jayega taaki tut na jaye!
+                    let finalLink = a.animeLink || a.link;
 
-let nameMatch=(a.name||"").toLowerCase().includes(currentSearch);
+                    if (finalLink) {
+                        if (!finalLink.match(/^https?:\/\//i)) {
+                            finalLink = "https://" + finalLink;
+                        }
+                        window.open(finalLink, "_blank");
+                    } else {
+                        location.href = "detail.html?id=" + a.id;
+                    }
+                };
 
-let genreMatch = currentGenre=="" ||
-(a.genre||"").toLowerCase().split(/[,|]+/).map(g=>g.trim()).includes(currentGenre);
+                box.appendChild(card);
+            });
+        }
 
-let typeMatch = currentType=="all" ||
-(a.type||"sub").toLowerCase()==currentType;
+        /* Set Filters Logic */
+        window.setType = function(type, btn) {
+            currentType = type;
+            document.querySelectorAll(".filter-container button").forEach(b => {
+                if(b.innerText.includes("Sub") || b.innerText.includes("Dub") || b.innerText.includes("Type")) b.classList.remove("active");
+            });
+            btn.classList.add("active");
+            applyFilter();
+        }
 
-return nameMatch && genreMatch && typeMatch;
+        window.setGenre = function(genre, btn) {
+            currentGenre = genre.toLowerCase();
+            document.querySelectorAll(".filter-container button").forEach(b => {
+                if(!b.innerText.includes("Sub") && !b.innerText.includes("Dub") && !b.innerText.includes("Type")) b.classList.remove("active");
+            });
+            btn.classList.add("active");
+            applyFilter();
+        }
 
-});
+        document.getElementById("searchInput").addEventListener("input", e => {
+            currentSearch = e.target.value.toLowerCase().trim();
+            applyFilter();
+        });
 
-render(filtered);
-}
-
-function render(list){
-
-let box=document.getElementById("animeList");
-box.innerHTML="";
-
-if(list.length==0){
-box.innerHTML="No Anime Found";
-return;
-}
-
-list.forEach(a=>{
-
-let card=document.createElement("div");
-card.className="anime-card";
-
-let imgSrc=a.image || "https://via.placeholder.com/200x250";
-
-card.innerHTML=`
-<img src="${imgSrc}">
-<div class="anime-info">
-<b>${a.name||"Unknown"}</b><br>
-<span class="genre-tag">${a.genre||""}</span>
-</div>
-`;
-
-card.onclick=()=>{
-
-// Shortner / TG Redirect Support
-if(a.link){
-window.open(a.link,"_blank");
-}
-else{
-location.href="detail.html?id="+a.id;
-}
-
-};
-
-box.appendChild(card);
-
-});
-
-}
-
-/* Filters */
-
-window.setType=function(type,btn){
-currentType=type;
-
-document.querySelectorAll(".filter-box button").forEach(b=>{
-b.classList.remove("active");
-});
-
-btn.classList.add("active");
-
-applyFilter();
-}
-
-window.setGenre=function(genre,btn){
-currentGenre=genre.toLowerCase();
-
-document.querySelectorAll(".filter-box button").forEach(b=>{
-b.classList.remove("active");
-});
-
-btn.classList.add("active");
-
-applyFilter();
-}
-
-document.getElementById("searchInput").addEventListener("input",e=>{
-currentSearch=e.target.value.toLowerCase().trim();
-applyFilter();
-});
-
-loadAnime();
-
-</script>
-
+        loadAnime();
+    </script>
 </body>
 </html>
