@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ASI Admin Panel (Anime Editor)</title>
+    <title>ASI Admin Panel</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
 </head>
 <body style="padding-bottom: 20px;">
 
 <div class="admin-container">
-    <h2 class="admin-title">🔥 ASI Anime Uploader</h2>
+    <h2 class="admin-title">🔥 ASI Admin Panel</h2>
 
     <div class="box" id="loginBox">
         <input type="password" id="adminPass" placeholder="Enter Admin Password">
@@ -26,8 +26,6 @@
                 <option value="sub">Hindi Sub</option>
                 <option value="dub">Hindi Dub</option>
             </select>
-            <!-- DIRECT LINK BOX -->
-            <input id="newLink" placeholder="Direct Anime Link / Shortener (Optional)">
             <textarea id="newDesc" placeholder="Description"></textarea>
             
             <button id="uploadImgBtn" style="background:#333;">📸 Select Image</button>
@@ -40,7 +38,7 @@
         <div class="box">
             <h3>Add Episode</h3>
             <select id="animeSelect"></select>
-            <input id="epNum" placeholder="Episode Number">
+            <input id="epNum" placeholder="Episode Number (01, 02...)">
             <input id="epLink" placeholder="Episode Link / Shortener">
             <button id="addEpBtn">Save Episode</button>
         </div>
@@ -74,10 +72,13 @@
     async function loadList(){
         const snap = await getDocs(collection(db, "anime"));
         animeSelect.innerHTML = "<option>Select Anime To Add Episode</option>";
-        snap.forEach(d => {
+        let tempList = [];
+        snap.forEach(d => tempList.push({id: d.id, ...d.data()}));
+        tempList.sort((a,b) => a.name.localeCompare(b.name));
+        tempList.forEach(a => {
             let opt = document.createElement("option");
-            opt.value = d.id;
-            opt.textContent = d.data().name;
+            opt.value = a.id;
+            opt.textContent = a.name;
             animeSelect.appendChild(opt);
         });
     }
@@ -101,23 +102,18 @@
         let genre = newGenre.value.trim();
         let type = newType.value;
         let desc = newDesc.value.trim();
-        let aLink = newLink.value.trim();
 
         if(!name || !uploadedImage){
             alert("Fill Name and Upload Image!"); return;
         }
 
-        if(aLink && !aLink.match(/^https?:\/\//i)) {
-            aLink = "https://" + aLink;
-        }
-
         await addDoc(collection(db, "anime"), {
             name: name, genre: genre, type: type, description: desc,
-            image: uploadedImage, animeLink: aLink, episodes: []
+            image: uploadedImage, updatedAt: Date.now(), episodes: []
         });
 
         alert("Anime Added ✅");
-        newName.value = ""; newGenre.value = ""; newDesc.value = ""; newLink.value = "";
+        newName.value = ""; newGenre.value = ""; newDesc.value = "";
         uploadedImage = ""; imgText.innerText = "No Image Selected"; imgText.style.color = "#ff4500";
         loadList();
     }
@@ -136,7 +132,8 @@
         }
 
         await updateDoc(doc(db, "anime", id), {
-            episodes: arrayUnion({ ep: ep, link: link })
+            episodes: arrayUnion({ ep: ep, link: link }),
+            updatedAt: Date.now()
         });
 
         alert("Episode Added ✅");
