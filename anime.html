@@ -1,207 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>ASI Admin Panel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-
-body{
-background:#121212;
-color:white;
-font-family:Arial;
-text-align:center;
-padding:20px;
-}
-
-.box{
-background:#1e1e1e;
-padding:20px;
-border-radius:10px;
-max-width:420px;
-margin:auto;
-margin-bottom:25px;
-}
-
-input,select,textarea{
-width:90%;
-padding:10px;
-margin:8px 0;
-border-radius:6px;
-border:none;
-background:#333;
-color:white;
-}
-
-button{
-padding:12px;
-width:90%;
-background:#ff4500;
-border:none;
-border-radius:6px;
-color:white;
-font-weight:bold;
-cursor:pointer;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <title>ASI Admin Panel (Anime Editor)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
 </head>
+<body style="padding-bottom: 20px;">
 
-<body>
+<div class="admin-container">
+    <h2 class="admin-title">🔥 ASI Anime Uploader</h2>
 
-<h2>🔥 ASI Admin Panel</h2>
+    <div class="box" id="loginBox">
+        <input type="password" id="adminPass" placeholder="Enter Admin Password">
+    </div>
 
-<!-- PASSWORD -->
-<input type="password" id="adminPass" placeholder="Enter Password">
+    <div id="adminPanel" style="display:none">
 
-<div id="adminPanel" style="display:none">
+        <!-- NEW ANIME ADDITION -->
+        <div class="box">
+            <h3>Add New Anime</h3>
+            <input id="newName" placeholder="Anime Name">
+            <input id="newGenre" placeholder="Genre">
+            <select id="newType">
+                <option value="sub">Hindi Sub</option>
+                <option value="dub">Hindi Dub</option>
+            </select>
+            <!-- DIRECT LINK BOX -->
+            <input id="newLink" placeholder="Direct Anime Link / Shortener (Optional)">
+            <textarea id="newDesc" placeholder="Description"></textarea>
+            
+            <button id="uploadImgBtn" style="background:#333;">📸 Select Image</button>
+            <p id="imgText" style="text-align:center; margin-top:10px; font-size:13px; color:#ff4500;">No Image Selected</p>
+            
+            <button id="addAnimeBtn">Save Anime</button>
+        </div>
 
-<!-- NEW ANIME -->
-<div class="box">
-<h3>Add New Anime</h3>
+        <!-- EPISODE ADDITION -->
+        <div class="box">
+            <h3>Add Episode</h3>
+            <select id="animeSelect"></select>
+            <input id="epNum" placeholder="Episode Number">
+            <input id="epLink" placeholder="Episode Link / Shortener">
+            <button id="addEpBtn">Save Episode</button>
+        </div>
 
-<input id="newName" placeholder="Anime Name">
-<input id="newGenre" placeholder="Genre">
-
-<select id="newType">
-<option value="sub">Hindi Sub</option>
-<option value="dub">Hindi Dub</option>
-</select>
-
-<textarea id="newDesc" placeholder="Description"></textarea>
-
-<button id="uploadImgBtn">📸 Select Image</button>
-<p id="imgText">No Image Selected</p>
-
-<button id="addAnimeBtn">Save Anime</button>
-</div>
-
-<!-- EPISODE -->
-<div class="box">
-<h3>Add Episode</h3>
-
-<select id="animeSelect"></select>
-
-<input id="epNum" placeholder="Episode Number">
-<input id="epLink" placeholder="Episode Link">
-
-<button id="addEpBtn">Save Episode</button>
-</div>
-
+    </div>
 </div>
 
 <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
 
 <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion } 
+    from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+    const app = initializeApp({
+        apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
+        authDomain: "asi-anime.firebaseapp.com",
+        projectId: "asi-anime"
+    });
 
-const app=initializeApp({
-apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
-authDomain:"asi-anime.firebaseapp.com",
-projectId:"asi-anime"
-});
+    const db = getFirestore(app);
+    let uploadedImage = "";
 
-const db=getFirestore(app);
+    adminPass.addEventListener("input", () => {
+        if(adminPass.value === "Animestudioio786"){
+            document.getElementById("adminPanel").style.display = "block";
+            document.getElementById("loginBox").style.display = "none";
+        }
+    });
 
-let uploadedImage="";
+    async function loadList(){
+        const snap = await getDocs(collection(db, "anime"));
+        animeSelect.innerHTML = "<option>Select Anime To Add Episode</option>";
+        snap.forEach(d => {
+            let opt = document.createElement("option");
+            opt.value = d.id;
+            opt.textContent = d.data().name;
+            animeSelect.appendChild(opt);
+        });
+    }
 
-/* PASSWORD */
-adminPass.addEventListener("input",()=>{
-adminPanel.style.display =
-adminPass.value==="Animestudioio786" ? "block" : "none";
-});
+    uploadImgBtn.onclick = () => {
+        let widget = cloudinary.createUploadWidget({
+            cloudName: "dmxqosmk0",
+            uploadPreset: "asi_anime_upload"
+        }, (error, result) => {
+            if(!error && result && result.event === "success"){
+                uploadedImage = result.info.secure_url;
+                imgText.innerText = "Image Uploaded Successfully ✅";
+                imgText.style.color = "#00ff00";
+            }
+        });
+        widget.open();
+    }
 
-/* LOAD ANIME LIST */
-async function loadList(){
-const snap=await getDocs(collection(db,"anime"));
+    addAnimeBtn.onclick = async () => {
+        let name = newName.value.trim();
+        let genre = newGenre.value.trim();
+        let type = newType.value;
+        let desc = newDesc.value.trim();
+        let aLink = newLink.value.trim();
 
-animeSelect.innerHTML="<option>Select Anime</option>";
+        if(!name || !uploadedImage){
+            alert("Fill Name and Upload Image!"); return;
+        }
 
-snap.forEach(d=>{
-let opt=document.createElement("option");
-opt.value=d.id;
-opt.textContent=d.data().name;
-animeSelect.appendChild(opt);
-});
-}
+        if(aLink && !aLink.match(/^https?:\/\//i)) {
+            aLink = "https://" + aLink;
+        }
 
-/* IMAGE UPLOAD */
-uploadImgBtn.onclick=()=>{
+        await addDoc(collection(db, "anime"), {
+            name: name, genre: genre, type: type, description: desc,
+            image: uploadedImage, animeLink: aLink, episodes: []
+        });
 
-let widget=cloudinary.createUploadWidget({
-cloudName:"dmxqosmk0",
-uploadPreset:"asi_anime_upload"
-},
-(error,result)=>{
-if(!error && result && result.event==="success"){
-uploadedImage=result.info.secure_url;
-imgText.innerText="Image Uploaded ✅";
-}
-});
+        alert("Anime Added ✅");
+        newName.value = ""; newGenre.value = ""; newDesc.value = ""; newLink.value = "";
+        uploadedImage = ""; imgText.innerText = "No Image Selected"; imgText.style.color = "#ff4500";
+        loadList();
+    }
 
-widget.open();
-}
+    addEpBtn.onclick = async () => {
+        let id = animeSelect.value;
+        let ep = epNum.value.trim();
+        let link = epLink.value.trim();
 
-/* ADD NEW ANIME */
-addAnimeBtn.onclick=async()=>{
+        if(!id || !ep || !link){
+            alert("Fill Episode Data!"); return;
+        }
 
-let name=newName.value;
-let genre=newGenre.value;
-let type=newType.value;
-let desc=newDesc.value;
+        if(link && !link.match(/^https?:\/\//i)) {
+            link = "https://" + link;
+        }
 
-if(!name || !uploadedImage){
-alert("Fill Name + Upload Image");
-return;
-}
+        await updateDoc(doc(db, "anime", id), {
+            episodes: arrayUnion({ ep: ep, link: link })
+        });
 
-await addDoc(collection(db,"anime"),{
-name,
-genre,
-type,
-description:desc,
-image:uploadedImage,
-episodes:[]
-});
+        alert("Episode Added ✅");
+        epNum.value = ""; epLink.value = "";
+    }
 
-alert("Anime Added ✅");
-loadList();
-
-}
-
-/* ADD EPISODE */
-addEpBtn.onclick=async()=>{
-
-let id=animeSelect.value;
-let ep=epNum.value;
-let link=epLink.value;
-
-if(!id || !ep || !link){
-alert("Fill Episode Data");
-return;
-}
-
-await updateDoc(doc(db,"anime",id),{
-episodes:arrayUnion({
-ep:ep,
-link:link
-})
-});
-
-alert("Episode Added ✅");
-
-epNum.value="";
-epLink.value="";
-
-}
-
-loadList();
-
+    loadList();
 </script>
-
 </body>
 </html>
