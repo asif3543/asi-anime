@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- **NEW TITLE & META DESCRIPTION** -->
     <title>Anime Details | ASI Anime</title>
+    <meta name="description" content="View detailed information and episodes for your favorite anime on ASI Anime. Watch Hindi subbed and dubbed anime online.">
+    <!-- **END NEW TITLE & META DESCRIPTION** -->
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -36,6 +41,7 @@
 
         const db = getFirestore(app);
         
+        // Get anime ID from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
 
@@ -49,21 +55,24 @@
                 const docSnap = await getDoc(doc(db, "anime", animeId));
                 
                 if (docSnap.exists()) {
-                    let a = docSnap.data();
-                    let imgSrc = a.image || "https://via.placeholder.com/250x350";
-                    let typeText = a.type ? a.type.toUpperCase() : "SUB";
-                    let seasonText = a.season ? `Season ${a.season}` : "";
+                    let a = docSnap.data(); // Anime data
+                    let imgSrc = a.image || "https://via.placeholder.com/250x350"; // Use fallback image if no image is available
+                    let typeText = a.type ? a.type.toUpperCase() : "SUB"; // Get anime type (SUB/DUB)
+                    let seasonText = a.season ? `Season ${a.season}` : ""; // Display season if available
 
-                    let episodesHTML = "";
+                    let episodesHTML = ""; // To store HTML for episodes
                     
-                    let eps = a.episodes || [];
+                    let eps = a.episodes || []; // Get episodes array or empty array if none
+                    // Sort episodes by episode number (numeric sort)
                     eps.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
 
                     if(eps.length === 0){
                         episodesHTML = "<p style='color:#a0a0b0;'>No episodes uploaded yet.</p>";
                     } else {
+                        // Loop through episodes and create buttons
                         eps.forEach(episode => {
                             let link = episode.link;
+                            // Ensure link starts with http:// or https://
                             if(link && !link.match(/^https?:\/\//i)) {
                                 link = "https://" + link;
                             }
@@ -76,11 +85,12 @@
                         });
                     }
 
+                    // Inject the detailed anime information into the DOM
                     document.getElementById("detailBox").outerHTML = `
                         <div class="detail-container">
-                            <img src="${imgSrc}" class="detail-img">
+                            <img src="${imgSrc}" alt="${a.name || 'Unknown Anime'} Details Poster" class="detail-img"> <!-- **ALT TEXT ADDED HERE** -->
                             <div class="detail-info">
-                                <h1>${a.name}</h1>
+                                <h1>${a.name || "Unknown Anime"}</h1>
                                 ${seasonText ? `<h4 class="detail-season">${seasonText}</h4>` : ''}
                                 <span class="badge" style="background:var(--primary)">${typeText}</span>
                                 <span class="badge">${a.genre || "No Genre"}</span>
@@ -96,14 +106,17 @@
                         </div>
                     `;
                 } else {
+                    // If no document exists for the ID
                     document.getElementById("detailBox").innerHTML = "<h2>Anime Not Found!</h2>";
                 }
             } catch (error) {
-                console.error(error);
+                // Handle any errors during data fetching
+                console.error("Error loading anime details:", error); // Log error for debugging
                 document.getElementById("detailBox").innerHTML = "<h2>Error loading details!</h2>";
             }
         }
 
+        // Load anime details when the page loads
         loadDetail();
     </script>
 </body>
