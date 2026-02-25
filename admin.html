@@ -1,280 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>ASI Admin Panel</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>ASI Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
 </head>
-<body style="padding-bottom: 20px;">
+
+<body style="padding-bottom:20px;">
 
 <div class="admin-container">
-    <h2 class="admin-title">ðŸ”¥ ASI Admin Panel</h2>
+<h2 class="admin-title">🔥 ASI Admin Panel</h2>
 
-    <div class="box" id="loginBox">
-        <input type="password" id="adminPass" placeholder="Enter Admin Password">
-    </div>
+<div class="box" id="loginBox">
+<input type="password" id="adminPass" placeholder="Enter Admin Password">
+</div>
 
-    <div id="adminPanel" style="display:none">
+<div id="adminPanel" style="display:none">
 
-        <!-- NEW ANIME ADDITION -->
-        <div class="box">
-            <h3>Add New Anime</h3>
+<!-- ADD NEW ANIME -->
+<div class="box">
+<h3>Add New Anime</h3>
 
-            <input id="newName" placeholder="Anime Name (e.g. Solo Leveling)">
-            <input id="newSeason" placeholder="Season (e.g. 1, 2, Movie)">
-            <input id="newGenre" placeholder="Genre (Action, Fantasy, etc.)">
-            
-            <select id="newType">
-                <option value="sub">Hindi Sub</option>
-                <option value="dub">Hindi Dub</option>
-            </select>
+<input id="newName" placeholder="Anime Name">
+<input id="newSeason" placeholder="Season">
+<input id="newGenre" placeholder="Genre">
 
-            <textarea id="newDesc" placeholder="Description (Superpower wala aadmi...)"></textarea>
+<select id="newType">
+<option value="sub">Hindi Sub</option>
+<option value="dub">Hindi Dub</option>
+</select>
 
-            <!-- **IMAGE UPLOAD BUTTON WITH CROPPING** -->
-            <button id="uploadImgBtn" style="background:#333;">ðŸ“¸ Select & Crop Image</button>
-            <p id="imgText" style="text-align:center; margin-top:10px; font-size:13px; color:#ff4500;">No Image Selected</p>
+<textarea id="newDesc" placeholder="Description"></textarea>
 
-            <button id="addAnimeBtn">Save Anime</button>
-        </div>
+<button id="addAnimeBtn">Save Anime</button>
+</div>
 
-        <!-- EPISODE ADDITION -->
-        <div class="box">
-            <h3>Add Episode (Link Here)</h3>
+<!-- DELETE ANIME -->
+<div class="box">
+<h3>Delete Anime</h3>
+
+<input type="text" id="deleteSearch" placeholder="🔎 Search Anime To Delete...">
+
+<div id="deleteResults"
+style="background:#121216;border-radius:8px;margin-top:5px;max-height:150px;overflow-y:auto;">
+</div>
+
+<select id="deleteSelect" style="margin-top:10px;">
+<option value="">Select Anime To Delete</option>
+</select>
+
+<button id="deleteAnimeBtn" style="background:#8b0000;margin-top:10px;">
+🗑 Delete Selected Anime
+</button>
+</div>
+
+<!-- ADD EPISODE -->
+<div class="box">
+<h3>Add Episode</h3>
 
 <input type="text" id="animeSearch" placeholder="🔎 Search Anime...">
 
-<div id="searchResults" 
-     style="background:#121216; border-radius:8px; margin-top:5px; max-height:150px; overflow-y:auto;">
+<div id="searchResults"
+style="background:#121216;border-radius:8px;margin-top:5px;max-height:150px;overflow-y:auto;">
 </div>
 
 <select id="animeSelect" style="margin-top:10px;">
-    <option value="">Select Anime To Add Episode</option>
+<option value="">Select Anime</option>
 </select>
-            <input id="epNum" placeholder="Episode Number (e.g. 01, 02)">
-            <input id="epLink" placeholder="Shortener Link Here">
 
-            <button id="addEpBtn">Save Episode</button>
-        </div>
+<input id="epNum" placeholder="Episode Number">
+<input id="epLink" placeholder="Episode Link">
 
-    </div>
+<button id="addEpBtn">Save Episode</button>
 </div>
 
-<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+</div>
+</div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion } 
-    from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-    // Firebase Configuration
-    const app = initializeApp({
-        apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
-        authDomain: "asi-anime.firebaseapp.com",
-        projectId: "asi-anime"
-    });
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import {
+getFirestore, collection, addDoc, getDocs,
+doc, updateDoc, deleteDoc, arrayUnion
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-    const db = getFirestore(app);
-    let uploadedImage = ""; // Stores the URL of the uploaded and cropped image
-
-    /* PASSWORD LOGIC */
-    const adminPassInput = document.getElementById("adminPass");
-    const adminPanelDiv = document.getElementById("adminPanel");
-    const loginBoxDiv = document.getElementById("loginBox");
-
-    adminPassInput.addEventListener("input", () => {
-        if(adminPassInput.value === "Animestudioio786"){ // Your admin password
-            adminPanelDiv.style.display = "block";
-            loginBoxDiv.style.display = "none";
-            loadList(); // Load anime list when panel is unlocked
-        }
-    });
- const animeSelect = document.getElementById("animeSelect");
-/* SEARCH FUNCTIONALITY */
-const animeSearchInput = document.getElementById("animeSearch");
-const searchResultsDiv = document.getElementById("searchResults");
-
-let animeData = []; // Store all anime for search
-
-async function loadList(){
-    const snap = await getDocs(collection(db, "anime"));
-    animeSelect.innerHTML = "<option value=''>Select Anime To Add Episode</option>";
-    animeData = [];
-
-    snap.forEach(d => animeData.push({id: d.id, ...d.data()}));
-    animeData.sort((a,b) => a.name.localeCompare(b.name));
-
-    animeData.forEach(a => {
-        let opt = document.createElement("option");
-        opt.value = a.id;
-        opt.textContent = a.name;
-        animeSelect.appendChild(opt);
-    });
-}
-
-/* LIVE SEARCH */
-animeSearchInput.addEventListener("input", () => {
-    let value = animeSearchInput.value.toLowerCase();
-    searchResultsDiv.innerHTML = "";
-
-    if(value === "") return;
-
-    let filtered = animeData.filter(a => 
-        a.name.toLowerCase().includes(value)
-    );
-
-    filtered.forEach(a => {
-        let div = document.createElement("div");
-        div.textContent = a.name;
-        div.style.padding = "8px";
-        div.style.cursor = "pointer";
-        div.style.borderBottom = "1px solid #222";
-
-        div.onclick = () => {
-            animeSelect.value = a.id;
-            animeSearchInput.value = a.name;
-            searchResultsDiv.innerHTML = "";
-        };
-
-        searchResultsDiv.appendChild(div);
-    });
+/* FIREBASE CONFIG (Tumhara Original) */
+const app = initializeApp({
+apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
+authDomain: "asi-anime.firebaseapp.com",
+projectId: "asi-anime"
 });
 
-    /* IMAGE UPLOAD WIDGET WITH CROPPING */
-    const uploadImgBtn = document.getElementById("uploadImgBtn");
-    const imgText = document.getElementById("imgText");
+const db = getFirestore(app);
 
-    uploadImgBtn.onclick = () => {
-        let widget = cloudinary.createUploadWidget({
-            cloudName: "dmxqosmk0", // Your Cloudinary cloud name
-            uploadPreset: "asi_anime_upload", // Your Cloudinary upload preset
-            cropping: true, // Enable cropping
-            // cropping_mode: "aspect_ratio", // Use aspect_ratio mode for fixed ratios
-            cropping_aspect_ratio: "2:3", // Set aspect ratio for posters (e.g., 2:3 for vertical, 16:9 for horizontal)
-            // cropping_default_selection_ratio: 0.8, // Optional: Default selection size
-            // folder: "anime_posters" // Optional: Save images to a specific folder in Cloudinary
-        }, (error, result) => {
-            if(!error && result && result.event === "success"){
-                // Image uploaded and cropped successfully
-                uploadedImage = result.info.secure_url; // Get the URL of the cropped image
-                imgText.innerText = "Image Uploaded & Cropped Successfully âœ…";
-                imgText.style.color = "#00ff00"; // Green color for success
-            } else if (result && result.event === "close") {
-                // Widget was closed by user without success
-                if (!uploadedImage) { // If no image was uploaded before closing
-                    imgText.innerText = "Image Upload Cancelled";
-                    imgText.style.color = "#ff4500"; // Red color for cancel/error
-                } else { // If an image was already uploaded
-                    imgText.innerText = "Image Uploaded Successfully âœ…";
-                    imgText.style.color = "#00ff00";
-                }
-            } else if (error) {
-                // Handle upload errors
-                console.error("Cloudinary Upload Error:", error);
-                imgText.innerText = "Image Upload Failed!";
-                imgText.style.color = "#ff0000"; // Red color for error
-            }
-        });
-        widget.open();
-    }
+let animeData = [];
 
-    /* SAVE NEW ANIME */
-    const newNameInput = document.getElementById("newName");
-    const newSeasonInput = document.getElementById("newSeason");
-    const newGenreInput = document.getElementById("newGenre");
-    const newTypeSelect = document.getElementById("newType");
-    const newDescTextarea = document.getElementById("newDesc");
-    const addAnimeBtn = document.getElementById("addAnimeBtn");
+/* LOGIN */
+const adminPass = document.getElementById("adminPass");
+const adminPanel = document.getElementById("adminPanel");
+const loginBox = document.getElementById("loginBox");
 
-    addAnimeBtn.onclick = async () => {
-        let name = newNameInput.value.trim();
-        let season = newSeasonInput.value.trim(); // Get season value
-        let genre = newGenreInput.value.trim();
-        let type = newTypeSelect.value;
-        let desc = newDescTextarea.value.trim();
+adminPass.addEventListener("input",()=>{
+if(adminPass.value==="Animestudioio786"){
+adminPanel.style.display="block";
+loginBox.style.display="none";
+loadList();
+}
+});
 
-        // Basic validation
-        if(!name || !uploadedImage){ // Image is mandatory
-            alert("Please fill Anime Name and Upload Image!");
-            return;
-        }
+/* LOAD ANIME LIST */
+async function loadList(){
+const snap = await getDocs(collection(db,"anime"));
+animeData=[];
+document.getElementById("animeSelect").innerHTML="<option value=''>Select Anime</option>";
+document.getElementById("deleteSelect").innerHTML="<option value=''>Select Anime</option>";
 
-        // Add new anime to Firestore
-        try {
-            await addDoc(collection(db, "anime"), {
-                name: name,
-                season: season, // Save season to Firestore
-                genre: genre,
-                type: type,
-                description: desc,
-                image: uploadedImage, // URL of the cropped image
-                updatedAt: Date.now(), // Timestamp for last update
-                episodes: [] // Initialize with empty episodes array
-            });
+snap.forEach(d=>animeData.push({id:d.id,...d.data()}));
 
-            alert("Anime Added Successfully âœ…");
-            
-            // Clear form fields and reset image status
-            newNameInput.value = ""; 
-            newSeasonInput.value = ""; 
-            newGenreInput.value = ""; 
-            newDescTextarea.value = "";
-            uploadedImage = ""; // Reset uploaded image URL
-            imgText.innerText = "No Image Selected"; 
-            imgText.style.color = "#ff4500"; // Reset text color
-            
-            loadList(); // Reload anime list in select dropdown
-        } catch (error) {
-            console.error("Error adding anime:", error);
-            alert("Failed to add anime. Please try again.");
-        }
-    }
+animeData.sort((a,b)=>a.name.localeCompare(b.name));
 
-    /* SAVE EPISODE */
-    const epNumInput = document.getElementById("epNum");
-    const epLinkInput = document.getElementById("epLink");
-    const addEpBtn = document.getElementById("addEpBtn");
+animeData.forEach(a=>{
+let opt1=document.createElement("option");
+opt1.value=a.id;
+opt1.textContent=a.name;
+document.getElementById("animeSelect").appendChild(opt1);
 
-    addEpBtn.onclick = async () => {
-        let id = animeSelect.value; // Selected anime ID
-        let ep = epNumInput.value.trim(); // Episode number
-        let link = epLinkInput.value.trim(); // Episode link
+let opt2=document.createElement("option");
+opt2.value=a.id;
+opt2.textContent=a.name;
+document.getElementById("deleteSelect").appendChild(opt2);
+});
+}
 
-        // Basic validation
-        if(!id || !ep || !link){
-            alert("Please fill all Episode Details!");
-            return;
-        }
+/* SEARCH ADD EPISODE */
+document.getElementById("animeSearch").addEventListener("input",function(){
+let val=this.value.toLowerCase();
+let resultDiv=document.getElementById("searchResults");
+resultDiv.innerHTML="";
+if(!val) return;
 
-        // Ensure link is properly formatted (add https:// if missing)
-        if(link && !link.match(/^https?:\/\//i)) {
-            link = "https://" + link;
-        }
+animeData.filter(a=>a.name.toLowerCase().includes(val))
+.forEach(a=>{
+let div=document.createElement("div");
+div.textContent=a.name;
+div.style.padding="8px";
+div.style.cursor="pointer";
 
-        // Update the anime document with the new episode
-        try {
-            await updateDoc(doc(db, "anime", id), {
-                episodes: arrayUnion({ // Use arrayUnion to add to the existing array
-                    ep: ep,
-                    link: link
-                }),
-                updatedAt: Date.now() // Update timestamp
-            });
+div.onclick=()=>{
+document.getElementById("animeSelect").value=a.id;
+this.value=a.name;
+resultDiv.innerHTML="";
+};
 
-            alert("Episode Added Successfully âœ…");
-            
-            // Clear episode form fields
-            epNumInput.value = "";
-            epLinkInput.value = "";
-        } catch (error) {
-            console.error("Error adding episode:", error);
-            alert("Failed to add episode. Please try again.");
-        }
-    }
+resultDiv.appendChild(div);
+});
+});
 
-    // Initial call to load the list of anime when the panel is unlocked
-    // loadList(); // Moved inside password check for better UX
+/* SEARCH DELETE */
+document.getElementById("deleteSearch").addEventListener("input",function(){
+let val=this.value.toLowerCase();
+let resultDiv=document.getElementById("deleteResults");
+resultDiv.innerHTML="";
+if(!val) return;
+
+animeData.filter(a=>a.name.toLowerCase().includes(val))
+.forEach(a=>{
+let div=document.createElement("div");
+div.textContent=a.name;
+div.style.padding="8px";
+div.style.cursor="pointer";
+
+div.onclick=()=>{
+document.getElementById("deleteSelect").value=a.id;
+this.value=a.name;
+resultDiv.innerHTML="";
+};
+
+resultDiv.appendChild(div);
+});
+});
+
+/* ADD ANIME */
+document.getElementById("addAnimeBtn").onclick=async()=>{
+let name=document.getElementById("newName").value.trim();
+let season=document.getElementById("newSeason").value.trim();
+let genre=document.getElementById("newGenre").value.trim();
+let type=document.getElementById("newType").value;
+let desc=document.getElementById("newDesc").value.trim();
+
+if(!name){alert("Enter Anime Name");return;}
+
+await addDoc(collection(db,"anime"),{
+name,season,genre,type,description:desc,episodes:[],updatedAt:Date.now()
+});
+
+alert("Anime Added Successfully ✅");
+loadList();
+};
+
+/* ADD EPISODE */
+document.getElementById("addEpBtn").onclick=async()=>{
+let id=document.getElementById("animeSelect").value;
+let ep=document.getElementById("epNum").value.trim();
+let link=document.getElementById("epLink").value.trim();
+
+if(!id||!ep||!link){alert("Fill All Fields");return;}
+
+if(link && !link.match(/^https?:\/\//i)){
+link="https://"+link;
+}
+
+await updateDoc(doc(db,"anime",id),{
+episodes:arrayUnion({ep,link}),
+updatedAt:Date.now()
+});
+
+alert("Episode Added Successfully ✅");
+};
+
+/* DELETE ANIME */
+document.getElementById("deleteAnimeBtn").onclick=async()=>{
+let id=document.getElementById("deleteSelect").value;
+if(!id){alert("Select Anime");return;}
+
+if(confirm("Are you sure you want to delete this anime?")){
+await deleteDoc(doc(db,"anime",id));
+alert("Anime Deleted Successfully 🗑");
+loadList();
+}
+};
+
 </script>
 </body>
 </html>
