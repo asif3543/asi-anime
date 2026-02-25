@@ -32,7 +32,8 @@
 
             <textarea id="newDesc" placeholder="Description (Superpower wala aadmi...)"></textarea>
 
-            <button id="uploadImgBtn" style="background:#333;">📸 Select Image</button>
+            <!-- **IMAGE UPLOAD BUTTON WITH CROPPING** -->
+            <button id="uploadImgBtn" style="background:#333;">📸 Select & Crop Image</button>
             <p id="imgText" style="text-align:center; margin-top:10px; font-size:13px; color:#ff4500;">No Image Selected</p>
 
             <button id="addAnimeBtn">Save Anime</button>
@@ -59,6 +60,7 @@
     import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion } 
     from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
+    // Firebase Configuration
     const app = initializeApp({
         apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
         authDomain: "asi-anime.firebaseapp.com",
@@ -66,20 +68,26 @@
     });
 
     const db = getFirestore(app);
-    let uploadedImage = "";
+    let uploadedImage = ""; // Stores the URL of the uploaded and cropped image
 
     /* PASSWORD LOGIC */
-    adminPass.addEventListener("input", () => {
-        if(adminPass.value === "Animestudioio786"){
-            document.getElementById("adminPanel").style.display = "block";
-            document.getElementById("loginBox").style.display = "none";
+    const adminPassInput = document.getElementById("adminPass");
+    const adminPanelDiv = document.getElementById("adminPanel");
+    const loginBoxDiv = document.getElementById("loginBox");
+
+    adminPassInput.addEventListener("input", () => {
+        if(adminPassInput.value === "Animestudioio786"){ // Your admin password
+            adminPanelDiv.style.display = "block";
+            loginBoxDiv.style.display = "none";
+            loadList(); // Load anime list when panel is unlocked
         }
     });
 
     /* LOAD ANIME LIST FOR EPISODE SELECTION */
+    const animeSelect = document.getElementById("animeSelect"); // Get select element
     async function loadList(){
         const snap = await getDocs(collection(db, "anime"));
-        animeSelect.innerHTML = "<option>Select Anime To Add Episode</option>";
+        animeSelect.innerHTML = "<option value=''>Select Anime To Add Episode</option>"; // Default option
         
         let tempList = [];
         snap.forEach(d => tempList.push({id: d.id, ...d.data()}));
@@ -93,81 +101,140 @@
         });
     }
 
-    /* IMAGE UPLOAD WIDGET */
+    /* IMAGE UPLOAD WIDGET WITH CROPPING */
+    const uploadImgBtn = document.getElementById("uploadImgBtn");
+    const imgText = document.getElementById("imgText");
+
     uploadImgBtn.onclick = () => {
         let widget = cloudinary.createUploadWidget({
-            cloudName: "dmxqosmk0",
-            uploadPreset: "asi_anime_upload"
+            cloudName: "dmxqosmk0", // Your Cloudinary cloud name
+            uploadPreset: "asi_anime_upload", // Your Cloudinary upload preset
+            cropping: true, // Enable cropping
+            // cropping_mode: "aspect_ratio", // Use aspect_ratio mode for fixed ratios
+            cropping_aspect_ratio: "2:3", // Set aspect ratio for posters (e.g., 2:3 for vertical, 16:9 for horizontal)
+            // cropping_default_selection_ratio: 0.8, // Optional: Default selection size
+            // folder: "anime_posters" // Optional: Save images to a specific folder in Cloudinary
         }, (error, result) => {
             if(!error && result && result.event === "success"){
-                uploadedImage = result.info.secure_url;
-                imgText.innerText = "Image Uploaded Successfully ✅";
-                imgText.style.color = "#00ff00";
+                // Image uploaded and cropped successfully
+                uploadedImage = result.info.secure_url; // Get the URL of the cropped image
+                imgText.innerText = "Image Uploaded & Cropped Successfully ✅";
+                imgText.style.color = "#00ff00"; // Green color for success
+            } else if (result && result.event === "close") {
+                // Widget was closed by user without success
+                if (!uploadedImage) { // If no image was uploaded before closing
+                    imgText.innerText = "Image Upload Cancelled";
+                    imgText.style.color = "#ff4500"; // Red color for cancel/error
+                } else { // If an image was already uploaded
+                    imgText.innerText = "Image Uploaded Successfully ✅";
+                    imgText.style.color = "#00ff00";
+                }
+            } else if (error) {
+                // Handle upload errors
+                console.error("Cloudinary Upload Error:", error);
+                imgText.innerText = "Image Upload Failed!";
+                imgText.style.color = "#ff0000"; // Red color for error
             }
         });
         widget.open();
     }
 
     /* SAVE NEW ANIME */
-    addAnimeBtn.onclick = async () => {
-        let name = newName.value.trim();
-        let season = newSeason.value.trim(); // Get season value
-        let genre = newGenre.value.trim();
-        let type = newType.value;
-        let desc = newDesc.value.trim();
+    const newNameInput = document.getElementById("newName");
+    const newSeasonInput = document.getElementById("newSeason");
+    const newGenreInput = document.getElementById("newGenre");
+    const newTypeSelect = document.getElementById("newType");
+    const newDescTextarea = document.getElementById("newDesc");
+    const addAnimeBtn = document.getElementById("addAnimeBtn");
 
-        if(!name || !uploadedImage){
+    addAnimeBtn.onclick = async () => {
+        let name = newNameInput.value.trim();
+        let season = newSeasonInput.value.trim(); // Get season value
+        let genre = newGenreInput.value.trim();
+        let type = newTypeSelect.value;
+        let desc = newDescTextarea.value.trim();
+
+        // Basic validation
+        if(!name || !uploadedImage){ // Image is mandatory
             alert("Please fill Anime Name and Upload Image!");
             return;
         }
 
-        await addDoc(collection(db, "anime"), {
-            name: name,
-            season: season, // Save season to Firestore
-            genre: genre,
-            type: type,
-            description: desc,
-            image: uploadedImage,
-            updatedAt: Date.now(), 
-            episodes: []
-        });
+        // Add new anime to Firestore
+        try {
+            await addDoc(collection(db, "anime"), {
+                name: name,
+                season: season, // Save season to Firestore
+                genre: genre,
+                type: type,
+                description: desc,
+                image: uploadedImage, // URL of the cropped image
+                updatedAt: Date.now(), // Timestamp for last update
+                episodes: [] // Initialize with empty episodes array
+            });
 
-        alert("Anime Added Successfully ✅");
-        
-        newName.value = ""; newSeason.value = ""; newGenre.value = ""; newDesc.value = "";
-        uploadedImage = ""; imgText.innerText = "No Image Selected"; imgText.style.color = "#ff4500";
-        loadList();
+            alert("Anime Added Successfully ✅");
+            
+            // Clear form fields and reset image status
+            newNameInput.value = ""; 
+            newSeasonInput.value = ""; 
+            newGenreInput.value = ""; 
+            newDescTextarea.value = "";
+            uploadedImage = ""; // Reset uploaded image URL
+            imgText.innerText = "No Image Selected"; 
+            imgText.style.color = "#ff4500"; // Reset text color
+            
+            loadList(); // Reload anime list in select dropdown
+        } catch (error) {
+            console.error("Error adding anime:", error);
+            alert("Failed to add anime. Please try again.");
+        }
     }
 
     /* SAVE EPISODE */
-    addEpBtn.onclick = async () => {
-        let id = animeSelect.value;
-        let ep = epNum.value.trim();
-        let link = epLink.value.trim();
+    const epNumInput = document.getElementById("epNum");
+    const epLinkInput = document.getElementById("epLink");
+    const addEpBtn = document.getElementById("addEpBtn");
 
+    addEpBtn.onclick = async () => {
+        let id = animeSelect.value; // Selected anime ID
+        let ep = epNumInput.value.trim(); // Episode number
+        let link = epLinkInput.value.trim(); // Episode link
+
+        // Basic validation
         if(!id || !ep || !link){
             alert("Please fill all Episode Details!");
             return;
         }
 
+        // Ensure link is properly formatted (add https:// if missing)
         if(link && !link.match(/^https?:\/\//i)) {
             link = "https://" + link;
         }
 
-        await updateDoc(doc(db, "anime", id), {
-            episodes: arrayUnion({
-                ep: ep,
-                link: link
-            }),
-            updatedAt: Date.now() 
-        });
+        // Update the anime document with the new episode
+        try {
+            await updateDoc(doc(db, "anime", id), {
+                episodes: arrayUnion({ // Use arrayUnion to add to the existing array
+                    ep: ep,
+                    link: link
+                }),
+                updatedAt: Date.now() // Update timestamp
+            });
 
-        alert("Episode Added Successfully ✅");
-        epNum.value = "";
-        epLink.value = "";
+            alert("Episode Added Successfully ✅");
+            
+            // Clear episode form fields
+            epNumInput.value = "";
+            epLinkInput.value = "";
+        } catch (error) {
+            console.error("Error adding episode:", error);
+            alert("Failed to add episode. Please try again.");
+        }
     }
 
-    loadList();
+    // Initial call to load the list of anime when the panel is unlocked
+    // loadList(); // Moved inside password check for better UX
 </script>
 </body>
 </html>
