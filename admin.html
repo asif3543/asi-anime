@@ -9,7 +9,7 @@
 <body style="padding-bottom: 20px;">
 
 <div class="admin-container">
-    <h2 class="admin-title">🔥 ASI Admin Panel</h2>
+    <h2 class="admin-title">ðŸ”¥ ASI Admin Panel</h2>
 
     <div class="box" id="loginBox">
         <input type="password" id="adminPass" placeholder="Enter Admin Password">
@@ -33,7 +33,7 @@
             <textarea id="newDesc" placeholder="Description (Superpower wala aadmi...)"></textarea>
 
             <!-- **IMAGE UPLOAD BUTTON WITH CROPPING** -->
-            <button id="uploadImgBtn" style="background:#333;">📸 Select & Crop Image</button>
+            <button id="uploadImgBtn" style="background:#333;">ðŸ“¸ Select & Crop Image</button>
             <p id="imgText" style="text-align:center; margin-top:10px; font-size:13px; color:#ff4500;">No Image Selected</p>
 
             <button id="addAnimeBtn">Save Anime</button>
@@ -43,7 +43,15 @@
         <div class="box">
             <h3>Add Episode (Link Here)</h3>
 
-            <select id="animeSelect"></select>
+<input type="text" id="animeSearch" placeholder="🔎 Search Anime...">
+
+<div id="searchResults" 
+     style="background:#121216; border-radius:8px; margin-top:5px; max-height:150px; overflow-y:auto;">
+</div>
+
+<select id="animeSelect" style="margin-top:10px;">
+    <option value="">Select Anime To Add Episode</option>
+</select>
             <input id="epNum" placeholder="Episode Number (e.g. 01, 02)">
             <input id="epLink" placeholder="Shortener Link Here">
 
@@ -82,24 +90,56 @@
             loadList(); // Load anime list when panel is unlocked
         }
     });
+ const animeSelect = document.getElementById("animeSelect");
+/* SEARCH FUNCTIONALITY */
+const animeSearchInput = document.getElementById("animeSearch");
+const searchResultsDiv = document.getElementById("searchResults");
 
-    /* LOAD ANIME LIST FOR EPISODE SELECTION */
-    const animeSelect = document.getElementById("animeSelect"); // Get select element
-    async function loadList(){
-        const snap = await getDocs(collection(db, "anime"));
-        animeSelect.innerHTML = "<option value=''>Select Anime To Add Episode</option>"; // Default option
-        
-        let tempList = [];
-        snap.forEach(d => tempList.push({id: d.id, ...d.data()}));
-        tempList.sort((a,b) => a.name.localeCompare(b.name)); // Alphabetical dropdown
+let animeData = []; // Store all anime for search
 
-        tempList.forEach(a => {
-            let opt = document.createElement("option");
-            opt.value = a.id;
-            opt.textContent = a.name;
-            animeSelect.appendChild(opt);
-        });
-    }
+async function loadList(){
+    const snap = await getDocs(collection(db, "anime"));
+    animeSelect.innerHTML = "<option value=''>Select Anime To Add Episode</option>";
+    animeData = [];
+
+    snap.forEach(d => animeData.push({id: d.id, ...d.data()}));
+    animeData.sort((a,b) => a.name.localeCompare(b.name));
+
+    animeData.forEach(a => {
+        let opt = document.createElement("option");
+        opt.value = a.id;
+        opt.textContent = a.name;
+        animeSelect.appendChild(opt);
+    });
+}
+
+/* LIVE SEARCH */
+animeSearchInput.addEventListener("input", () => {
+    let value = animeSearchInput.value.toLowerCase();
+    searchResultsDiv.innerHTML = "";
+
+    if(value === "") return;
+
+    let filtered = animeData.filter(a => 
+        a.name.toLowerCase().includes(value)
+    );
+
+    filtered.forEach(a => {
+        let div = document.createElement("div");
+        div.textContent = a.name;
+        div.style.padding = "8px";
+        div.style.cursor = "pointer";
+        div.style.borderBottom = "1px solid #222";
+
+        div.onclick = () => {
+            animeSelect.value = a.id;
+            animeSearchInput.value = a.name;
+            searchResultsDiv.innerHTML = "";
+        };
+
+        searchResultsDiv.appendChild(div);
+    });
+});
 
     /* IMAGE UPLOAD WIDGET WITH CROPPING */
     const uploadImgBtn = document.getElementById("uploadImgBtn");
@@ -118,7 +158,7 @@
             if(!error && result && result.event === "success"){
                 // Image uploaded and cropped successfully
                 uploadedImage = result.info.secure_url; // Get the URL of the cropped image
-                imgText.innerText = "Image Uploaded & Cropped Successfully ✅";
+                imgText.innerText = "Image Uploaded & Cropped Successfully âœ…";
                 imgText.style.color = "#00ff00"; // Green color for success
             } else if (result && result.event === "close") {
                 // Widget was closed by user without success
@@ -126,7 +166,7 @@
                     imgText.innerText = "Image Upload Cancelled";
                     imgText.style.color = "#ff4500"; // Red color for cancel/error
                 } else { // If an image was already uploaded
-                    imgText.innerText = "Image Uploaded Successfully ✅";
+                    imgText.innerText = "Image Uploaded Successfully âœ…";
                     imgText.style.color = "#00ff00";
                 }
             } else if (error) {
@@ -173,7 +213,7 @@
                 episodes: [] // Initialize with empty episodes array
             });
 
-            alert("Anime Added Successfully ✅");
+            alert("Anime Added Successfully âœ…");
             
             // Clear form fields and reset image status
             newNameInput.value = ""; 
@@ -222,7 +262,7 @@
                 updatedAt: Date.now() // Update timestamp
             });
 
-            alert("Episode Added Successfully ✅");
+            alert("Episode Added Successfully âœ…");
             
             // Clear episode form fields
             epNumInput.value = "";
