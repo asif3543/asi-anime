@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="title" content="ASI Anime | Hindi Sub & Dub Anime Free">
-    <meta name="description" content="Watch Hindi Subbed and Dubbed Anime Free Online | ASI Anime Streaming">
-    <meta name="keywords" content="anime hindi sub, anime hindi dub, watch anime free, hindi anime, asi anime, anime streaming free">
-    <meta name="google-site-verification" content="3LX6AtLTBpFLgq2qg6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ASI Anime | Premium Anime Streaming</title>
+
+    <!-- **NEW TITLE & META DESCRIPTION** -->
+    <title>ASI Anime: Watch Hindi Subbed & Dubbed Anime Online Free | Latest Episodes</title>
+    <meta name="description" content="ASI Anime is your ultimate destination to watch Hindi subbed and dubbed anime online for free. Explore a vast collection of new and classic anime series. Get the latest episodes now!">
+    <!-- **END NEW TITLE & META DESCRIPTION** -->
+
+    <meta name="google-site-verification" content="3LX6AtLTBpFLgq2qg6ZCIpMOwJp8ZU1KPcK-u-jUMDk" />
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -115,11 +117,13 @@
                 const snap = await getDocs(collection(db, "anime"));
                 allAnime = [];
                 snap.forEach(d => allAnime.push({ id: d.id, ...d.data() }));
+                // Sort by update time (latest first)
                 allAnime.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
                 
                 populateGenres();
                 applyFilter();
             } catch (e) {
+                console.error("Error loading anime:", e); // Log error for debugging
                 document.getElementById("animeList").innerHTML = "<h3 style='text-align:center;width:100%;'>Error loading anime!</h3>";
             }
         }
@@ -130,19 +134,20 @@
                 if (a.genre) {
                     // Split by comma or space to get individual genres
                     a.genre.replace(/,/g, ' ').split(/\s+/).forEach(g => {
-                        if (g) genresSet.add(g.trim().toLowerCase());
+                        if (g.trim()) genresSet.add(g.trim().toLowerCase()); // Trim and add if not empty
                     });
                 }
             });
 
             const genreContainer = document.getElementById("genre-list-sidebar");
-            genreContainer.innerHTML = '';
+            genreContainer.innerHTML = ''; // Clear previous genres
             
             [...genresSet].sort().forEach(genre => {
                  const label = document.createElement('label');
                  const checkbox = document.createElement('input');
                  checkbox.type = 'checkbox';
                  checkbox.value = genre;
+                 checkbox.id = `genre-${genre}`; // Unique ID for each checkbox
                  const text = document.createElement('span');
                  text.textContent = genre.charAt(0).toUpperCase() + genre.slice(1);
                  
@@ -175,7 +180,7 @@
 
         function render(list) {
             let box = document.getElementById("animeList");
-            box.innerHTML = "";
+            box.innerHTML = ""; // Clear previous content
 
             if (list.length === 0) {
                 box.innerHTML = "<h3 style='text-align:center;width:100%; color:#a0a0b0;'>No Anime Found.</h3>";
@@ -185,12 +190,12 @@
             list.forEach(a => {
                 let card = document.createElement("div");
                 card.className = "anime-card";
-                let imgSrc = a.image || "https://via.placeholder.com/200x250";
-                let typeText = a.type ? a.type.toUpperCase() : "SUB";
+                let imgSrc = a.image || "https://via.placeholder.com/200x250"; // Fallback image
+                let typeText = a.type ? a.type.toUpperCase() : "SUB"; // Default to SUB if type is missing
 
                 card.innerHTML = `
                     <div class="badge-type">${typeText}</div>
-                    <img src="${imgSrc}" alt="${a.name}">
+                    <img src="${imgSrc}" alt="${a.name || 'Unknown Anime'} ${typeText} Poster"> <!-- **ALT TEXT ADDED HERE** -->
                     <div class="anime-info">
                         <h4>${a.name || "Unknown"}</h4>
                         <span class="genre-tag">${a.genre || "No Genre"}</span>
@@ -203,39 +208,43 @@
         
         // Event listener for the "Done" button in the sidebar
         document.getElementById("applyGenreFilterBtn").onclick = () => {
-            selectedGenres = [];
+            selectedGenres = []; // Reset selected genres
             const checkboxes = document.querySelectorAll('#genre-list-sidebar input[type="checkbox"]:checked');
             checkboxes.forEach(cb => {
                 selectedGenres.push(cb.value);
             });
-            closeNav();
-            showHome(); // This calls applyFilter internally
+            closeNav(); // Close sidebar after selection
+            applyFilter(); // Re-apply filters to show results
         };
 
         window.setType = (type, btn) => {
             currentType = type;
+            // Remove 'active' class from all buttons
             document.querySelectorAll(".filter-container button").forEach(b => b.classList.remove("active"));
+            // Add 'active' class to the clicked button
             btn.classList.add("active");
-            applyFilter();
+            applyFilter(); // Apply filter based on new type
         }
 
+        // Search input event listener
+        const searchInput = document.getElementById("searchInput"); // Get search input element
         searchInput.addEventListener("input", e => {
-            currentSearch = e.target.value.trim();
-            applyFilter();
+            currentSearch = e.target.value.trim(); // Update current search query
+            applyFilter(); // Apply filter based on new search query
         });
         
         // --- A-Z List Logic (unchanged) ---
         window.showAzList = (type) => {
-            closeNav();
-            document.getElementById("animeList").style.display = "none";
-            document.querySelector(".filter-container").style.display = "none";
-            document.getElementById("azListView").style.display = "block";
+            closeNav(); // Close sidebar
+            document.getElementById("animeList").style.display = "none"; // Hide main list
+            document.querySelector(".filter-container").style.display = "none"; // Hide type filters
+            document.getElementById("azListView").style.display = "block"; // Show A-Z view
             
             const title = type === 'sub' ? 'Hindi Sub Anime (A-Z)' : 'Hindi Dub Anime (A-Z)';
             document.getElementById("azListTitle").textContent = title;
             
             const alphabetBox = document.getElementById("az-alphabet-box");
-            alphabetBox.innerHTML = '';
+            alphabetBox.innerHTML = ''; // Clear previous letters
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(letter => {
                 let btn = document.createElement('button');
                 btn.textContent = letter;
@@ -243,34 +252,39 @@
                 alphabetBox.appendChild(btn);
             });
             
-            document.getElementById("az-results").innerHTML = "<p>Select an alphabet to see the list.</p>";
+            document.getElementById("az-results").innerHTML = "<p>Select an alphabet to see the list.</p>"; // Default message
         };
         
         window.renderAzResults = (type, letter) => {
+             // Remove 'active' class from all alphabet buttons
              document.querySelectorAll('#az-alphabet-box button').forEach(b => b.classList.remove('active'));
+             // Add 'active' class to the clicked button
              event.target.classList.add('active');
 
             const resultsBox = document.getElementById("az-results");
-            resultsBox.innerHTML = '';
+            resultsBox.innerHTML = ''; // Clear previous results
             
+            // Filter anime by type and starting letter
             const filtered = allAnime
-                .filter(a => a.type === type && a.name.toUpperCase().startsWith(letter))
-                .sort((a,b) => a.name.localeCompare(b.name));
+                .filter(a => (a.type || "").toLowerCase() === type && (a.name || "").toUpperCase().startsWith(letter))
+                .sort((a,b) => (a.name || "").localeCompare(b.name || "")); // Sort alphabetically
             
             if(filtered.length === 0) {
                 resultsBox.innerHTML = '<p>No anime found starting with this letter.</p>';
                 return;
             }
             
+            // Display results
             filtered.forEach(a => {
                 let p = document.createElement('a');
                 p.className = 'az-result-item';
-                p.textContent = a.name;
-                p.href = `detail.html?id=${a.id}`;
+                p.textContent = a.name || "Unknown Anime";
+                p.href = `detail.html?id=${a.id}`; // Link to detail page
                 resultsBox.appendChild(p);
             });
         };
 
+        // Initial load of anime data
         loadAnime();
     </script>
 </body>
