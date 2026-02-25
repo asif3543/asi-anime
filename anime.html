@@ -2,239 +2,141 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ASI Admin Panel</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
+    <title>Add Anime - Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background: crimson;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: darkred;
+        }
+
+        .episode-box {
+            background: #2a2a2a;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
 </head>
-<body style="padding-bottom: 20px;">
+<body>
 
-<div class="admin-container">
-    <h2 class="admin-title">🔥 ASI Admin Panel</h2>
+<h2>Basic Anime Admin Panel</h2>
 
-    <div class="box" id="loginBox">
-        <input type="password" id="adminPass" placeholder="Enter Admin Password">
-    </div>
+<div class="container">
 
-    <div id="adminPanel" style="display:none">
+    <input type="text" id="title" placeholder="Anime Title">
+    <input type="text" id="image" placeholder="Image URL">
+    <textarea id="description" placeholder="Anime Description"></textarea>
 
-        <!-- NEW ANIME ADDITION -->
-        <div class="box">
-            <h3>Add New Anime</h3>
+    <h3>Episodes</h3>
+    <div id="episodes"></div>
 
-            <input id="newName" placeholder="Anime Name (e.g. Solo Leveling)">
-            <input id="newSeason" placeholder="Season (e.g. 1, 2, Movie)">
-            <input id="newGenre" placeholder="Genre (Action, Fantasy, etc.)">
-            
-            <select id="newType">
-                <option value="sub">Hindi Sub</option>
-                <option value="dub">Hindi Dub</option>
-            </select>
+    <button onclick="addEpisodeField()">Add Episode</button>
+    <br><br>
+    <button onclick="saveAnime()">Save Anime</button>
 
-            <textarea id="newDesc" placeholder="Description (Superpower wala aadmi...)"></textarea>
-
-            <!-- **IMAGE UPLOAD BUTTON WITH CROPPING** -->
-            <button id="uploadImgBtn" style="background:#333;">📸 Select & Crop Image</button>
-            <p id="imgText" style="text-align:center; margin-top:10px; font-size:13px; color:#ff4500;">No Image Selected</p>
-
-            <button id="addAnimeBtn">Save Anime</button>
-        </div>
-
-        <!-- EPISODE ADDITION -->
-        <div class="box">
-            <h3>Add Episode (Link Here)</h3>
-
-            <select id="animeSelect"></select>
-            <input id="epNum" placeholder="Episode Number (e.g. 01, 02)">
-            <input id="epLink" placeholder="Shortener Link Here">
-
-            <button id="addEpBtn">Save Episode</button>
-        </div>
-
-    </div>
 </div>
 
-<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
-
+<!-- Firebase -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion } 
-    from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Firebase Configuration
-    const app = initializeApp({
-        apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
-        authDomain: "asi-anime.firebaseapp.com",
-        projectId: "asi-anime"
-    });
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MSG_ID",
+        appId: "YOUR_APP_ID"
+    };
 
+    const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let uploadedImage = ""; // Stores the URL of the uploaded and cropped image
 
-    /* PASSWORD LOGIC */
-    const adminPassInput = document.getElementById("adminPass");
-    const adminPanelDiv = document.getElementById("adminPanel");
-    const loginBoxDiv = document.getElementById("loginBox");
+    let episodeCount = 0;
 
-    adminPassInput.addEventListener("input", () => {
-        if(adminPassInput.value === "Animestudioio786"){ // Your admin password
-            adminPanelDiv.style.display = "block";
-            loginBoxDiv.style.display = "none";
-            loadList(); // Load anime list when panel is unlocked
-        }
-    });
+    window.addEpisodeField = function () {
+        episodeCount++;
+        const div = document.createElement("div");
+        div.className = "episode-box";
+        div.innerHTML = `
+            <input type="text" placeholder="Episode ${episodeCount} Title" class="epTitle">
+            <input type="text" placeholder="Episode ${episodeCount} Video URL" class="epUrl">
+        `;
+        document.getElementById("episodes").appendChild(div);
+    };
 
-    /* LOAD ANIME LIST FOR EPISODE SELECTION */
-    const animeSelect = document.getElementById("animeSelect"); // Get select element
-    async function loadList(){
-        const snap = await getDocs(collection(db, "anime"));
-        animeSelect.innerHTML = "<option value=''>Select Anime To Add Episode</option>"; // Default option
-        
-        let tempList = [];
-        snap.forEach(d => tempList.push({id: d.id, ...d.data()}));
-        tempList.sort((a,b) => a.name.localeCompare(b.name)); // Alphabetical dropdown
+    window.saveAnime = async function () {
+        const title = document.getElementById("title").value;
+        const image = document.getElementById("image").value;
+        const description = document.getElementById("description").value;
 
-        tempList.forEach(a => {
-            let opt = document.createElement("option");
-            opt.value = a.id;
-            opt.textContent = a.name;
-            animeSelect.appendChild(opt);
-        });
-    }
+        const epTitles = document.querySelectorAll(".epTitle");
+        const epUrls = document.querySelectorAll(".epUrl");
 
-    /* IMAGE UPLOAD WIDGET WITH CROPPING */
-    const uploadImgBtn = document.getElementById("uploadImgBtn");
-    const imgText = document.getElementById("imgText");
+        let episodes = [];
 
-    uploadImgBtn.onclick = () => {
-        let widget = cloudinary.createUploadWidget({
-            cloudName: "dmxqosmk0", // Your Cloudinary cloud name
-            uploadPreset: "asi_anime_upload", // Your Cloudinary upload preset
-            cropping: true, // Enable cropping
-            // cropping_mode: "aspect_ratio", // Use aspect_ratio mode for fixed ratios
-            cropping_aspect_ratio: "2:3", // Set aspect ratio for posters (e.g., 2:3 for vertical, 16:9 for horizontal)
-            // cropping_default_selection_ratio: 0.8, // Optional: Default selection size
-            // folder: "anime_posters" // Optional: Save images to a specific folder in Cloudinary
-        }, (error, result) => {
-            if(!error && result && result.event === "success"){
-                // Image uploaded and cropped successfully
-                uploadedImage = result.info.secure_url; // Get the URL of the cropped image
-                imgText.innerText = "Image Uploaded & Cropped Successfully ✅";
-                imgText.style.color = "#00ff00"; // Green color for success
-            } else if (result && result.event === "close") {
-                // Widget was closed by user without success
-                if (!uploadedImage) { // If no image was uploaded before closing
-                    imgText.innerText = "Image Upload Cancelled";
-                    imgText.style.color = "#ff4500"; // Red color for cancel/error
-                } else { // If an image was already uploaded
-                    imgText.innerText = "Image Uploaded Successfully ✅";
-                    imgText.style.color = "#00ff00";
-                }
-            } else if (error) {
-                // Handle upload errors
-                console.error("Cloudinary Upload Error:", error);
-                imgText.innerText = "Image Upload Failed!";
-                imgText.style.color = "#ff0000"; // Red color for error
-            }
-        });
-        widget.open();
-    }
-
-    /* SAVE NEW ANIME */
-    const newNameInput = document.getElementById("newName");
-    const newSeasonInput = document.getElementById("newSeason");
-    const newGenreInput = document.getElementById("newGenre");
-    const newTypeSelect = document.getElementById("newType");
-    const newDescTextarea = document.getElementById("newDesc");
-    const addAnimeBtn = document.getElementById("addAnimeBtn");
-
-    addAnimeBtn.onclick = async () => {
-        let name = newNameInput.value.trim();
-        let season = newSeasonInput.value.trim(); // Get season value
-        let genre = newGenreInput.value.trim();
-        let type = newTypeSelect.value;
-        let desc = newDescTextarea.value.trim();
-
-        // Basic validation
-        if(!name || !uploadedImage){ // Image is mandatory
-            alert("Please fill Anime Name and Upload Image!");
-            return;
+        for (let i = 0; i < epTitles.length; i++) {
+            episodes.push({
+                title: epTitles[i].value,
+                url: epUrls[i].value
+            });
         }
 
-        // Add new anime to Firestore
         try {
             await addDoc(collection(db, "anime"), {
-                name: name,
-                season: season, // Save season to Firestore
-                genre: genre,
-                type: type,
-                description: desc,
-                image: uploadedImage, // URL of the cropped image
-                updatedAt: Date.now(), // Timestamp for last update
-                episodes: [] // Initialize with empty episodes array
+                title: title,
+                image: image,
+                description: description,
+                episodes: episodes
             });
 
-            alert("Anime Added Successfully ✅");
-            
-            // Clear form fields and reset image status
-            newNameInput.value = ""; 
-            newSeasonInput.value = ""; 
-            newGenreInput.value = ""; 
-            newDescTextarea.value = "";
-            uploadedImage = ""; // Reset uploaded image URL
-            imgText.innerText = "No Image Selected"; 
-            imgText.style.color = "#ff4500"; // Reset text color
-            
-            loadList(); // Reload anime list in select dropdown
+            alert("Anime Added Successfully!");
         } catch (error) {
-            console.error("Error adding anime:", error);
-            alert("Failed to add anime. Please try again.");
+            alert("Error adding anime");
+            console.error(error);
         }
-    }
-
-    /* SAVE EPISODE */
-    const epNumInput = document.getElementById("epNum");
-    const epLinkInput = document.getElementById("epLink");
-    const addEpBtn = document.getElementById("addEpBtn");
-
-    addEpBtn.onclick = async () => {
-        let id = animeSelect.value; // Selected anime ID
-        let ep = epNumInput.value.trim(); // Episode number
-        let link = epLinkInput.value.trim(); // Episode link
-
-        // Basic validation
-        if(!id || !ep || !link){
-            alert("Please fill all Episode Details!");
-            return;
-        }
-
-        // Ensure link is properly formatted (add https:// if missing)
-        if(link && !link.match(/^https?:\/\//i)) {
-            link = "https://" + link;
-        }
-
-        // Update the anime document with the new episode
-        try {
-            await updateDoc(doc(db, "anime", id), {
-                episodes: arrayUnion({ // Use arrayUnion to add to the existing array
-                    ep: ep,
-                    link: link
-                }),
-                updatedAt: Date.now() // Update timestamp
-            });
-
-            alert("Episode Added Successfully ✅");
-            
-            // Clear episode form fields
-            epNumInput.value = "";
-            epLinkInput.value = "";
-        } catch (error) {
-            console.error("Error adding episode:", error);
-            alert("Failed to add episode. Please try again.");
-        }
-    }
-
-    // Initial call to load the list of anime when the panel is unlocked
-    // loadList(); // Moved inside password check for better UX
+    };
 </script>
+
 </body>
 </html>
