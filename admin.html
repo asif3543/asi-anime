@@ -146,9 +146,8 @@
 
     <!-- LOGIN BOX -->
     <div class="box" id="loginBox">
-        <h3>Admin Login</h3>
-        <input type="password" id="adminPass" placeholder="Animestudioio786" onkeypress="if(event.key === 'Enter') checkLogin()">
-        <button onclick="checkLogin()">Login</button>
+        <input type="password" id="adminPass" placeholder="Enter Admin Password">
+        <p style="text-align:center; font-size:12px; color:gray;">Type password to auto-login</p>
     </div>
 
     <div id="adminPanel" style="display:none">
@@ -203,7 +202,7 @@
 
             <!-- Show Existing Episodes here -->
             <div id="existingEpisodesBox" style="display:none; margin-top: 20px;">
-                <h4 style="color: #ff4500; margin-bottom: 5px;">Existing Episodes</h4>
+                <h4 style="color: #ff4500; margin-bottom: 5px; border-bottom: none;">Current Episodes</h4>
                 <div id="episodesContainer" class="ep-list">
                     <!-- Episodes will load here -->
                 </div>
@@ -241,19 +240,18 @@
 
     const db = getFirestore(app);
     let uploadedImage = "";
-    let currentAnimeData = {}; // To store selected anime data for episodes
+    let currentEpisodesList =[];
+    let selectedAnimeId = "";
 
     /* LOGIN LOGIC */
-    window.checkLogin = function() {
-        const pass = document.getElementById("adminPass").value;
-        if(pass === "Animestudioio786") {
+    const adminPassInput = document.getElementById("adminPass");
+    adminPassInput.addEventListener("input", () => {
+        if(adminPassInput.value === "Animestudioio786") {
             document.getElementById("adminPanel").style.display = "block";
             document.getElementById("loginBox").style.display = "none";
             loadList();
-        } else {
-            alert("Incorrect Password!");
         }
-    };
+    });
 
     /* LOAD ANIME LIST */
     async function loadList() {
@@ -284,7 +282,6 @@
             });
         } catch (error) {
             console.error("Error loading anime list:", error);
-            alert("Failed to load anime list. Check console.");
         }
     }
 
@@ -352,7 +349,7 @@
             document.getElementById("imgText").innerText = "No Image Selected";
             document.getElementById("imgText").style.color = "#ff4500";
             
-            loadList(); // Refresh list without page reload
+            loadList(); // Refresh list automatically
 
         } catch (error) {
             alert("Error adding anime: " + error.message);
@@ -364,20 +361,145 @@
 
     /* FETCH EPISODES WHEN ANIME SELECTED */
     document.getElementById("animeSelect").onchange = async (e) => {
-        const animeId = e.target.value;
+        selectedAnimeId = e.target.value;
         const epBox = document.getElementById("existingEpisodesBox");
-        const epContainer = document.getElementById("episodesContainer");
-
-        if(!animeId) {
+        
+        if(!selectedAnimeId) {
             epBox.style.display = "none";
             return;
         }
+        fetchEpisodes(selectedAnimeId);
+    };
+
+    /* FUNCTION TO FETCH & SHOW EPISODES */
+    async function fetchEpisodes(animeId) {
+        const epBox = document.getElementById("existingEpisodesBox");
+        const epContainer = document.getElementById("episodesContainer");
+        
+        epContainer.innerHTML = "<p style='color:white;'>Loading episodes...</p>";
+        epBox.style.display = "block";
+
+        const docSnap = await getDoc(doc(db, "anime", animeId));
+        if(docSnap.exists()){
+            currentEpisodesList = docSnap.data().episodes ||[];
+            renderEpisodes();
+        }
+    }
+
+    /* RENDER EPISODES ON SCREEN */
+    function renderEpisodes() {
+        const epContainer = document.getElementById("episodesContainer");
+        epContainer.innerHTML = "";
+
+        if(currentEpisodesList.length === 0) {
+            epContainer.innerHTML = "<p style='color:gray;'>No episodes available yet.</p>";
+            return;
+        }
+
+        // Sort episodes by number if possible
+        currentEpisodesList.sort((a,b) => Number(a.ep) - Number(b.ep));
+
+        currentEpisodesList.forEach((epObj, index) => {
+            let div = document.createElement("div");
+            div.className = "ep-item";
+            div.innerHTML = `
+                <span>Ep ${epObj.ep}</span> 
+                <button data-index="${index}" class="delete-ep-btn">Delete</button>
+            `;
+            epContainer.appendChild(div);
+        });
+
+        // Add Delete Event to Episode Buttons
+        document.querySelectorAll(".delete-ep-btn").forEach(btn => {
+            btn.onclick = async (e) => {
+                let idx = e.target.getAttribute("data-index");
+                let epToDelete = currentEpisodesList[idx];
+                
+                if(confirm(`Are you sure you want to delete Episode ${epToDelete.ep}?`)){
+                    e.target.innerText = "Wait...";
+                    try {
+                        await updateDoc(doc(db, "anime", selectedAnimeId), {
+                            episodes: arrayRemove(epToDelete)
+                        });
+                        fetchEpisodes(selectedAnimeId); // Refresh episodes
+                    } catch(err) {
+                        alert("Error deleting episode.");
+                    }
+                }
+            };
+        });
+    }
+
+    /* ADD EPISODE */
+    document.getElementById("addEpBtn").onclick = async () => {
+        let ep = document.getElementById("epNum").value.trim();
+        let link = document.getElementById("epLink").value.trim();
+
+        if(!selectedAnimeId) {
+            alert("Please select an Anime first.");
+            return;
+        }
+        if(!ep || !link){
+            alert("Fill Episode Number and Link");
+            return;
+        }
+
+        if(!link.match(/^https?:\/\//i)){
+            link = "https://" + link;
+        }
+
+        const btn = document.getElementById("addEpBtn");
+        btn.innerText = "Adding...";
+        btn.disabled = true;
 
         try {
-            epContainer.innerHTML = "<p>Loading episodes...</p>";
-            epBox.style.display = "block";
+            await updateDoc(doc(db, "anime", selectedAnimeId), {
+                episodes: arrayUnion({ ep, link }),
+                updatedAt: Date.now()
+            });
 
-            const docSnap = await getDoc(doc(db, "anime", animeId));
-            if(docSnap.exists()){
-                const data = docSnap.data();
-                renderEpisodes(animeId, data.episodes ||
+            alert("Episode Added ✅");
+            document.getElementById("epNum").value = "";
+            document.getElementById("epLink").value = "";
+            
+            fetchEpisodes(selectedAnimeId); // Refresh episodes instantly
+        } catch(err) {
+            alert("Error adding episode: " + err.message);
+        } finally {
+            btn.innerText = "Add Episode";
+            btn.disabled = false;
+        }
+    };
+
+    /* DELETE ANIME */
+    document.getElementById("deleteAnimeBtn").onclick = async () => {
+        let deleteSelect = document.getElementById("deleteSelect");
+        let id = deleteSelect.value;
+
+        if(!id){
+            alert("Select an Anime to delete.");
+            return;
+        }
+
+        if(confirm("⚠️ Are you sure you want to delete this ENTIRE anime? This action cannot be undone.")){
+            const btn = document.getElementById("deleteAnimeBtn");
+            btn.innerText = "Deleting...";
+            btn.disabled = true;
+
+            try {
+                await deleteDoc(doc(db, "anime", id));
+                alert("Anime Deleted ✅");
+                loadList(); // Refresh lists
+            } catch(err) {
+                alert("Error deleting anime: " + err.message);
+            } finally {
+                btn.innerText = "Delete Entire Anime";
+                btn.disabled = false;
+                deleteSelect.value = "";
+            }
+        }
+    };
+
+</script>
+</body>
+</html>
