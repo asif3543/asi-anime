@@ -1,215 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>ASI Admin Panel</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+    <meta charset="UTF-8">
+    <title>ASI Admin Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
+    <style>
+        /* Modern Dark Theme CSS */
+        :root {
+            --bg-color: #121212;
+            --box-bg: #1e1e1e;
+            --primary: #ff4500;
+            --primary-hover: #e03e00;
+            --text-color: #ffffff;
+            --border: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .admin-title {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .box {
+            background-color: var(--box-bg);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+        }
+
+        .box h3 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            color: var(--primary);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border);
+            background: #2a2a2a;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .delete-btn {
+            background-color: #d32f2f;
+        }
+        .delete-btn:hover {
+            background-color: #b71c1c;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .preview-img {
+            max-width: 150px;
+            border-radius: 8px;
+            margin: 10px auto;
+            display: block;
+        }
+
+        /* Episode List Styles */
+        .ep-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #2a2a2a;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        .ep-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e1e1e;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        .ep-item button {
+            width: auto;
+            padding: 5px 10px;
+            font-size: 12px;
+            background: #d32f2f;
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="admin-container">
-<h2 class="admin-title">🔥 ASI Admin Panel</h2>
+    <h2 class="admin-title">🔥 ASI Admin Panel</h2>
 
-<div class="box" id="loginBox">
-<input type="password" id="adminPass" placeholder="Enter Admin Password">
-</div>
+    <!-- LOGIN BOX -->
+    <div class="box" id="loginBox">
+        <h3>Admin Login</h3>
+        <input type="password" id="adminPass" placeholder="Enter Admin Password" onkeypress="if(event.key === 'Enter') checkLogin()">
+        <button onclick="checkLogin()">Login</button>
+    </div>
 
-<div id="adminPanel" style="display:none">
+    <div id="adminPanel" style="display:none">
 
-<!-- ADD ANIME -->
-<div class="box">
-<h3>Add New Anime</h3>
+        <!-- ADD ANIME -->
+        <div class="box">
+            <h3>🎬 Add New Anime</h3>
+            
+            <input id="newName" placeholder="Anime Name (e.g., Naruto)">
+            
+            <div class="grid-2">
+                <input id="newSeason" placeholder="Season (e.g., 1)">
+                <input id="newYear" type="number" placeholder="Release Year (e.g., 2024)">
+            </div>
 
-<input id="newName" placeholder="Anime Name">
-<input id="newSeason" placeholder="Season">
-<input id="newGenre" placeholder="Genre">
+            <div class="grid-2">
+                <input id="newGenre" placeholder="Genre (Action, Romance, etc.)">
+                <select id="newStatus">
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
 
-<select id="newType">
-<option value="sub">Hindi Sub</option>
-<option value="dub">Hindi Dub</option>
-</select>
+            <select id="newType">
+                <option value="sub">Hindi Sub</option>
+                <option value="dub">Hindi Dub</option>
+            </select>
 
-<textarea id="newDesc" placeholder="Description"></textarea>
+            <textarea id="newDesc" placeholder="Anime Description"></textarea>
 
-<button id="uploadImgBtn">📸 Select Image</button>
-<p id="imgText" style="text-align:center;color:#ff4500;margin-top:10px;">
-No Image Selected
-</p>
+            <button id="uploadImgBtn" type="button">📸 Select Image</button>
+            <p id="imgText" style="text-align:center;color:#ff4500;margin-top:10px;">No Image Selected</p>
+            <img id="imgPreview" class="preview-img" style="display:none;">
 
-<button id="addAnimeBtn">Save Anime</button>
-</div>
+            <button id="addAnimeBtn" style="margin-top: 15px;">Save Anime</button>
+        </div>
 
-<!-- ADD EPISODE -->
-<div class="box">
-<h3>Add Episode</h3>
+        <!-- ADD & MANAGE EPISODES -->
+        <div class="box">
+            <h3>📺 Add & Manage Episodes</h3>
 
-<select id="animeSelect">
-<option value="">Select Anime</option>
-</select>
+            <select id="animeSelect">
+                <option value="">Select Anime</option>
+            </select>
 
-<input id="epNum" placeholder="Episode Number">
-<input id="epLink" placeholder="Episode Link">
+            <div class="grid-2">
+                <input id="epNum" type="number" placeholder="Episode Number">
+                <input id="epLink" placeholder="Episode Link (URL)">
+            </div>
 
-<button id="addEpBtn">Save Episode</button>
-</div>
+            <button id="addEpBtn">Add Episode</button>
 
-</div>
+            <!-- Show Existing Episodes here -->
+            <div id="existingEpisodesBox" style="display:none; margin-top: 20px;">
+                <h4 style="color: #ff4500; margin-bottom: 5px;">Existing Episodes</h4>
+                <div id="episodesContainer" class="ep-list">
+                    <!-- Episodes will load here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- DELETE ANIME -->
+        <div class="box">
+            <h3>🗑️ Delete Anime</h3>
+
+            <select id="deleteSelect">
+                <option value="">Select Anime to Delete</option>
+            </select>
+
+            <button id="deleteAnimeBtn" class="delete-btn">Delete Entire Anime</button>
+        </div>
+
+    </div>
 </div>
 
 <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import {
+        getFirestore, collection, addDoc, getDoc,
+        getDocs, doc, updateDoc,
+        deleteDoc, arrayUnion, arrayRemove
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-import {
-getFirestore, collection, addDoc,
-getDocs, doc, updateDoc,
-arrayUnion
-}
-from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    // Firebase Configuration
+    const app = initializeApp({
+        apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
+        authDomain: "asi-anime.firebaseapp.com",
+        projectId: "asi-anime"
+    });
 
-/* FIREBASE CONFIG */
-const app = initializeApp({
-apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
-authDomain:"asi-anime.firebaseapp.com",
-projectId:"asi-anime"
-});
+    const db = getFirestore(app);
+    let uploadedImage = "";
+    let currentAnimeData = {}; // To store selected anime data for episodes
 
-const db = getFirestore(app);
+    /* LOGIN LOGIC */
+    window.checkLogin = function() {
+        const pass = document.getElementById("adminPass").value;
+        if(pass === "Animestudioio786") {
+            document.getElementById("adminPanel").style.display = "block";
+            document.getElementById("loginBox").style.display = "none";
+            loadList();
+        } else {
+            alert("Incorrect Password!");
+        }
+    };
 
-let uploadedImage="";
+    /* LOAD ANIME LIST */
+    async function loadList() {
+        try {
+            const snap = await getDocs(collection(db, "anime"));
+            const animeSelect = document.getElementById("animeSelect");
+            const deleteSelect = document.getElementById("deleteSelect");
 
-/* LOGIN */
-const adminPass=document.getElementById("adminPass");
-const adminPanel=document.getElementById("adminPanel");
-const loginBox=document.getElementById("loginBox");
+            animeSelect.innerHTML = "<option value=''>Select Anime</option>";
+            deleteSelect.innerHTML = "<option value=''>Select Anime to Delete</option>";
 
-adminPass.addEventListener("input",()=>{
-if(adminPass.value==="Animestudioio786"){
-adminPanel.style.display="block";
-loginBox.style.display="none";
-loadList();
-}
-});
+            let list =[];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            
+            // Sort A-Z
+            list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
-/* LOAD ANIME LIST */
-async function loadList(){
-const snap=await getDocs(collection(db,"anime"));
-const animeSelect=document.getElementById("animeSelect");
+            list.forEach(a => {
+                let opt1 = document.createElement("option");
+                opt1.value = a.id;
+                opt1.textContent = a.name;
+                animeSelect.appendChild(opt1);
 
-animeSelect.innerHTML="<option value=''>Select Anime</option>";
+                let opt2 = document.createElement("option");
+                opt2.value = a.id;
+                opt2.textContent = a.name;
+                deleteSelect.appendChild(opt2);
+            });
+        } catch (error) {
+            console.error("Error loading anime list:", error);
+            alert("Failed to load anime list. Check console.");
+        }
+    }
 
-let list=[];
-snap.forEach(d=>list.push({id:d.id,...d.data()}));
-list.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+    /* CLOUDINARY UPLOAD */
+    document.getElementById("uploadImgBtn").onclick = () => {
+        let widget = cloudinary.createUploadWidget({
+            cloudName: "dmxqosmk0",
+            uploadPreset: "asi_anime_upload",
+            cropping: false,
+            multiple: false
+        }, (error, result) => {
+            if (!error && result && result.event === "success") {
+                uploadedImage = result.info.secure_url;
+                
+                const imgText = document.getElementById("imgText");
+                const imgPreview = document.getElementById("imgPreview");
+                
+                imgText.innerText = "Image Uploaded Successfully ✅";
+                imgText.style.color = "#00ff00";
+                
+                imgPreview.src = uploadedImage;
+                imgPreview.style.display = "block";
+            }
+        });
+        widget.open();
+    };
 
-list.forEach(a=>{
-let opt=document.createElement("option");
-opt.value=a.id;
-opt.textContent=a.name || a.title;
-animeSelect.appendChild(opt);
-});
-}
+    /* ADD ANIME */
+    document.getElementById("addAnimeBtn").onclick = async () => {
+        let name = document.getElementById("newName").value.trim();
+        const btn = document.getElementById("addAnimeBtn");
 
-/* SIMPLE CLOUDINARY UPLOAD */
-document.getElementById("uploadImgBtn").onclick=()=>{
+        if (!name || !uploadedImage) {
+            alert("Please fill Anime Name and Upload an Image.");
+            return;
+        }
 
-let widget=cloudinary.createUploadWidget({
-cloudName:"dmxqosmk0",
-uploadPreset:"asi_anime_upload",
+        try {
+            btn.innerText = "Saving...";
+            btn.disabled = true;
 
-cropping:false,
-multiple:false,
-resourceType:"image",
-clientAllowedFormats:["jpg","jpeg","png","webp"]
+            await addDoc(collection(db, "anime"), {
+                name: name,
+                season: document.getElementById("newSeason").value || "1",
+                year: document.getElementById("newYear").value || new Date().getFullYear(),
+                genre: document.getElementById("newGenre").value,
+                status: document.getElementById("newStatus").value,
+                type: document.getElementById("newType").value,
+                description: document.getElementById("newDesc").value,
+                image: uploadedImage,
+                episodes:[],
+                updatedAt: Date.now()
+            });
 
-},(error,result)=>{
+            alert("Anime Added Successfully ✅");
+            
+            // Clear Form
+            document.getElementById("newName").value = "";
+            document.getElementById("newSeason").value = "";
+            document.getElementById("newYear").value = "";
+            document.getElementById("newGenre").value = "";
+            document.getElementById("newDesc").value = "";
+            uploadedImage = "";
+            document.getElementById("imgPreview").style.display = "none";
+            document.getElementById("imgText").innerText = "No Image Selected";
+            document.getElementById("imgText").style.color = "#ff4500";
+            
+            loadList(); // Refresh list without page reload
 
-if(!error && result && result.event==="success"){
-uploadedImage=result.info.secure_url;
+        } catch (error) {
+            alert("Error adding anime: " + error.message);
+        } finally {
+            btn.innerText = "Save Anime";
+            btn.disabled = false;
+        }
+    };
 
-document.getElementById("imgText").innerText="Image Uploaded ✅";
-document.getElementById("imgText").style.color="#00ff00";
-}
+    /* FETCH EPISODES WHEN ANIME SELECTED */
+    document.getElementById("animeSelect").onchange = async (e) => {
+        const animeId = e.target.value;
+        const epBox = document.getElementById("existingEpisodesBox");
+        const epContainer = document.getElementById("episodesContainer");
 
-if(error){
-document.getElementById("imgText").innerText="Upload Failed ❌";
-document.getElementById("imgText").style.color="red";
-console.error(error);
-}
+        if(!animeId) {
+            epBox.style.display = "none";
+            return;
+        }
 
-});
+        try {
+            epContainer.innerHTML = "<p>Loading episodes...</p>";
+            epBox.style.display = "block";
 
-widget.open();
-};
-
-/* ADD ANIME */
-document.getElementById("addAnimeBtn").onclick=async()=>{
-
-let name=document.getElementById("newName").value.trim();
-let season=document.getElementById("newSeason").value.trim();
-let genre=document.getElementById("newGenre").value.trim();
-let type=document.getElementById("newType").value;
-let desc=document.getElementById("newDesc").value.trim();
-
-if(!name || !uploadedImage){
-alert("Fill Name + Upload Image");
-return;
-}
-
-await addDoc(collection(db,"anime"),{
-name,
-season,
-genre,
-type,
-description:desc,
-image:uploadedImage,
-episodes:[],
-updatedAt:Date.now()
-});
-
-alert("Anime Added ✅");
-
-/* RESET FORM */
-document.getElementById("newName").value="";
-document.getElementById("newSeason").value="";
-document.getElementById("newGenre").value="";
-document.getElementById("newDesc").value="";
-uploadedImage="";
-document.getElementById("imgText").innerText="No Image Selected";
-document.getElementById("imgText").style.color="#ff4500";
-
-loadList();
-};
-
-/* ADD EPISODE */
-document.getElementById("addEpBtn").onclick=async()=>{
-
-let id=document.getElementById("animeSelect").value;
-let ep=document.getElementById("epNum").value.trim();
-let link=document.getElementById("epLink").value.trim();
-
-if(!id || !ep || !link){
-alert("Fill Episode Data");
-return;
-}
-
-if(!link.match(/^https?:\/\//i)){
-link="https://"+link;
-}
-
-await updateDoc(doc(db,"anime",id),{
-episodes:arrayUnion({ep,link}),
-updatedAt:Date.now()
-});
-
-alert("Episode Added ✅");
-
-document.getElementById("epNum").value="";
-document.getElementById("epLink").value="";
-};
-
-</script>
-</body>
-</html>
+            const docSnap = await getDoc(doc(db, "anime", animeId));
+            if(docSnap.exists()){
+                const data = docSnap.data();
+                renderEpisodes(animeId, data.episodes ||
