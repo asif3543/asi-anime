@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://asif3543.github.io/asi-anime/sitemap.xml
