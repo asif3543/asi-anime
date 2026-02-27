@@ -34,7 +34,7 @@
 
 <textarea id="newDesc" placeholder="Description"></textarea>
 
-<button id="uploadImgBtn">📸 Select & Crop Image</button>
+<button id="uploadImgBtn">📸 Select Image</button>
 <p id="imgText" style="text-align:center;color:#ff4500;margin-top:10px;">
 No Image Selected
 </p>
@@ -42,32 +42,9 @@ No Image Selected
 <button id="addAnimeBtn">Save Anime</button>
 </div>
 
-<!-- DELETE -->
-<div class="box">
-<h3>Delete Anime</h3>
-
-<input id="deleteSearch" placeholder="🔎 Search Anime To Delete">
-
-<div id="deleteResults"
-style="background:#121216;border-radius:8px;max-height:150px;overflow-y:auto;margin-top:5px"></div>
-
-<select id="deleteSelect">
-<option value="">Select Anime</option>
-</select>
-
-<button id="deleteAnimeBtn" style="background:#8b0000;margin-top:10px">
-🗑 Delete Anime
-</button>
-</div>
-
-<!-- EPISODE -->
+<!-- ADD EPISODE -->
 <div class="box">
 <h3>Add Episode</h3>
-
-<input id="animeSearch" placeholder="🔎 Search Anime">
-
-<div id="searchResults"
-style="background:#121216;border-radius:8px;max-height:150px;overflow-y:auto"></div>
 
 <select id="animeSelect">
 <option value="">Select Anime</option>
@@ -88,20 +65,19 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebas
 import {
 getFirestore, collection, addDoc,
 getDocs, doc, updateDoc,
-deleteDoc, arrayUnion
+arrayUnion
 }
 from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 /* FIREBASE CONFIG */
 const app = initializeApp({
-apiKey:"YOUR_API_KEY",
-authDomain:"YOUR_AUTH_DOMAIN",
-projectId:"YOUR_PROJECT_ID"
+apiKey:"AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
+authDomain:"asi-anime.firebaseapp.com",
+projectId:"asi-anime"
 });
 
 const db = getFirestore(app);
 
-let animeData=[];
 let uploadedImage="";
 
 /* LOGIN */
@@ -117,115 +93,111 @@ loadList();
 }
 });
 
-/* LOAD LIST */
+/* LOAD ANIME LIST */
 async function loadList(){
 const snap=await getDocs(collection(db,"anime"));
-animeData=[];
-
 const animeSelect=document.getElementById("animeSelect");
-const deleteSelect=document.getElementById("deleteSelect");
 
 animeSelect.innerHTML="<option value=''>Select Anime</option>";
-deleteSelect.innerHTML="<option value=''>Select Anime</option>";
 
-snap.forEach(d=>animeData.push({id:d.id,...d.data()}));
+let list=[];
+snap.forEach(d=>list.push({id:d.id,...d.data()}));
+list.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
 
-animeData.sort((a,b)=>a.name.localeCompare(b.name));
-
-animeData.forEach(a=>{
-let o1=document.createElement("option");
-o1.value=a.id;
-o1.textContent=a.name;
-animeSelect.appendChild(o1);
-
-let o2=document.createElement("option");
-o2.value=a.id;
-o2.textContent=a.name;
-deleteSelect.appendChild(o2);
+list.forEach(a=>{
+let opt=document.createElement("option");
+opt.value=a.id;
+opt.textContent=a.name || a.title;
+animeSelect.appendChild(opt);
 });
 }
 
-/* IMAGE UPLOAD */
+/* SIMPLE CLOUDINARY UPLOAD */
 document.getElementById("uploadImgBtn").onclick=()=>{
+
 let widget=cloudinary.createUploadWidget({
 cloudName:"dmxqosmk0",
 uploadPreset:"asi_anime_upload",
-cropping:true,
-cropping_aspect_ratio:"2:3"
+
+cropping:false,
+multiple:false,
+resourceType:"image",
+clientAllowedFormats:["jpg","jpeg","png","webp"]
+
 },(error,result)=>{
+
 if(!error && result && result.event==="success"){
 uploadedImage=result.info.secure_url;
+
 document.getElementById("imgText").innerText="Image Uploaded ✅";
 document.getElementById("imgText").style.color="#00ff00";
 }
+
+if(error){
+document.getElementById("imgText").innerText="Upload Failed ❌";
+document.getElementById("imgText").style.color="red";
+console.error(error);
+}
+
 });
+
 widget.open();
 };
 
-/* SEARCH */
-function searchAnime(inputId,resultId,selectId){
-document.getElementById(inputId).addEventListener("input",function(){
-let val=this.value.toLowerCase();
-let box=document.getElementById(resultId);
-box.innerHTML="";
-if(!val) return;
-
-animeData.filter(a=>a.name.toLowerCase().includes(val))
-.forEach(a=>{
-let div=document.createElement("div");
-div.style.padding="8px";
-div.style.cursor="pointer";
-div.textContent=a.name;
-
-div.onclick=()=>{
-document.getElementById(selectId).value=a.id;
-this.value=a.name;
-box.innerHTML="";
-};
-
-box.appendChild(div);
-});
-});
-}
-
-searchAnime("animeSearch","searchResults","animeSelect");
-searchAnime("deleteSearch","deleteResults","deleteSelect");
-
 /* ADD ANIME */
 document.getElementById("addAnimeBtn").onclick=async()=>{
-let name=newName.value.trim();
-if(!name||!uploadedImage){
+
+let name=document.getElementById("newName").value.trim();
+let season=document.getElementById("newSeason").value.trim();
+let genre=document.getElementById("newGenre").value.trim();
+let type=document.getElementById("newType").value;
+let desc=document.getElementById("newDesc").value.trim();
+
+if(!name || !uploadedImage){
 alert("Fill Name + Upload Image");
 return;
 }
 
 await addDoc(collection(db,"anime"),{
 name,
-season:newSeason.value,
-genre:newGenre.value,
-type:newType.value,
-description:newDesc.value,
+season,
+genre,
+type,
+description:desc,
 image:uploadedImage,
 episodes:[],
 updatedAt:Date.now()
 });
 
 alert("Anime Added ✅");
+
+/* RESET FORM */
+document.getElementById("newName").value="";
+document.getElementById("newSeason").value="";
+document.getElementById("newGenre").value="";
+document.getElementById("newDesc").value="";
+uploadedImage="";
+document.getElementById("imgText").innerText="No Image Selected";
+document.getElementById("imgText").style.color="#ff4500";
+
 loadList();
 };
 
-/* ADD EP */
+/* ADD EPISODE */
 document.getElementById("addEpBtn").onclick=async()=>{
-let id=animeSelect.value;
-let ep=epNum.value;
-let link=epLink.value;
 
-if(!id||!ep||!link){
+let id=document.getElementById("animeSelect").value;
+let ep=document.getElementById("epNum").value.trim();
+let link=document.getElementById("epLink").value.trim();
+
+if(!id || !ep || !link){
 alert("Fill Episode Data");
 return;
 }
 
-if(!link.match(/^https?:\/\//)) link="https://"+link;
+if(!link.match(/^https?:\/\//i)){
+link="https://"+link;
+}
 
 await updateDoc(doc(db,"anime",id),{
 episodes:arrayUnion({ep,link}),
@@ -233,18 +205,9 @@ updatedAt:Date.now()
 });
 
 alert("Episode Added ✅");
-};
 
-/* DELETE */
-document.getElementById("deleteAnimeBtn").onclick=async()=>{
-let id=deleteSelect.value;
-if(!id) return;
-
-if(confirm("Delete Anime?")){
-await deleteDoc(doc(db,"anime",id));
-alert("Deleted ✅");
-loadList();
-}
+document.getElementById("epNum").value="";
+document.getElementById("epLink").value="";
 };
 
 </script>
