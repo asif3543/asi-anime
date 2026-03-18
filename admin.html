@@ -1,368 +1,533 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>ASI Admin Panel</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
-    <style>
-        :root {
-            --bg-color: #121212;
-            --box-bg: #1e1e1e;
-            --primary: #ff4500;
-            --primary-hover: #e03e00;
-            --text-color: #ffffff;
-            --border: #333333;
-        }
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <title>ASI Admin Panel</title>  
+    <meta name="viewport" content="width=device-width, initial-scale=1">  
+    <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>  
+    <style>  
+        /* Modern Dark Theme CSS */  
+        :root {  
+            --bg-color: #121212;  
+            --box-bg: #1e1e1e;  
+            --primary: #ff4500;  
+            --primary-hover: #e03e00;  
+            --text-color: #ffffff;  
+            --border: #333333;  
+        }  body {  
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  
+        background-color: var(--bg-color);  
+        color: var(--text-color);  
+        margin: 0;  
+        padding: 20px;  
+    }  
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-        }
+    .admin-container {  
+        max-width: 800px;  
+        margin: 0 auto;  
+    }  
 
-        .admin-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
+    .admin-title {  
+        text-align: center;  
+        color: var(--primary);  
+        margin-bottom: 30px;  
+        font-size: 28px;  
+    }  
 
-        .admin-title {
-            text-align: center;
-            color: var(--primary);
-            margin-bottom: 30px;
-            font-size: 28px;
-        }
+    .box {  
+        background-color: var(--box-bg);  
+        padding: 25px;  
+        border-radius: 12px;  
+        margin-bottom: 25px;  
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);  
+        border: 1px solid var(--border);  
+    }  
 
-        .box {
-            background-color: var(--box-bg);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
-        }
+    .box h3 {  
+        margin-top: 0;  
+        border-bottom: 2px solid var(--border);  
+        padding-bottom: 10px;  
+        color: var(--primary);  
+    }  
 
-        .box h3 {
-            margin-top: 0;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 10px;
-            color: var(--primary);
-        }
+    input, select, textarea {  
+        width: 100%;  
+        padding: 12px;  
+        margin-bottom: 15px;  
+        border: 1px solid var(--border);  
+        background: #2a2a2a;  
+        color: white;  
+        border-radius: 6px;  
+        box-sizing: border-box;  
+        font-size: 15px;  
+    }  
 
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid var(--border);
-            background: #2a2a2a;
-            color: white;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 15px;
-        }
+    textarea {  
+        resize: vertical;  
+        min-height: 100px;  
+    }  
 
-        textarea { resize: vertical; min-height: 100px; }
+    button {  
+        width: 100%;  
+        padding: 12px;  
+        background-color: var(--primary);  
+        color: white;  
+        border: none;  
+        border-radius: 6px;  
+        font-size: 16px;  
+        font-weight: bold;  
+        cursor: pointer;  
+        transition: 0.3s;  
+    }  
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+    button:hover {  
+        background-color: var(--primary-hover);  
+    }  
 
-        button:hover { background-color: var(--primary-hover); }
-        button:disabled { background-color: #555; cursor: not-allowed; }
+    button:disabled {  
+        background-color: #555;  
+        cursor: not-allowed;  
+    }  
 
-        .delete-btn { background-color: #d32f2f; }
-        .delete-btn:hover { background-color: #b71c1c; }
+    .delete-btn {  
+        background-color: #d32f2f;  
+    }  
+    .delete-btn:hover {  
+        background-color: #b71c1c;  
+    }  
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .grid-2 {  
+        display: grid;  
+        grid-template-columns: 1fr 1fr;  
+        gap: 15px;  
+    }  
 
-        .preview-img { max-width: 150px; border-radius: 8px; margin: 10px auto; display: block; }
+    .preview-img {  
+        max-width: 150px;  
+        border-radius: 8px;  
+        margin: 10px auto;  
+        display: block;  
+    }  
 
-        .ep-list {
-            margin-top: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            background: #2a2a2a;
-            border-radius: 6px;
-            padding: 10px;
-        }
-        .ep-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1e1e1e;
-            padding: 8px 12px;
-            margin-bottom: 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-        }
-        .ep-item button { width: auto; padding: 5px 10px; font-size: 12px; background: #d32f2f; }
-    </style>
-</head>
+    /* Episode List Styles */  
+    .ep-list {  
+        margin-top: 15px;  
+        max-height: 200px;  
+        overflow-y: auto;  
+        background: #2a2a2a;  
+        border-radius: 6px;  
+        padding: 10px;  
+    }  
+    .ep-item {  
+        display: flex;  
+        justify-content: space-between;  
+        align-items: center;  
+        background: #1e1e1e;  
+        padding: 8px 12px;  
+        margin-bottom: 8px;  
+        border-radius: 4px;  
+        border: 1px solid var(--border);  
+    }  
+    .ep-item button {  
+        width: auto;  
+        padding: 5px 10px;  
+        font-size: 12px;  
+        background: #d32f2f;  
+    }  
+</style>
 
-<body>
+</head>  <body>  <div class="admin-container">  
+    <h2 class="admin-title">🔥 ASI Admin Panel</h2>  <!-- LOGIN BOX -->  
+<div class="box" id="loginBox">  
+    <h3 style="text-align:center;">Admin Login</h3>  
+    <input type="email" id="adminEmail" placeholder="Admin Email">  
+    <input type="password" id="adminPass" placeholder="Password">  
+    <button id="loginBtn">Login</button>  
+    <p id="loginError" style="color: #d32f2f; text-align: center; margin-top: 10px; font-size: 14px;"></p>  
+</div>  
 
-<div class="admin-container">
-    <h2 class="admin-title">🔥 ASI Admin Panel</h2>
+<div id="adminPanel" style="display:none">  
 
-    <!-- LOGIN BOX -->
-    <div class="box" id="loginBox">
-        <h3 style="text-align:center;">Admin Login</h3>
-        <input type="email" id="adminEmail" placeholder="Admin Email">
-        <input type="password" id="adminPass" placeholder="Password">
-        <button id="loginBtn">Login</button>
-        <p id="loginError" style="color: #ff4500; text-align: center; margin-top: 10px; font-size: 14px;"></p>
-    </div>
+    <!-- LOGOUT & SHORTENER KEY -->  
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">  
+        <div style="width: 70%;">  
+            <input id="shortenerKey" type="text" placeholder="Shortener API Key (Stored Locally)" style="margin-bottom: 0;">  
+            <small style="color: gray;">API key sirf aapke browser me save hogi.</small>  
+        </div>  
+        <button id="logoutBtn" style="width: 25%; background: #444;">Logout</button>  
+    </div>  
 
-    <div id="adminPanel" style="display:none">
+    <!-- ADD ANIME -->  
+    <div class="box">  
+        <h3>🎬 Add New Anime</h3>  
+          
+        <input id="newName" placeholder="Anime Name (e.g., Naruto)">  
+          
+        <div class="grid-2">  
+            <input id="newSeason" placeholder="Season (e.g., 1)">  
+            <input id="newYear" type="number" placeholder="Release Year (e.g., 2024)">  
+        </div>  
 
-        <!-- LOGOUT & SHORTENER -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div style="width: 70%;">
-                <input id="shortenerKey" type="text" placeholder="GPLinks API Key Daalein" style="margin-bottom: 0;">
-                <small style="color: gray;">Key browser me safe rahegi.</small>
-            </div>
-            <button id="logoutBtn" style="width: 25%; background: #444;">Logout</button>
-        </div>
+        <div class="grid-2">  
+            <input id="newGenre" placeholder="Genre (Action, Romance, etc.)">  
+            <select id="newStatus">  
+                <option value="Ongoing">Ongoing</option>  
+                <option value="Completed">Completed</option>  
+            </select>  
+        </div>  
 
-        <!-- ADD ANIME -->
-        <div class="box">
-            <h3>🎬 Add New Anime</h3>
-            <input id="newName" placeholder="Anime Name">
-            <div class="grid-2">
-                <input id="newSeason" placeholder="Season">
-                <input id="newYear" type="number" placeholder="Year">
-            </div>
-            <div class="grid-2">
-                <input id="newGenre" placeholder="Genre">
-                <select id="newStatus">
-                    <option value="Ongoing">Ongoing</option>
-                    <option value="Completed">Completed</option>
-                </select>
-            </div>
-            <select id="newType">
-                <option value="sub">Hindi Sub</option>
-                <option value="dub">Hindi Dub</option>
-            </select>
-            <textarea id="newDesc" placeholder="Description"></textarea>
-            <button id="uploadImgBtn" type="button">📸 Select Image</button>
-            <p id="imgText" style="text-align:center;color:#ff4500;margin-top:10px;">No Image Selected</p>
-            <img id="imgPreview" class="preview-img" style="display:none;">
-            <button id="addAnimeBtn" style="margin-top: 15px;">Save Anime</button>
-        </div>
+        <select id="newType">  
+            <option value="sub">Hindi Sub</option>  
+            <option value="dub">Hindi Dub</option>  
+        </select>  
 
-        <!-- MANAGE EPISODES -->
-        <div class="box">
-            <h3>📺 Add & Manage Episodes</h3>
-            <select id="animeSelect"><option value="">Select Anime</option></select>
-            <div class="grid-2">
-                <input id="epNum" type="number" placeholder="Episode Number">
-                <input id="epLink" placeholder="Paste Video Link">
-            </div>
-            <button id="addEpBtn">Add Episode</button>
-            <div id="existingEpisodesBox" style="display:none; margin-top: 20px;">
-                <h4 style="color: #ff4500;">Current Episodes</h4>
-                <div id="episodesContainer" class="ep-list"></div>
-            </div>
-        </div>
+        <textarea id="newDesc" placeholder="Anime Description"></textarea>  
 
-        <!-- DELETE SECTION -->
-        <div class="box">
-            <h3>🗑️ Delete Anime</h3>
-            <input type="text" id="deleteSearch" placeholder="Search Anime Name...">
-            <select id="deleteSelect"><option value="">Select Anime to Delete</option></select>
-            <button id="deleteAnimeBtn" class="delete-btn">Delete Entire Anime</button>
-        </div>
-    </div>
+        <button id="uploadImgBtn" type="button">📸 Select Image</button>  
+        <p id="imgText" style="text-align:center;color:#ff4500;margin-top:10px;">No Image Selected</p>  
+        <img id="imgPreview" class="preview-img" style="display:none;">  
+
+        <button id="addAnimeBtn" style="margin-top: 15px;">Save Anime</button>  
+    </div>  
+
+    <!-- ADD & MANAGE EPISODES -->  
+    <div class="box">  
+        <h3>📺 Add & Manage Episodes</h3>  
+
+        <select id="animeSelect">  
+            <option value="">Select Anime</option>  
+        </select>  
+
+        <div class="grid-2">  
+            <input id="epNum" type="number" placeholder="Episode Number">  
+            <input id="epLink" placeholder="Episode Link (URL)">  
+        </div>  
+
+        <button id="addEpBtn">Add Episode</button>  
+
+        <!-- Show Existing Episodes here -->  
+        <div id="existingEpisodesBox" style="display:none; margin-top: 20px;">  
+            <h4 style="color: #ff4500; margin-bottom: 5px; border-bottom: none;">Current Episodes</h4>  
+            <div id="episodesContainer" class="ep-list">  
+                <!-- Episodes will load here -->  
+            </div>  
+        </div>  
+    </div>  
+
+    <!-- DELETE ANIME -->  
+    <div class="box">  
+        <h3>🗑️ Delete Anime</h3>  
+
+        <input type="text" id="deleteSearch" placeholder="Search Anime to Delete..." style="margin-bottom: 10px;">  
+        <select id="deleteSelect">  
+            <option value="">Select Anime to Delete</option>  
+        </select>  
+
+        <button id="deleteAnimeBtn" class="delete-btn">Delete Entire Anime</button>  
+    </div>  
+
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDoc, getDocs, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-
-    // ✅ FIXED CONFIG: API Key exactly as per console screenshot
-    const firebaseConfig = {
-        apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v2iWLP8e_kZo1Q",
-        authDomain: "asi-anime.firebaseapp.com",
-        projectId: "asi-anime",
-        storageBucket: "asi-anime.firebasestorage.app",
-        messagingSenderId: "1029720406470",
-        appId: "1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let uploadedImage = "";
-    let selectedAnimeId = "";
-    let currentEpisodesList = [];
-
-    // --- AUTH ---
-    const loginBox = document.getElementById("loginBox");
-    const adminPanel = document.getElementById("adminPanel");
-    const errDisplay = document.getElementById("loginError");
-
-    document.getElementById("loginBtn").onclick = async () => {
-        const email = document.getElementById("adminEmail").value.trim();
-        const pass = document.getElementById("adminPass").value.trim();
-        if(!email || !pass) return;
-        try {
-            errDisplay.innerText = "Checking credentials...";
-            await signInWithEmailAndPassword(auth, email, pass);
-        } catch (error) {
-            errDisplay.innerText = "Login Failed: " + error.message;
-        }
-    };
-
-    document.getElementById("logoutBtn").onclick = () => signOut(auth);
-
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            adminPanel.style.display = "block";
-            loginBox.style.display = "none";
-            loadList();
-            document.getElementById("shortenerKey").value = localStorage.getItem("shortener_api_key") || "";
-        } else {
-            adminPanel.style.display = "none";
-            loginBox.style.display = "block";
-            errDisplay.innerText = "";
-        }
-    });
-
-    document.getElementById("shortenerKey").oninput = (e) => {
-        localStorage.setItem("shortener_api_key", e.target.value.trim());
-    };
-
-    // --- SEARCH ---
-    document.getElementById("deleteSearch").oninput = (e) => {
-        const term = e.target.value.toLowerCase();
-        const options = document.getElementById("deleteSelect").options;
-        for (let i = 0; i < options.length; i++) {
-            const text = options[i].text.toLowerCase();
-            options[i].style.display = (text.includes(term) || options[i].value === "") ? "block" : "none";
-        }
-    };
-
-    // --- SHORTENER ---
-    async function shortenLink(longUrl) {
-        const apiKey = localStorage.getItem("shortener_api_key");
-        if (!apiKey) throw new Error("Shortener API Key box me daalein!");
-        const apiUrl = `https://gplinks.in/api?api=${apiKey}&url=${encodeURIComponent(longUrl)}`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        if (data.status === "success") return data.shortenedUrl;
-        else throw new Error("Shortening failed");
-    }
-
-    // --- DATA LOADING ---
-    async function loadList() {
-        const snap = await getDocs(collection(db, "anime"));
-        const animeSelect = document.getElementById("animeSelect");
-        const deleteSelect = document.getElementById("deleteSelect");
-        animeSelect.innerHTML = "<option value=''>Select Anime</option>";
-        deleteSelect.innerHTML = "<option value=''>Select Anime</option>";
-        let list = [];
-        snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-        list.sort((a,b) => (a.name || "").localeCompare(b.name || ""));
-        list.forEach(a => {
-            let opt = document.createElement("option");
-            opt.value = a.id; opt.textContent = a.name;
-            animeSelect.appendChild(opt.cloneNode(true));
-            deleteSelect.appendChild(opt);
-        });
-    }
-
-    // --- ACTIONS ---
-    document.getElementById("uploadImgBtn").onclick = () => {
-        cloudinary.createUploadWidget({ cloudName: "dmxqosmk0", uploadPreset: "asi_anime_upload", multiple: false }, (err, res) => {
-            if (!err && res.event === "success") {
-                uploadedImage = res.info.secure_url;
-                document.getElementById("imgText").innerText = "Image Uploaded ✅";
-                document.getElementById("imgPreview").src = uploadedImage;
-                document.getElementById("imgPreview").style.display = "block";
-            }
-        }).open();
-    };
-
-    document.getElementById("addAnimeBtn").onclick = async () => {
-        const name = document.getElementById("newName").value.trim();
-        if(!name || !uploadedImage) return alert("Name & Image required");
-        const btn = document.getElementById("addAnimeBtn");
-        btn.disabled = true;
-        try {
-            await addDoc(collection(db, "anime"), {
-                name, season: document.getElementById("newSeason").value || "1",
-                year: document.getElementById("newYear").value || "2024",
-                genre: document.getElementById("newGenre").value,
-                status: document.getElementById("newStatus").value,
-                type: document.getElementById("newType").value,
-                description: document.getElementById("newDesc").value,
-                image: uploadedImage, episodes: [], updatedAt: Date.now()
-            });
-            alert("Added!"); loadList();
-        } catch(e) { alert(e.message); }
-        btn.disabled = false;
-    };
-
-    document.getElementById("animeSelect").onchange = async (e) => {
-        selectedAnimeId = e.target.value;
-        if(!selectedAnimeId) return document.getElementById("existingEpisodesBox").style.display = "none";
-        fetchEps();
-    };
-
-    async function fetchEps() {
-        const docSnap = await getDoc(doc(db, "anime", selectedAnimeId));
-        currentEpisodesList = docSnap.data().episodes || [];
-        const cont = document.getElementById("episodesContainer");
-        document.getElementById("existingEpisodesBox").style.display = "block";
-        cont.innerHTML = "";
-        currentEpisodesList.sort((a,b) => Number(a.ep) - Number(b.ep)).forEach((e, i) => {
-            let div = document.createElement("div");
-            div.className = "ep-item";
-            div.innerHTML = `<span>Ep ${e.ep}</span><button onclick="removeEpisode(${i})">Delete</button>`;
-            cont.appendChild(div);
-        });
-    }
-
-    window.removeEpisode = async (index) => {
-        if(!confirm("Delete?")) return;
-        await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayRemove(currentEpisodesList[index]) });
-        fetchEps();
-    };
-
-    document.getElementById("addEpBtn").onclick = async () => {
-        const ep = document.getElementById("epNum").value;
-        const link = document.getElementById("epLink").value.trim();
-        if(!selectedAnimeId || !ep || !link) return alert("Fill all fields");
-        const btn = document.getElementById("addEpBtn");
-        btn.disabled = true; btn.innerText = "Processing...";
-        try {
-            const shortLink = await shortenLink(link);
-            await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayUnion({ ep, link: shortLink }), updatedAt: Date.now() });
-            alert("Added!"); fetchEps();
-        } catch(e) { alert(e.message); }
-        btn.disabled = false; btn.innerText = "Add Episode";
-    };
-
-    document.getElementById("deleteAnimeBtn").onclick = async () => {
-        const id = document.getElementById("deleteSelect").value;
-        if(!id || !confirm("Delete Entire Anime?")) return;
-        await deleteDoc(doc(db, "anime", id));
-        alert("Deleted!"); loadList();
-    };
-</script>
-
-</body>
+</div>  <script type="module">  
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";  
+    import {  
+        getFirestore, collection, addDoc, getDoc,  
+        getDocs, doc, updateDoc,  
+        deleteDoc, arrayUnion, arrayRemove  
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";  
+    import {   
+        getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut   
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";  
+  
+    // Firebase Configuration  
+    const app = initializeApp({  
+        apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",  
+        authDomain: "asi-anime.firebaseapp.com",  
+        projectId: "asi-anime"  
+    });  
+  
+    const db = getFirestore(app);  
+    const auth = getAuth(app);  
+    let uploadedImage = "";  
+    let currentEpisodesList =[];  
+    let selectedAnimeId = "";  
+  
+    /* SECURITY: FIREBASE AUTH */  
+    const loginBox = document.getElementById("loginBox");  
+    const adminPanel = document.getElementById("adminPanel");  
+    const loginBtn = document.getElementById("loginBtn");  
+    const logoutBtn = document.getElementById("logoutBtn");  
+  
+    loginBtn.onclick = async () => {  
+        const email = document.getElementById("adminEmail").value;  
+        const pass = document.getElementById("adminPass").value;  
+        const errDisplay = document.getElementById("loginError");  
+        try {  
+            errDisplay.innerText = "Logging in...";  
+            await signInWithEmailAndPassword(auth, email, pass);  
+        } catch (error) {  
+            errDisplay.innerText = "Invalid Credentials: " + error.message;  
+        }  
+    };  
+  
+    logoutBtn.onclick = () => signOut(auth);  
+  
+    onAuthStateChanged(auth, (user) => {  
+        if (user) {  
+            adminPanel.style.display = "block";  
+            loginBox.style.display = "none";  
+            loadList();  
+            document.getElementById("shortenerKey").value = localStorage.getItem("shortener_api_key") || "";  
+        } else {  
+            adminPanel.style.display = "none";  
+            loginBox.style.display = "block";  
+            document.getElementById("loginError").innerText = "";  
+        }  
+    });  
+  
+    document.getElementById("shortenerKey").oninput = (e) => {  
+        localStorage.setItem("shortener_api_key", e.target.value.trim());  
+    };  
+  
+    /* FEATURE: DELETE ANIME SEARCH */  
+    document.getElementById("deleteSearch").oninput = function(e) {  
+        const term = e.target.value.toLowerCase();  
+        const options = document.getElementById("deleteSelect").options;  
+        for (let i = 0; i < options.length; i++) {  
+            const text = options[i].text.toLowerCase();  
+            options[i].style.display = text.includes(term) || options[i].value === "" ? "block" : "none";  
+        }  
+    };  
+  
+    /* FEATURE: AUTO LINK SHORTENING */  
+    async function shortenLink(longUrl) {  
+        const apiKey = localStorage.getItem("shortener_api_key");  
+        if (!apiKey) {  
+            throw new Error("Shortener API Key required to add episodes.");  
+        }  
+          
+        // Using generic shortener API format (GPLinks, ShrinkMe etc)  
+        const apiUrl = `https://gplinks.in/api?api=${apiKey}&url=${encodeURIComponent(longUrl)}`;  
+          
+        try {  
+            const response = await fetch(apiUrl);  
+            const data = await response.json();  
+            if (data.status === "success") {  
+                return data.shortenedUrl;  
+            } else {  
+                throw new Error(data.message || "Shortening failed");  
+            }  
+        } catch (err) {  
+            console.error("Shortening Error:", err);  
+            throw new Error("Failed to shorten link. Check your API Key or Internet.");  
+        }  
+    }  
+  
+    /* LOAD ANIME LIST */  
+    async function loadList() {  
+        try {  
+            const snap = await getDocs(collection(db, "anime"));  
+            const animeSelect = document.getElementById("animeSelect");  
+            const deleteSelect = document.getElementById("deleteSelect");  
+  
+            animeSelect.innerHTML = "<option value=''>Select Anime</option>";  
+            deleteSelect.innerHTML = "<option value=''>Select Anime to Delete</option>";  
+  
+            let list =[];  
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));  
+              
+            list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));  
+  
+            list.forEach(a => {  
+                let opt1 = document.createElement("option");  
+                opt1.value = a.id;  
+                opt1.textContent = a.name;  
+                animeSelect.appendChild(opt1);  
+  
+                let opt2 = document.createElement("option");  
+                opt2.value = a.id;  
+                opt2.textContent = a.name;  
+                deleteSelect.appendChild(opt2);  
+            });  
+        } catch (error) {  
+            console.error("Error loading anime list:", error);  
+        }  
+    }  
+  
+    /* CLOUDINARY UPLOAD */  
+    document.getElementById("uploadImgBtn").onclick = () => {  
+        let widget = cloudinary.createUploadWidget({  
+            cloudName: "dmxqosmk0",  
+            uploadPreset: "asi_anime_upload",  
+            cropping: false,  
+            multiple: false  
+        }, (error, result) => {  
+            if (!error && result && result.event === "success") {  
+                uploadedImage = result.info.secure_url;  
+                const imgText = document.getElementById("imgText");  
+                const imgPreview = document.getElementById("imgPreview");  
+                imgText.innerText = "Image Uploaded Successfully ✅";  
+                imgText.style.color = "#00ff00";  
+                imgPreview.src = uploadedImage;  
+                imgPreview.style.display = "block";  
+            }  
+        });  
+        widget.open();  
+    };  
+  
+    /* ADD ANIME */  
+    document.getElementById("addAnimeBtn").onclick = async () => {  
+        let name = document.getElementById("newName").value.trim();  
+        const btn = document.getElementById("addAnimeBtn");  
+  
+        if (!name || !uploadedImage) {  
+            alert("Please fill Anime Name and Upload an Image.");  
+            return;  
+        }  
+  
+        try {  
+            btn.innerText = "Saving...";  
+            btn.disabled = true;  
+            await addDoc(collection(db, "anime"), {  
+                name: name,  
+                season: document.getElementById("newSeason").value || "1",  
+                year: document.getElementById("newYear").value || new Date().getFullYear(),  
+                genre: document.getElementById("newGenre").value,  
+                status: document.getElementById("newStatus").value,  
+                type: document.getElementById("newType").value,  
+                description: document.getElementById("newDesc").value,  
+                image: uploadedImage,  
+                episodes:[],  
+                updatedAt: Date.now()  
+            });  
+            alert("Anime Added Successfully ✅");  
+            document.getElementById("newName").value = "";  
+            document.getElementById("newSeason").value = "";  
+            document.getElementById("newYear").value = "";  
+            document.getElementById("newGenre").value = "";  
+            document.getElementById("newDesc").value = "";  
+            uploadedImage = "";  
+            document.getElementById("imgPreview").style.display = "none";  
+            document.getElementById("imgText").innerText = "No Image Selected";  
+            document.getElementById("imgText").style.color = "#ff4500";  
+            loadList();  
+        } catch (error) {  
+            alert("Error adding anime: " + error.message);  
+        } finally {  
+            btn.innerText = "Save Anime";  
+            btn.disabled = false;  
+        }  
+    };  
+  
+    /* FETCH EPISODES */  
+    document.getElementById("animeSelect").onchange = async (e) => {  
+        selectedAnimeId = e.target.value;  
+        const epBox = document.getElementById("existingEpisodesBox");  
+        if(!selectedAnimeId) {  
+            epBox.style.display = "none";  
+            return;  
+        }  
+        fetchEpisodes(selectedAnimeId);  
+    };  
+  
+    async function fetchEpisodes(animeId) {  
+        const epBox = document.getElementById("existingEpisodesBox");  
+        const epContainer = document.getElementById("episodesContainer");  
+        epContainer.innerHTML = "<p style='color:white;'>Loading episodes...</p>";  
+        epBox.style.display = "block";  
+        const docSnap = await getDoc(doc(db, "anime", animeId));  
+        if(docSnap.exists()){  
+            currentEpisodesList = docSnap.data().episodes ||[];  
+            renderEpisodes();  
+        }  
+    }  
+  
+    function renderEpisodes() {  
+        const epContainer = document.getElementById("episodesContainer");  
+        epContainer.innerHTML = "";  
+        if(currentEpisodesList.length === 0) {  
+            epContainer.innerHTML = "<p style='color:gray;'>No episodes available yet.</p>";  
+            return;  
+        }  
+        currentEpisodesList.sort((a,b) => Number(a.ep) - Number(b.ep));  
+        currentEpisodesList.forEach((epObj, index) => {  
+            let div = document.createElement("div");  
+            div.className = "ep-item";  
+            div.innerHTML = `<span>Ep ${epObj.ep}</span><button data-index="${index}" class="delete-ep-btn">Delete</button>`;  
+            epContainer.appendChild(div);  
+        });  
+        document.querySelectorAll(".delete-ep-btn").forEach(btn => {  
+            btn.onclick = async (e) => {  
+                let idx = e.target.getAttribute("data-index");  
+                let epToDelete = currentEpisodesList[idx];  
+                if(confirm(`Delete Episode ${epToDelete.ep}?`)){  
+                    e.target.innerText = "...";  
+                    try {  
+                        await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayRemove(epToDelete) });  
+                        fetchEpisodes(selectedAnimeId);  
+                    } catch(err) { alert("Error deleting."); }  
+                }  
+            };  
+        });  
+    }  
+  
+    /* ADD EPISODE WITH SHORTENING */  
+    document.getElementById("addEpBtn").onclick = async () => {  
+        let ep = document.getElementById("epNum").value.trim();  
+        let link = document.getElementById("epLink").value.trim();  
+  
+        if(!selectedAnimeId) { alert("Please select an Anime first."); return; }  
+        if(!ep || !link){ alert("Fill Episode Number and Link"); return; }  
+        if(!link.match(/^https?:\/\//i)) link = "https://" + link;  
+  
+        const btn = document.getElementById("addEpBtn");  
+        btn.disabled = true;  
+  
+        try {  
+            btn.innerText = "Shortening...";  
+            const finalLink = await shortenLink(link);  
+  
+            btn.innerText = "Saving...";  
+            await updateDoc(doc(db, "anime", selectedAnimeId), {  
+                episodes: arrayUnion({ ep, link: finalLink }),  
+                updatedAt: Date.now()  
+            });  
+  
+            alert("Episode Added (Shortened) ✅");  
+            document.getElementById("epNum").value = "";  
+            document.getElementById("epLink").value = "";  
+            fetchEpisodes(selectedAnimeId);  
+        } catch(err) {  
+            alert(err.message);  
+        } finally {  
+            btn.innerText = "Add Episode";  
+            btn.disabled = false;  
+        }  
+    };  
+  
+    /* DELETE ANIME */  
+    document.getElementById("deleteAnimeBtn").onclick = async () => {  
+        let deleteSelect = document.getElementById("deleteSelect");  
+        let id = deleteSelect.value;  
+        if(!id){ alert("Select an Anime."); return; }  
+  
+        if(confirm("⚠️ Delete entire anime?")){  
+            const btn = document.getElementById("deleteAnimeBtn");  
+            btn.innerText = "Deleting...";  
+            btn.disabled = true;  
+            try {  
+                await deleteDoc(doc(db, "anime", id));  
+                alert("Deleted ✅");  
+                loadList();  
+            } catch(err) {  
+                alert("Error: " + err.message);  
+            } finally {  
+                btn.innerText = "Delete Entire Anime";  
+                btn.disabled = false;  
+                deleteSelect.value = "";  
+                document.getElementById("deleteSearch").value = "";  
+            }  
+        }  
+    };  
+  
+</script>  </body>  
 </html>
