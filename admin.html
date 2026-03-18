@@ -255,13 +255,9 @@ const firebaseConfig = {
   appId: "1:1029720406470:web:8ad8ad2d2ea1c7a4725ac7"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);",  
-        authDomain: "asi-anime.firebaseapp.com",  
-        projectId: "asi-anime"  
-    });  
-  
-    const db = getFirestore(app);  
+const app = initializeApp(firebaseConfig);
+
+    const db = getFirestore(app);
     const auth = getAuth(app);  
     let uploadedImage = "";  
     let currentEpisodesList =[];  
