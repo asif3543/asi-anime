@@ -130,8 +130,8 @@
         <!-- LOGOUT & SHORTENER KEY -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div style="width: 70%;">
-                <input id="shortenerKey" type="text" placeholder="Shortener API Key (GPLinks API Key Daalein)" style="margin-bottom: 0;">
-                <small style="color: gray;">Shortener API key browser me safe rahegi.</small>
+                <input id="shortenerKey" type="text" placeholder="GPLinks API Key Yahan Daalein" style="margin-bottom: 0;">
+                <small style="color: gray;">Key browser me safe rahegi.</small>
             </div>
             <button id="logoutBtn" style="width: 25%; background: #444;">Logout</button>
         </div>
@@ -193,7 +193,7 @@
     import { getFirestore, collection, addDoc, getDoc, getDocs, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-    // ✅ SAHI FIREBASE CONFIG (v1i wali API Key)
+    // ✅ FIXED CONFIG: API Key verified from your screenshot
     const firebaseConfig = {
         apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
         authDomain: "asi-anime.firebaseapp.com",
@@ -211,20 +211,21 @@
     let selectedAnimeId = "";
     let currentEpisodesList = [];
 
-    // --- AUTH LOGIC ---
     const loginBox = document.getElementById("loginBox");
     const adminPanel = document.getElementById("adminPanel");
     const errDisplay = document.getElementById("loginError");
 
+    // LOGIN ACTION
     document.getElementById("loginBtn").onclick = async () => {
         const email = document.getElementById("adminEmail").value.trim();
         const pass = document.getElementById("adminPass").value.trim();
-        if(!email || !pass) { errDisplay.innerText = "Email and Password required!"; return; }
+        if(!email || !pass) { errDisplay.innerText = "Email and Password are required!"; return; }
         try {
-            errDisplay.innerText = "Logging in...";
+            errDisplay.innerText = "Connecting...";
             await signInWithEmailAndPassword(auth, email, pass);
         } catch (error) {
-            errDisplay.innerText = "Error: " + error.message;
+            console.error(error);
+            errDisplay.innerText = "Login failed: " + error.message;
         }
     };
 
@@ -247,7 +248,7 @@
         localStorage.setItem("shortener_api_key", e.target.value.trim());
     };
 
-    // --- SEARCH DELETE LOGIC ---
+    // SEARCH FILTER
     document.getElementById("deleteSearch").oninput = (e) => {
         const term = e.target.value.toLowerCase();
         const options = document.getElementById("deleteSelect").options;
@@ -257,44 +258,40 @@
         }
     };
 
-    // --- LINK SHORTENING ---
+    // SHORTEN FUNCTION
     async function shortenLink(longUrl) {
         const apiKey = localStorage.getItem("shortener_api_key");
-        if (!apiKey) throw new Error("Please add your Shortener API Key first!");
-        
+        if (!apiKey) throw new Error("GPLinks API Key pehle box me daalein!");
         const apiUrl = `https://gplinks.in/api?api=${apiKey}&url=${encodeURIComponent(longUrl)}`;
-        
         try {
             const response = await fetch(apiUrl);
             const data = await response.json();
             if (data.status === "success") return data.shortenedUrl;
             else throw new Error(data.message || "Shortening failed");
-        } catch (err) { 
-            console.error(err);
-            throw new Error("Shortening failed. Check Key or Internet."); 
-        }
+        } catch (err) { throw new Error("Shortening error. API key ya net check karein."); }
     }
 
-    // --- LOAD ANIME LIST ---
+    // LOAD LIST
     async function loadList() {
-        const snap = await getDocs(collection(db, "anime"));
-        const animeSelect = document.getElementById("animeSelect");
-        const deleteSelect = document.getElementById("deleteSelect");
-        animeSelect.innerHTML = "<option value=''>Select Anime</option>";
-        deleteSelect.innerHTML = "<option value=''>Select Anime to Delete</option>";
-        let list = [];
-        snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-        list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-        list.forEach(a => {
-            let opt = document.createElement("option");
-            opt.value = a.id;
-            opt.textContent = a.name;
-            animeSelect.appendChild(opt.cloneNode(true));
-            deleteSelect.appendChild(opt);
-        });
+        try {
+            const snap = await getDocs(collection(db, "anime"));
+            const animeSelect = document.getElementById("animeSelect");
+            const deleteSelect = document.getElementById("deleteSelect");
+            animeSelect.innerHTML = "<option value=''>Select Anime</option>";
+            deleteSelect.innerHTML = "<option value=''>Select Anime to Delete</option>";
+            let list = [];
+            snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+            list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+            list.forEach(a => {
+                let opt = document.createElement("option");
+                opt.value = a.id; opt.textContent = a.name;
+                animeSelect.appendChild(opt.cloneNode(true));
+                deleteSelect.appendChild(opt);
+            });
+        } catch(e) { console.error(e); }
     }
 
-    // --- CLOUDINARY ---
+    // IMAGE UPLOAD
     document.getElementById("uploadImgBtn").onclick = () => {
         cloudinary.createUploadWidget({
             cloudName: "dmxqosmk0",
@@ -310,10 +307,10 @@
         }).open();
     };
 
-    // --- SAVE ANIME ---
+    // SAVE NEW ANIME
     document.getElementById("addAnimeBtn").onclick = async () => {
         const name = document.getElementById("newName").value.trim();
-        if(!name || !uploadedImage) { alert("Name and Image are required!"); return; }
+        if(!name || !uploadedImage) { alert("Name and Image required!"); return; }
         const btn = document.getElementById("addAnimeBtn");
         btn.disabled = true; btn.innerText = "Saving...";
         try {
@@ -330,11 +327,12 @@
                 updatedAt: Date.now()
             });
             alert("Anime Added!"); loadList();
+            document.getElementById("newName").value = "";
         } catch (e) { alert(e.message); }
         btn.disabled = false; btn.innerText = "Save Anime";
     };
 
-    // --- EPISODE MANAGE ---
+    // EPISODES
     document.getElementById("animeSelect").onchange = async (e) => {
         selectedAnimeId = e.target.value;
         if(!selectedAnimeId) {
@@ -345,9 +343,11 @@
     };
 
     async function fetchEps() {
-        const docSnap = await getDoc(doc(db, "anime", selectedAnimeId));
-        currentEpisodesList = docSnap.data().episodes || [];
-        renderEps();
+        try {
+            const docSnap = await getDoc(doc(db, "anime", selectedAnimeId));
+            currentEpisodesList = docSnap.data().episodes || [];
+            renderEps();
+        } catch(e) { console.error(e); }
     }
 
     function renderEps() {
@@ -363,7 +363,7 @@
     }
 
     window.removeEpisode = async (index) => {
-        if(!confirm("Delete this episode?")) return;
+        if(!confirm("Delete episode?")) return;
         const item = currentEpisodesList[index];
         try {
             await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayRemove(item) });
@@ -374,11 +374,9 @@
     document.getElementById("addEpBtn").onclick = async () => {
         const ep = document.getElementById("epNum").value;
         const link = document.getElementById("epLink").value.trim();
-        if(!selectedAnimeId || !ep || !link) { alert("Fill all episode fields!"); return; }
-        
+        if(!selectedAnimeId || !ep || !link) { alert("Fill all fields!"); return; }
         const btn = document.getElementById("addEpBtn");
         btn.disabled = true; btn.innerText = "Shortening Link...";
-        
         try {
             const shortLink = await shortenLink(link);
             btn.innerText = "Saving to DB...";
@@ -394,10 +392,10 @@
         btn.disabled = false; btn.innerText = "Add Episode";
     };
 
-    // --- DELETE ANIME ---
+    // DELETE ANIME
     document.getElementById("deleteAnimeBtn").onclick = async () => {
         const id = document.getElementById("deleteSelect").value;
-        if(!id || !confirm("Are you sure? This will delete the entire anime!")) return;
+        if(!id || !confirm("Delete ENTIRE anime?")) return;
         try {
             await deleteDoc(doc(db, "anime", id));
             alert("Anime Deleted!"); loadList();
