@@ -130,7 +130,7 @@
         <!-- LOGOUT & SHORTENER KEY -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div style="width: 70%;">
-                <input id="shortenerKey" type="text" placeholder="Shortener API Key (Paste Key Here)" style="margin-bottom: 0;">
+                <input id="shortenerKey" type="text" placeholder="Shortener API Key (GPLinks API Key Daalein)" style="margin-bottom: 0;">
                 <small style="color: gray;">Shortener API key browser me safe rahegi.</small>
             </div>
             <button id="logoutBtn" style="width: 25%; background: #444;">Logout</button>
@@ -168,7 +168,7 @@
             <select id="animeSelect"><option value="">Select Anime</option></select>
             <div class="grid-2">
                 <input id="epNum" type="number" placeholder="Episode Number">
-                <input id="epLink" placeholder="Paste Video Link">
+                <input id="epLink" placeholder="Paste Video Link (Bot Link)">
             </div>
             <button id="addEpBtn">Add Episode</button>
             <div id="existingEpisodesBox" style="display:none; margin-top: 20px;">
@@ -193,9 +193,9 @@
     import { getFirestore, collection, addDoc, getDoc, getDocs, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-    // Firebase Configuration - FIXED API KEY
+    // ✅ SAHI FIREBASE CONFIG (v1i wali API Key)
     const firebaseConfig = {
-        apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v2iWLP8e_kZo1Q",
+        apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
         authDomain: "asi-anime.firebaseapp.com",
         projectId: "asi-anime",
         storageBucket: "asi-anime.firebasestorage.app",
@@ -262,7 +262,6 @@
         const apiKey = localStorage.getItem("shortener_api_key");
         if (!apiKey) throw new Error("Please add your Shortener API Key first!");
         
-        // This works for GPLinks, ShrinkMe, etc.
         const apiUrl = `https://gplinks.in/api?api=${apiKey}&url=${encodeURIComponent(longUrl)}`;
         
         try {
