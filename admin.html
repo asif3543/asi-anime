@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ASI Admin Panel - Advanced</title>
+    <title>ASI Admin Panel - Optimized</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
     <style>
@@ -25,11 +25,10 @@
         button:disabled { background-color: #555; cursor: not-allowed; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .preview-img { max-width: 150px; border-radius: 8px; margin: 10px auto; display: block; }
-        .shortener-item { background: #252525; padding: 10px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; }
-        .ep-list { margin-top: 15px; max-height: 250px; overflow-y: auto; background: #2a2a2a; border-radius: 6px; padding: 10px; }
+        .ep-list { margin-top: 15px; max-height: 200px; overflow-y: auto; background: #2a2a2a; border-radius: 6px; padding: 10px; }
         .ep-item { display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; padding: 8px 12px; margin-bottom: 8px; border-radius: 4px; border: 1px solid var(--border); }
         .ep-item button { width: auto; padding: 5px 10px; font-size: 12px; background: #d32f2f; }
-        .search-box { margin-bottom: 10px; border-color: var(--primary); }
+        .search-box { margin-bottom: 10px; border: 1px solid var(--primary); }
     </style>
 </head>
 <body>
@@ -47,22 +46,8 @@
     </div>
 
     <div id="adminPanel" style="display:none">
-
         <div style="text-align: right; margin-bottom: 20px;">
             <button id="logoutBtn" style="width: auto; background: #444;">Logout</button>
-        </div>
-
-        <!-- SHORTENER MANAGER -->
-        <div class="box">
-            <h3>🔗 Shortener Accounts Manager</h3>
-            <div class="grid-2">
-                <input id="shortName" placeholder="Site Name">
-                <input id="shortGmail" placeholder="Account Gmail">
-            </div>
-            <input id="shortApi" placeholder="API Token">
-            <input id="shortUrl" placeholder="API URL (e.g., https://nowshort.com/api)">
-            <button id="addShortenerBtn" style="background: #2e7d32;">Add Shortener Account</button>
-            <div id="shortenerList" style="margin-top: 15px;"></div>
         </div>
 
         <!-- ADD ANIME -->
@@ -79,26 +64,24 @@
             <button id="addAnimeBtn" style="margin-top: 15px;">Save Anime</button>
         </div>
 
-        <!-- ADD & MANAGE EPISODES (System Instruction logic) -->
+        <!-- ADD & MANAGE EPISODES (System Instruction Method) -->
         <div class="box">
             <h3>📺 Add & Manage Episodes</h3>
+            
             <input type="text" id="epSearch" class="search-box" placeholder="🔍 Search Anime to add episode...">
             <select id="animeSelect">
                 <option value="">Select Anime</option>
             </select>
 
             <div class="grid-2">
-                <input id="epNum" type="number" placeholder="Episode Number">
-                <input id="epLink" placeholder="Drive / Telegram / Bot Link">
+                <input id="epNum" type="number" placeholder="Ep Number">
+                <input id="epLink" placeholder="Paste Shortened / Direct Link">
             </div>
-            <button id="addEpBtn">Shorten & Add Episode</button>
+            <button id="addEpBtn">Add Episode</button>
 
-            <!-- Live Episode List Area -->
             <div id="existingEpisodesBox" style="display:none; margin-top: 20px;">
-                <h4 style="color: #ff4500; border-bottom: 1px solid #333; padding-bottom: 5px;">Current Episodes</h4>
-                <div id="episodesContainer" class="ep-list">
-                    <!-- Episodes load here -->
-                </div>
+                <h4 style="color: #ff4500;">Current Episodes</h4>
+                <div id="episodesContainer" class="ep-list"></div>
             </div>
         </div>
 
@@ -109,9 +92,8 @@
             <select id="deleteSelect">
                 <option value="">Select Anime to Delete</option>
             </select>
-            <button id="deleteAnimeBtn" class="delete-btn" style="background: #d32f2f;">Delete Entire Anime</button>
+            <button id="deleteAnimeBtn" style="background: #d32f2f;">Delete Entire Anime</button>
         </div>
-
     </div>
 </div>
 
@@ -140,16 +122,13 @@
 
     let uploadedImage = "";
     let selectedAnimeId = "";
-    let currentEpisodesList = [];
-    let shortenerAccounts = [];
 
-    /* --- AUTH --- */
+    /* AUTH LOGIC */
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById("adminPanel").style.display = "block";
             document.getElementById("loginBox").style.display = "none";
             loadList();
-            loadShorteners();
         } else {
             document.getElementById("adminPanel").style.display = "none";
             document.getElementById("loginBox").style.display = "block";
@@ -162,56 +141,10 @@
         try { await signInWithEmailAndPassword(auth, email, pass); } 
         catch (error) { document.getElementById("loginError").innerText = error.message; }
     };
+
     document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
-    /* --- SHORTENER LOGIC --- */
-    async function loadShorteners() {
-        const snap = await getDocs(collection(db, "shorteners"));
-        shortenerAccounts = [];
-        const listDiv = document.getElementById("shortenerList");
-        listDiv.innerHTML = "";
-        snap.forEach(d => {
-            const data = d.data();
-            data.id = d.id;
-            shortenerAccounts.push(data);
-            const item = document.createElement("div");
-            item.className = "shortener-item";
-            item.innerHTML = `<span><b>${data.name}</b> (${data.gmail})</span>`;
-            const delBtn = document.createElement("button");
-            delBtn.innerText = "Remove";
-            delBtn.style = "width:auto; padding:5px; background:red;";
-            delBtn.onclick = async () => {
-                if(confirm("Remove?")) { await deleteDoc(doc(db, "shorteners", d.id)); loadShorteners(); }
-            };
-            item.appendChild(delBtn);
-            listDiv.appendChild(item);
-        });
-    }
-
-    document.getElementById("addShortenerBtn").onclick = async () => {
-        const name = document.getElementById("shortName").value;
-        const api = document.getElementById("shortApi").value;
-        const url = document.getElementById("shortUrl").value;
-        const gmail = document.getElementById("shortGmail").value;
-        if(!name || !api || !url) return alert("Fill all fields");
-        await addDoc(collection(db, "shorteners"), { name, api, url, gmail });
-        loadShorteners();
-    };
-
-    async function getShortenedLink(longUrl) {
-        if (shortenerAccounts.length === 0) throw new Error("Add shortener accounts first!");
-        for (let acc of shortenerAccounts) {
-            try {
-                const apiUrl = `${acc.url}?api=${acc.api}&url=${encodeURIComponent(longUrl)}`;
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                if (data.status === "success" || data.shortenedUrl) return data.shortenedUrl || data.link;
-            } catch (err) { console.log(acc.name + " failed"); }
-        }
-        throw new Error("All shorteners failed!");
-    }
-
-    /* --- SEARCH DROPDOWNS --- */
+    /* SEARCH LOGIC */
     function setupSearch(inputId, selectId) {
         document.getElementById(inputId).oninput = function(e) {
             const term = e.target.value.toLowerCase();
@@ -225,7 +158,7 @@
     setupSearch("epSearch", "animeSelect");
     setupSearch("deleteSearch", "deleteSelect");
 
-    /* --- ANIME LIST --- */
+    /* LOAD ANIME LIST */
     async function loadList() {
         const snap = await getDocs(query(collection(db, "anime"), orderBy("name")));
         const animeSelect = document.getElementById("animeSelect");
@@ -238,77 +171,72 @@
         });
     }
 
-    /* --- EPISODE MANAGEMENT (SYSTEM METHOD) --- */
+    /* EPISODE MANAGEMENT (SIMPLE METHOD) */
     document.getElementById("animeSelect").onchange = async (e) => {
         selectedAnimeId = e.target.value;
         if(!selectedAnimeId) {
             document.getElementById("existingEpisodesBox").style.display = "none";
             return;
         }
-        fetchEpisodes(selectedAnimeId);
+        fetchEpisodes();
     };
 
-    async function fetchEpisodes(id) {
-        const container = document.getElementById("episodesContainer");
-        container.innerHTML = "<p>Loading episodes...</p>";
-        document.getElementById("existingEpisodesBox").style.display = "block";
-
-        const docSnap = await getDoc(doc(db, "anime", id));
+    async function fetchEpisodes() {
+        const docSnap = await getDoc(doc(db, "anime", selectedAnimeId));
         if(docSnap.exists()){
-            currentEpisodesList = docSnap.data().episodes || [];
-            renderEpisodes();
+            const eps = docSnap.data().episodes || [];
+            const container = document.getElementById("episodesContainer");
+            document.getElementById("existingEpisodesBox").style.display = "block";
+            
+            // Sort episodes numerically
+            eps.sort((a,b) => Number(a.ep) - Number(b.ep));
+
+            container.innerHTML = eps.map(ep => `
+                <div class="ep-item">
+                    <span>Ep ${ep.ep}</span>
+                    <button onclick="window.delEp('${ep.ep}','${ep.link}')">Delete</button>
+                </div>
+            `).join('');
         }
     }
 
-    function renderEpisodes() {
-        const container = document.getElementById("episodesContainer");
-        container.innerHTML = "";
-        if(currentEpisodesList.length === 0) {
-            container.innerHTML = "<p style='color:gray;'>No episodes found.</p>";
-            return;
+    window.delEp = async (ep, link) => {
+        if(confirm("Delete Episode " + ep + "?")) {
+            await updateDoc(doc(db, "anime", selectedAnimeId), {
+                episodes: arrayRemove({ ep, link })
+            });
+            fetchEpisodes();
         }
-        currentEpisodesList.sort((a,b) => Number(a.ep) - Number(b.ep));
-        currentEpisodesList.forEach((epObj, index) => {
-            const div = document.createElement("div");
-            div.className = "ep-item";
-            div.innerHTML = `<span>Episode ${epObj.ep}</span>`;
-            const delBtn = document.createElement("button");
-            delBtn.innerText = "Delete";
-            delBtn.onclick = async () => {
-                if(confirm(`Delete Episode ${epObj.ep}?`)) {
-                    await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayRemove(epObj) });
-                    fetchEpisodes(selectedAnimeId);
-                }
-            };
-            div.appendChild(delBtn);
-            container.appendChild(div);
-        });
-    }
+    };
 
     document.getElementById("addEpBtn").onclick = async () => {
         const ep = document.getElementById("epNum").value;
         const link = document.getElementById("epLink").value.trim();
         const btn = document.getElementById("addEpBtn");
+
         if(!selectedAnimeId || !ep || !link) return alert("Fill all details!");
 
+        btn.disabled = true;
+        btn.innerText = "Adding...";
+
         try {
-            btn.disabled = true;
-            btn.innerText = "Shortening Link...";
-            const shortLink = await getShortenedLink(link);
-            
-            btn.innerText = "Saving...";
             await updateDoc(doc(db, "anime", selectedAnimeId), {
-                episodes: arrayUnion({ ep, link: shortLink }),
+                episodes: arrayUnion({ ep, link }),
                 updatedAt: Date.now()
             });
-            alert("Episode Added!");
+            alert("Episode Added! ✅");
             document.getElementById("epLink").value = "";
-            fetchEpisodes(selectedAnimeId);
-        } catch (err) { alert(err.message); }
-        finally { btn.disabled = false; btn.innerText = "Shorten & Add Episode"; }
+            document.getElementById("epNum").value = parseInt(ep) + 1; // Auto increment for next
+            fetchEpisodes();
+        } catch (err) {
+            alert("Error: " + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Add Episode";
+        }
     };
 
-    /* --- ADD & DELETE ANIME --- */
+    /* ADD ANIME & CLOUDINARY */
     document.getElementById("uploadImgBtn").onclick = () => {
         cloudinary.createUploadWidget({ cloudName: "dmxqosmk0", uploadPreset: "asi_anime_upload" }, (err, res) => {
             if (!err && res.event === "success") {
@@ -332,9 +260,10 @@
         loadList();
     };
 
+    /* DELETE ANIME */
     document.getElementById("deleteAnimeBtn").onclick = async () => {
         const id = document.getElementById("deleteSelect").value;
-        if(id && confirm("Delete anime permanently?")) {
+        if(id && confirm("Delete entire anime permanently?")) {
             await deleteDoc(doc(db, "anime", id));
             loadList();
             alert("Deleted!");
