@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ASI Admin Panel - Optimized</title>
+    <title>ASI Admin Panel - Full Features</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
     <style>
@@ -50,21 +50,38 @@
             <button id="logoutBtn" style="width: auto; background: #444;">Logout</button>
         </div>
 
-        <!-- ADD ANIME -->
+        <!-- ADD ANIME BOX -->
         <div class="box">
             <h3>🎬 Add New Anime</h3>
-            <input id="newName" placeholder="Anime Name">
+            <input id="newName" placeholder="Anime Name (e.g., Solo Leveling)">
+            
             <div class="grid-2">
-                <input id="newSeason" placeholder="Season">
-                <input id="newYear" type="number" placeholder="Year">
+                <input id="newSeason" placeholder="Season (e.g., 1)">
+                <input id="newYear" type="number" placeholder="Year (e.g., 2024)">
             </div>
+
+            <div class="grid-2">
+                <input id="newGenre" placeholder="Genre (e.g., Action, Magic)">
+                <select id="newStatus">
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+
+            <select id="newType">
+                <option value="Hindi Dub">Hindi Dub</option>
+                <option value="Hindi Sub">Hindi Sub</option>
+            </select>
+
             <textarea id="newDesc" placeholder="Description"></textarea>
+            
             <button id="uploadImgBtn" type="button">📸 Select Image</button>
             <img id="imgPreview" class="preview-img" style="display:none;">
+            
             <button id="addAnimeBtn" style="margin-top: 15px;">Save Anime</button>
         </div>
 
-        <!-- ADD & MANAGE EPISODES (System Instruction Method) -->
+        <!-- ADD & MANAGE EPISODES BOX -->
         <div class="box">
             <h3>📺 Add & Manage Episodes</h3>
             
@@ -74,8 +91,8 @@
             </select>
 
             <div class="grid-2">
-                <input id="epNum" type="number" placeholder="Ep Number">
-                <input id="epLink" placeholder="Paste Shortened / Direct Link">
+                <input id="epNum" type="number" placeholder="Ep No.">
+                <input id="epLink" placeholder="Paste Direct / Shortener Link">
             </div>
             <button id="addEpBtn">Add Episode</button>
 
@@ -85,7 +102,7 @@
             </div>
         </div>
 
-        <!-- DELETE ANIME -->
+        <!-- DELETE ANIME BOX -->
         <div class="box">
             <h3>🗑️ Delete Anime</h3>
             <input type="text" id="deleteSearch" class="search-box" placeholder="🔍 Search Anime to Delete...">
@@ -123,7 +140,7 @@
     let uploadedImage = "";
     let selectedAnimeId = "";
 
-    /* AUTH LOGIC */
+    /* --- LOGIN CHECK --- */
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById("adminPanel").style.display = "block";
@@ -139,12 +156,12 @@
         const email = document.getElementById("adminEmail").value;
         const pass = document.getElementById("adminPass").value;
         try { await signInWithEmailAndPassword(auth, email, pass); } 
-        catch (error) { document.getElementById("loginError").innerText = error.message; }
+        catch (error) { document.getElementById("loginError").innerText = "Error: " + error.message; }
     };
 
     document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
-    /* SEARCH LOGIC */
+    /* --- SEARCH FEATURE --- */
     function setupSearch(inputId, selectId) {
         document.getElementById(inputId).oninput = function(e) {
             const term = e.target.value.toLowerCase();
@@ -158,7 +175,7 @@
     setupSearch("epSearch", "animeSelect");
     setupSearch("deleteSearch", "deleteSelect");
 
-    /* LOAD ANIME LIST */
+    /* --- LOAD LIST --- */
     async function loadList() {
         const snap = await getDocs(query(collection(db, "anime"), orderBy("name")));
         const animeSelect = document.getElementById("animeSelect");
@@ -171,72 +188,7 @@
         });
     }
 
-    /* EPISODE MANAGEMENT (SIMPLE METHOD) */
-    document.getElementById("animeSelect").onchange = async (e) => {
-        selectedAnimeId = e.target.value;
-        if(!selectedAnimeId) {
-            document.getElementById("existingEpisodesBox").style.display = "none";
-            return;
-        }
-        fetchEpisodes();
-    };
-
-    async function fetchEpisodes() {
-        const docSnap = await getDoc(doc(db, "anime", selectedAnimeId));
-        if(docSnap.exists()){
-            const eps = docSnap.data().episodes || [];
-            const container = document.getElementById("episodesContainer");
-            document.getElementById("existingEpisodesBox").style.display = "block";
-            
-            // Sort episodes numerically
-            eps.sort((a,b) => Number(a.ep) - Number(b.ep));
-
-            container.innerHTML = eps.map(ep => `
-                <div class="ep-item">
-                    <span>Ep ${ep.ep}</span>
-                    <button onclick="window.delEp('${ep.ep}','${ep.link}')">Delete</button>
-                </div>
-            `).join('');
-        }
-    }
-
-    window.delEp = async (ep, link) => {
-        if(confirm("Delete Episode " + ep + "?")) {
-            await updateDoc(doc(db, "anime", selectedAnimeId), {
-                episodes: arrayRemove({ ep, link })
-            });
-            fetchEpisodes();
-        }
-    };
-
-    document.getElementById("addEpBtn").onclick = async () => {
-        const ep = document.getElementById("epNum").value;
-        const link = document.getElementById("epLink").value.trim();
-        const btn = document.getElementById("addEpBtn");
-
-        if(!selectedAnimeId || !ep || !link) return alert("Fill all details!");
-
-        btn.disabled = true;
-        btn.innerText = "Adding...";
-
-        try {
-            await updateDoc(doc(db, "anime", selectedAnimeId), {
-                episodes: arrayUnion({ ep, link }),
-                updatedAt: Date.now()
-            });
-            alert("Episode Added! ✅");
-            document.getElementById("epLink").value = "";
-            document.getElementById("epNum").value = parseInt(ep) + 1; // Auto increment for next
-            fetchEpisodes();
-        } catch (err) {
-            alert("Error: " + err.message);
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Add Episode";
-        }
-    };
-
-    /* ADD ANIME & CLOUDINARY */
+    /* --- ADD ANIME --- */
     document.getElementById("uploadImgBtn").onclick = () => {
         cloudinary.createUploadWidget({ cloudName: "dmxqosmk0", uploadPreset: "asi_anime_upload" }, (err, res) => {
             if (!err && res.event === "success") {
@@ -249,24 +201,88 @@
 
     document.getElementById("addAnimeBtn").onclick = async () => {
         const name = document.getElementById("newName").value.trim();
-        if(!name || !uploadedImage) return alert("Name & Image required!");
-        await addDoc(collection(db, "anime"), {
-            name, season: document.getElementById("newSeason").value,
-            year: document.getElementById("newYear").value,
-            description: document.getElementById("newDesc").value,
-            image: uploadedImage, episodes: [], updatedAt: Date.now()
-        });
-        alert("Anime Added!");
-        loadList();
+        const genre = document.getElementById("newGenre").value.trim();
+        const type = document.getElementById("newType").value;
+        const status = document.getElementById("newStatus").value;
+
+        if(!name || !uploadedImage) return alert("Anime Name and Image are mandatory!");
+
+        const btn = document.getElementById("addAnimeBtn");
+        btn.disabled = true; btn.innerText = "Saving...";
+
+        try {
+            await addDoc(collection(db, "anime"), {
+                name,
+                season: document.getElementById("newSeason").value || "1",
+                year: document.getElementById("newYear").value || "2024",
+                genre: genre || "Action",
+                type: type,
+                status: status,
+                description: document.getElementById("newDesc").value,
+                image: uploadedImage,
+                episodes: [],
+                updatedAt: Date.now()
+            });
+            alert("Anime Added Successfully! ✅");
+            location.reload(); // Refresh to clear form
+        } catch (err) { alert(err.message); btn.disabled = false; btn.innerText = "Save Anime"; }
     };
 
-    /* DELETE ANIME */
+    /* --- EPISODE MANAGEMENT (SIMPLE) --- */
+    document.getElementById("animeSelect").onchange = (e) => {
+        selectedAnimeId = e.target.value;
+        if(selectedAnimeId) fetchEpisodes();
+        else document.getElementById("existingEpisodesBox").style.display = "none";
+    };
+
+    async function fetchEpisodes() {
+        const docSnap = await getDoc(doc(db, "anime", selectedAnimeId));
+        if(docSnap.exists()){
+            const eps = docSnap.data().episodes || [];
+            const container = document.getElementById("episodesContainer");
+            document.getElementById("existingEpisodesBox").style.display = "block";
+            
+            eps.sort((a,b) => Number(a.ep) - Number(b.ep));
+            container.innerHTML = eps.map(ep => `
+                <div class="ep-item">
+                    <span>Episode ${ep.ep}</span>
+                    <button onclick="window.delEp('${ep.ep}','${ep.link}')">Delete</button>
+                </div>
+            `).join('');
+        }
+    }
+
+    window.delEp = async (ep, link) => {
+        if(confirm("Delete Episode " + ep + "?")) {
+            await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayRemove({ ep, link }) });
+            fetchEpisodes();
+        }
+    };
+
+    document.getElementById("addEpBtn").onclick = async () => {
+        const epNum = document.getElementById("epNum").value;
+        const link = document.getElementById("epLink").value.trim();
+        if(!selectedAnimeId || !epNum || !link) return alert("Select Anime and fill Ep No/Link!");
+
+        try {
+            await updateDoc(doc(db, "anime", selectedAnimeId), {
+                episodes: arrayUnion({ ep: epNum, link: link }),
+                updatedAt: Date.now()
+            });
+            alert("Episode Added! ✅");
+            document.getElementById("epLink").value = "";
+            document.getElementById("epNum").value = parseInt(epNum) + 1;
+            fetchEpisodes();
+        } catch (err) { alert(err.message); }
+    };
+
+    /* --- DELETE ANIME --- */
     document.getElementById("deleteAnimeBtn").onclick = async () => {
         const id = document.getElementById("deleteSelect").value;
-        if(id && confirm("Delete entire anime permanently?")) {
+        if(id && confirm("Are you sure? This will delete all episodes and data for this anime!")) {
             await deleteDoc(doc(db, "anime", id));
-            loadList();
             alert("Deleted!");
+            loadList();
         }
     };
 </script>
