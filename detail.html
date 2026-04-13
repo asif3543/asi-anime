@@ -27,6 +27,7 @@
     <div class="social-footer">
         <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
         <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
+        <!-- YAHAN APNA PAID TELEGRAM GROUP LINK DAALEIN 👇 -->
         <a href="https://t.me/YOUR_PAID_GROUP_LINK" target="_blank" class="btn-paid"><i class="fas fa-gem"></i> Premium Anime</a>
     </div>
 
@@ -44,89 +45,97 @@
         const animeId = urlParams.get('id');
 
         // ========================================================
-        // 🔥 CORS-PROXY ENABLED DYNAMIC SHORTENER ENGINE
+        // 🔥 TRIPLE-LAYER GUARANTEE DYNAMIC SHORTENER ENGINE
         // ========================================================
         window.openEpisode = async function(originalLink, btnElement) {
             
-            // Step 1: Change button to 'Generating Link...'
-            const originalText = btnElement.innerText;
+            const originalText = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Link...';
             btnElement.style.pointerEvents = "none";
             btnElement.style.opacity = "0.7";
 
             try {
-                // Step 2: Fetch Settings from Database
+                // 1. Get Shortener API details from DB
                 const settingsSnap = await getDoc(doc(db, "settings", "general"));
-                let shortUrl = "";
-                let shortKey = "";
-
-                if(settingsSnap.exists()) {
-                    shortUrl = settingsSnap.data().shortUrl;
-                    shortKey = settingsSnap.data().shortKey;
-                }
-
-                // Agar Admin ne API set nahi ki hai, toh fallback (Original link de do)
-                if(!shortUrl || !shortKey) {
+                if(!settingsSnap.exists() || !settingsSnap.data().shortUrl || !settingsSnap.data().shortKey) {
+                    // Agar API set nahi hai toh hi original link dega
                     window.open(originalLink, "_blank");
-                    btnElement.innerText = originalText;
-                    btnElement.style.pointerEvents = "auto";
-                    btnElement.style.opacity = "1";
+                    resetButton(btnElement, originalText);
                     return;
                 }
 
-                // Step 3: Construct Exact API URL
+                let shortUrl = settingsSnap.data().shortUrl.trim();
+                let shortKey = settingsSnap.data().shortKey.trim();
+
+                // Auto-fix URL just in case admin typed it wrong
+                if (!shortUrl.endsWith("api")) {
+                    shortUrl = shortUrl.endsWith("/") ? shortUrl + "api" : shortUrl + "/api";
+                }
+
+                // Append &format=text to force simple response from API
                 const encodedTargetUrl = encodeURIComponent(originalLink);
-                let apiCall = "";
-                if(shortUrl.includes('?')) {
-                    apiCall = `${shortUrl}&api=${shortKey}&url=${encodedTargetUrl}`;
+                const directApiCall = `${shortUrl}?api=${shortKey}&url=${encodedTargetUrl}&format=text`;
+
+                // TRIPLE FALLBACK ARRAY (Direct -> Proxy 1 -> Proxy 2)
+                const fetchEndpoints = [
+                    directApiCall, // Try 1
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(directApiCall)}`, // Try 2
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(directApiCall)}` // Try 3
+                ];
+
+                let finalShortLink = null;
+
+                // Loop through options until one works
+                for (let url of fetchEndpoints) {
+                    try {
+                        const response = await fetch(url, { method: "GET" });
+                        const textData = await response.text();
+
+                        // Check if response is a pure URL
+                        if (textData && textData.trim().match(/^https?:\/\/[^\s]+$/i)) {
+                            finalShortLink = textData.trim();
+                            break; // Stop loop, we found the link!
+                        } 
+                        // If it's not a pure URL, try parsing as JSON
+                        else {
+                            let jsonData = JSON.parse(textData);
+                            if (jsonData.shortenedUrl) { finalShortLink = jsonData.shortenedUrl; break; }
+                            if (jsonData.short_url) { finalShortLink = jsonData.short_url; break; }
+                        }
+                    } catch(err) {
+                        console.log(`Failed attempting endpoint: ${url}`);
+                    }
+                }
+
+                // Check final result
+                if (finalShortLink && finalShortLink !== "") {
+                    // YAY! Success. Open short link.
+                    window.open(finalShortLink, "_blank");
                 } else {
-                    apiCall = `${shortUrl}?api=${shortKey}&url=${encodedTargetUrl}`;
+                    // Ye error tab aayega agar aapki API Key puri tarah galat ho
+                    throw new Error("Invalid API Key or API Server Down.");
                 }
-
-                // Step 4: Use CORS PROXY to bypass Browser Security Blocks
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiCall)}`;
-                
-                const response = await fetch(proxyUrl);
-                const proxyData = await response.json();
-                
-                // proxyData.contents me API ka actual result hota hai
-                const text = proxyData.contents;
-                let finalUrl = originalLink; 
-
-                // Step 5: Extract URL from response
-                try {
-                    const data = JSON.parse(text);
-                    if(data.status === "success" || data.shortenedUrl || data.short_url) {
-                        finalUrl = data.shortenedUrl || data.short_url || data.link || data.url;
-                    }
-                } catch(err) {
-                    // Fallback to plain text if API returns text instead of JSON
-                    if(text && text.trim().startsWith("http")) {
-                        finalUrl = text.trim();
-                    }
-                }
-
-                // Step 6: REDIRECT
-                window.open(finalUrl, "_blank");
 
             } catch(e) {
-                console.error("Critical Fetch Error:", e);
-                // Agar internet/Proxy issue kare, tab hi error aayega
+                console.error("Master Fetch Error:", e);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Network Error',
-                    text: 'Unable to generate secure link. Taking you to direct link...',
-                    timer: 2000,
+                    title: 'Shortener API Error',
+                    text: 'Your API Key might be wrong. Opening direct link for now...',
+                    timer: 3000,
                     showConfirmButton: false
                 });
-                setTimeout(() => { window.open(originalLink, "_blank"); }, 2000);
+                setTimeout(() => { window.open(originalLink, "_blank"); }, 3000);
             }
 
-            // Restore button state
-            btnElement.innerText = originalText;
-            btnElement.style.pointerEvents = "auto";
-            btnElement.style.opacity = "1";
+            resetButton(btnElement, originalText);
         };
+
+        function resetButton(btn, text) {
+            btn.innerHTML = text;
+            btn.style.pointerEvents = "auto";
+            btn.style.opacity = "1";
+        }
         // ========================================================
 
 
