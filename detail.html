@@ -3,30 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- **NEW TITLE & META DESCRIPTION** -->
-    <title>Anime Details | ASI Anime</title>
-    <meta name="description" content="View detailed information and episodes for your favorite anime on ASI Anime. Watch Hindi subbed and dubbed anime online.">
-    <!-- **END NEW TITLE & META DESCRIPTION** -->
-
+    <title>Watch Online | ASI Anime</title>
+    <meta name="description" content="View detailed information and episodes. Watch high quality Anime, K-Dramas, and Movies in Hindi Sub & Dub.">
     <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="logo">ASI Anime</a>
+        <a href="index.html" class="logo">ASI <span>Studio</span></a>
     </header>
 
-    <a href="index.html" class="back-btn">⬅️ Back to Home</a>
+    <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Home</a>
 
-    <div id="detailBox" style="text-align:center; margin-top:50px; color:#ff4500;">
-        <h2>Loading Anime Details...</h2>
+    <div id="detailBox" style="text-align:center; margin-top:50px; color:var(--primary);">
+        <div class="loader-container">
+            <div class="loader"></div>
+            <h2>Loading Data...</h2>
+        </div>
     </div>
 
-    <!-- Social Footer -->
+    <!-- Social Footer with Premium Button -->
     <div class="social-footer">
-        <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg">✈️ Telegram Channel</a>
-        <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc">💬 Join Group Chat</a>
+        <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
+        <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
+        <!-- YAHAN APNA PAID TELEGRAM GROUP LINK DAALEIN -->
+        <a href="https://t.me/YOUR_PAID_GROUP_LINK" target="_blank" class="btn-paid"><i class="fas fa-gem"></i> Premium Anime</a>
     </div>
 
     <script type="module">
@@ -38,16 +41,59 @@
             authDomain: "asi-anime.firebaseapp.com",
             projectId: "asi-anime"
         });
-
         const db = getFirestore(app);
-        
-        // Get anime ID from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
 
+        // ========================================================
+        // DYNAMIC SHORTENER ENGINE (ANTI-BYPASS)
+        // ========================================================
+        window.openEpisode = async function(originalLink, btnElement) {
+            // Loading Animation on Button
+            const originalText = btnElement.innerText;
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            btnElement.style.pointerEvents = "none";
+            btnElement.style.opacity = "0.7";
+
+            try {
+                // Fetch Shortener API details from Firebase
+                const settingsSnap = await getDoc(doc(db, "settings", "general"));
+                let finalUrl = originalLink;
+
+                if(settingsSnap.exists()) {
+                    const { shortUrl, shortKey } = settingsSnap.data();
+                    
+                    if(shortUrl && shortKey) {
+                        // Generate dynamic shortlink via API GET Request
+                        const apiCall = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(originalLink)}`;
+                        const response = await fetch(apiCall);
+                        const data = await response.json();
+                        
+                        // Parse JSON Response
+                        if(data.status === "success" || data.shortenedUrl || data.short_url) {
+                            finalUrl = data.shortenedUrl || data.short_url || data.link || data.url;
+                        }
+                    }
+                }
+                
+                // Open Link in New Tab
+                window.open(finalUrl, "_blank");
+                
+            } catch(e) {
+                console.log("Shortener API Error, falling back to original link:", e);
+                // Fallback: If API fails, give original link so user isn't stuck
+                window.open(originalLink, "_blank");
+            }
+
+            // Restore Button State
+            btnElement.innerText = originalText;
+            btnElement.style.pointerEvents = "auto";
+            btnElement.style.opacity = "1";
+        };
+
         async function loadDetail() {
             if (!animeId) {
-                document.getElementById("detailBox").innerHTML = "<h2>Anime Not Found!</h2>";
+                document.getElementById("detailBox").innerHTML = "<h2>Content Not Found! 😢</h2>";
                 return;
             }
 
@@ -55,49 +101,50 @@
                 const docSnap = await getDoc(doc(db, "anime", animeId));
                 
                 if (docSnap.exists()) {
-                    let a = docSnap.data(); // Anime data
-                    let imgSrc = a.image || "https://via.placeholder.com/250x350"; // Use fallback image if no image is available
-                    let typeText = a.type ? a.type.toUpperCase() : "SUB"; // Get anime type (SUB/DUB)
-                    let seasonText = a.season ? `Season ${a.season}` : ""; // Display season if available
-
-                    let episodesHTML = ""; // To store HTML for episodes
+                    let a = docSnap.data();
+                    let imgSrc = a.image || "https://via.placeholder.com/250x350";
+                    let typeText = a.type ? a.type.toUpperCase() : "ANIME";
                     
-                    let eps = a.episodes || []; // Get episodes array or empty array if none
-                    // Sort episodes by episode number (numeric sort)
+                    let eps = a.episodes || [];
                     eps.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
 
+                    let episodesHTML = "";
                     if(eps.length === 0){
-                        episodesHTML = "<p style='color:#a0a0b0;'>No episodes uploaded yet.</p>";
+                        episodesHTML = "<p style='color:#a0a0b0; width:100%; text-align:center;'>No episodes uploaded yet. 🚧</p>";
                     } else {
-                        // Loop through episodes and create buttons
                         eps.forEach(episode => {
-                            let link = episode.link;
-                            // Ensure link starts with http:// or https://
-                            if(link && !link.match(/^https?:\/\//i)) {
-                                link = "https://" + link;
+                            let safeLink = episode.link;
+                            if(safeLink && !safeLink.match(/^https?:\/\//i)) {
+                                safeLink = "https://" + safeLink;
                             }
                             
+                            // Trigger dynamic shortener on click
                             episodesHTML += `
-                                <div class="ep-btn" onclick="window.open('${link}', '_blank')">
-                                    Episode ${episode.ep}
-                                </div>
+                                <button class="ep-btn" onclick="openEpisode('${safeLink}', this)">
+                                    <i class="fas fa-play-circle"></i> Ep ${episode.ep}
+                                </button>
                             `;
                         });
                     }
 
-                    // Inject the detailed anime information into the DOM
                     document.getElementById("detailBox").outerHTML = `
                         <div class="detail-container">
-                            <img src="${imgSrc}" alt="${a.name || 'Unknown Anime'} Details Poster" class="detail-img"> <!-- **ALT TEXT ADDED HERE** -->
+                            <img src="${imgSrc}" alt="${a.name} Poster" class="detail-img">
                             <div class="detail-info">
-                                <h1>${a.name || "Unknown Anime"}</h1>
-                                ${seasonText ? `<h4 class="detail-season">${seasonText}</h4>` : ''}
-                                <span class="badge" style="background:var(--primary)">${typeText}</span>
-                                <span class="badge">${a.genre || "No Genre"}</span>
-                                <p class="detail-desc">${a.description || "No description available."}</p>
+                                <h1>${a.name}</h1>
+                                ${a.season ? `<h4 class="detail-season">Season ${a.season}</h4>` : ''}
+                                
+                                <div style="margin: 10px 0 15px;">
+                                    <span class="badge" style="background:var(--primary); color:white;">${typeText}</span>
+                                    <span class="badge"><i class="fas fa-tags"></i> ${a.genre || "General"}</span>
+                                    ${a.year ? `<span class="badge"><i class="far fa-calendar-alt"></i> ${a.year}</span>` : ''}
+                                    ${a.status ? `<span class="badge"><i class="fas fa-info-circle"></i> ${a.status}</span>` : ''}
+                                </div>
+                                
+                                <p class="detail-desc">${a.description || "No description available at the moment."}</p>
                                 
                                 <div class="episodes-box">
-                                    <h3>Watch Episodes</h3>
+                                    <h3>📺 Watch / Download Episodes</h3>
                                     <div class="episodes-grid">
                                         ${episodesHTML}
                                     </div>
@@ -106,17 +153,14 @@
                         </div>
                     `;
                 } else {
-                    // If no document exists for the ID
-                    document.getElementById("detailBox").innerHTML = "<h2>Anime Not Found!</h2>";
+                    document.getElementById("detailBox").innerHTML = "<h2>Content Not Found! 😢</h2>";
                 }
             } catch (error) {
-                // Handle any errors during data fetching
-                console.error("Error loading anime details:", error); // Log error for debugging
-                document.getElementById("detailBox").innerHTML = "<h2>Error loading details!</h2>";
+                console.error("Error loading details:", error);
+                document.getElementById("detailBox").innerHTML = "<h2>Error loading details! ⚠️</h2>";
             }
         }
 
-        // Load anime details when the page loads
         loadDetail();
     </script>
 </body>
