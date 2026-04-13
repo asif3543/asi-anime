@@ -3,177 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ASI Anime - Watch Hindi Sub & Dub Anime Online</title>
-    <meta name="description" content="Watch your favorite Anime in Hindi Sub & Dub for free. Get the latest episodes of Naruto, Demon Slayer, One Piece and more on ASI Anime.">
+    
+    <!-- MASTER SEO METATAGS -->
+    <title>ASI Anime - Watch Hindi Subbed & Dubbed Anime, K-Drama, Movies</title>
+    <meta name="description" content="Watch your favorite Anime, K-Dramas, Web Series, and Movies in Hindi Sub & Dub for free on ASI Anime Sub Studio.">
+    <meta name="keywords" content="Anime hindi sub, Hindi sub anime, Hindi subbed anime, Anime hindi subbed, K drama Hindi sub, Asi anime, Anime sub studio, download anime in hindi, watch anime online hindi dub, movies hindi sub">
+    <meta name="robots" content="index, follow">
     <meta name="google-site-verification" content="ND0KTgqSSZEiva4iEnrwKjwKebvFX4s0ugNm4XrRaCA" />
-
-    <style>
-        /* --- PREMIUM DARK THEME CSS --- */
-        :root {
-            --bg-color: #0f0f0f;
-            --header-bg: #1a1a1a;
-            --primary: #ff4500;
-            --card-bg: #222;
-            --text-main: #fff;
-            --text-muted: #aaa;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            overflow-x: hidden;
-        }
-
-        /* HEADER */
-        header {
-            background-color: var(--header-bg);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .menu-icon { font-size: 24px; cursor: pointer; color: var(--primary); }
-        .logo { text-decoration: none; font-size: 22px; font-weight: bold; color: #fff; letter-spacing: 1px; }
-        .logo span { color: var(--primary); }
-        
-        .search-box input {
-            padding: 10px 15px;
-            border-radius: 20px;
-            border: none;
-            outline: none;
-            background: #333;
-            color: white;
-            width: 250px;
-            font-size: 14px;
-        }
-
-        /* FILTER BUTTONS */
-        .filter-container {
-            display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap;
-        }
-        .filter-container button {
-            background: #333; color: #fff; border: none; padding: 10px 20px; border-radius: 20px;
-            cursor: pointer; font-weight: bold; transition: 0.3s;
-        }
-        .filter-container button:hover, .filter-container button.active {
-            background: var(--primary); color: #fff; box-shadow: 0 0 10px var(--primary);
-        }
-
-        /* ANIME GRID */
-        .anime-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 20px;
-            padding: 0 20px 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .anime-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .anime-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(255, 69, 0, 0.4);
-        }
-        .anime-card img {
-            width: 100%; height: 240px; object-fit: cover; border-bottom: 2px solid var(--primary);
-        }
-        .badge-type {
-            position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8);
-            color: #00ff00; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;
-        }
-        .anime-info { padding: 10px; text-align: center; }
-        .anime-info h4 { margin: 0 0 5px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .genre-tag { font-size: 11px; color: var(--text-muted); }
-
-        /* SIDEBAR */
-        .sidebar {
-            height: 100%; width: 0; position: fixed; z-index: 1000;
-            top: 0; left: 0; background-color: #111; overflow-x: hidden;
-            transition: 0.4s; box-shadow: 5px 0 15px rgba(0,0,0,0.9);
-        }
-        .sidebar-content { padding: 20px; padding-top: 60px; }
-        .close-btn {
-            position: absolute; top: 10px; right: 20px; font-size: 36px;
-            text-decoration: none; color: #fff;
-        }
-        .sidebar h3 { color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px; }
-        
-        /* GENRE TAGS (Premium look) */
-        .genre-list-sidebar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-        .genre-list-sidebar label {
-            background: #222; border: 1px solid #444; padding: 6px 12px;
-            border-radius: 15px; font-size: 13px; cursor: pointer; transition: 0.3s;
-        }
-        .genre-list-sidebar input { display: none; }
-        .genre-list-sidebar input:checked + span { color: var(--primary); font-weight: bold; }
-        .genre-list-sidebar label:has(input:checked) { border-color: var(--primary); background: rgba(255, 69, 0, 0.1); }
-        
-        #applyGenreFilterBtn {
-            width: 100%; padding: 10px; background: var(--primary); color: white;
-            border: none; border-radius: 5px; cursor: pointer; font-weight: bold;
-        }
-        #all-anime-list-menu a { display: block; color: #ccc; text-decoration: none; padding: 10px 0; transition: 0.3s; }
-        #all-anime-list-menu a:hover { color: var(--primary); padding-left: 10px; }
-        
-        #overlay { display: none; position: fixed; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; top:0; left:0; }
-
-        /* A-Z LIST */
-        .az-list-view { max-width: 900px; margin: 30px auto; padding: 20px; text-align: center; }
-        .back-to-home-btn { background: #333; color: #fff; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
-        .az-alphabet-box { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 20px 0; }
-        .az-alphabet-box button { background: #222; color: #fff; border: 1px solid #444; padding: 10px; min-width: 40px; cursor: pointer; border-radius: 4px; }
-        .az-alphabet-box button:hover, .az-alphabet-box button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-        
-        .az-results { text-align: left; background: #1a1a1a; padding: 20px; border-radius: 8px; }
-        .az-result-item { display: block; color: #ccc; text-decoration: none; padding: 10px; border-bottom: 1px solid #333; }
-        .az-result-item:hover { color: var(--primary); background: #222; }
-
-        /* FOOTER */
-        .social-footer { display: flex; justify-content: center; gap: 15px; padding: 20px; background: #1a1a1a; margin-top: 40px; }
-        .social-footer a { padding: 10px 20px; text-decoration: none; color: white; border-radius: 5px; font-weight: bold; font-size: 14px; }
-        .btn-tg { background: #0088cc; }
-        .btn-gc { background: #25D366; }
-
-        @media (max-width: 600px) {
-            .search-box input { width: 160px; }
-            .anime-list { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 10px 20px; }
-            .anime-card img { height: 180px; }
-        }
-    </style>
+    
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <!-- SIDEBAR -->
+    <!-- A-Z DIRECTORY SIDEBAR (Upgraded UI) -->
     <div id="sidebar" class="sidebar">
-        <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">×</a>
+        <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">&times;</a>
         <div class="sidebar-content">
-            <!-- Genres Filter -->
-            <div id="genre-filter-section">
-                 <h3>🎭 Select Genres</h3>
-                 <div id="genre-list-sidebar" class="genre-list-sidebar">
-                    <!-- Genres inject automatically -->
-                 </div>
-                 <button id="applyGenreFilterBtn">Apply Filter ✅</button>
-            </div>
-            <hr style="border:1px solid #333; margin: 20px 0;">
-            <!-- A-Z Menu -->
+            <h3 style="color: var(--primary); border-bottom: 1px solid #333; padding-bottom: 10px;"><i class="fas fa-book"></i> A-Z Directory</h3>
             <div id="all-anime-list-menu">
-                <h3>📚 Anime Directory</h3>
-                <a href="javascript:void(0)" onclick="showAzList('sub')">🔹 Hindi Sub (A-Z)</a>
-                <a href="javascript:void(0)" onclick="showAzList('dub')">🔸 Hindi Dub (A-Z)</a>
+                <a href="javascript:void(0)" onclick="showAzList('Anime Sub')"><i class="fas fa-angle-right"></i> Anime (Sub)</a>
+                <a href="javascript:void(0)" onclick="showAzList('Anime Dub')"><i class="fas fa-angle-right"></i> Anime (Dub)</a>
+                <a href="javascript:void(0)" onclick="showAzList('K-Drama')"><i class="fas fa-angle-right"></i> K-Dramas</a>
+                <a href="javascript:void(0)" onclick="showAzList('Movie')"><i class="fas fa-angle-right"></i> Movies</a>
+                <a href="javascript:void(0)" onclick="showAzList('Series')"><i class="fas fa-angle-right"></i> Web Series</a>
             </div>
         </div>
     </div>
@@ -182,48 +36,55 @@
     <!-- HEADER -->
     <header>
         <div class="header-left">
-            <span class="menu-icon" onclick="openNav()">☰</span>
-            <a href="index.html" class="logo">ASI <span>Anime</span></a>
+            <span class="menu-icon" onclick="openNav()"><i class="fas fa-bars"></i></span>
+            <a href="index.html" class="logo">ASI <span>Studio</span></a>
         </div>
         <div class="search-box">
-            <input id="searchInput" placeholder="Search Anime...">
+            <i class="fas fa-search"></i>
+            <input id="searchInput" placeholder="Search Anime, K-Drama, Movies...">
         </div>
     </header>
 
-    <!-- TYPE FILTER -->
+    <!-- NEW CATEGORY FILTERS -->
     <div class="filter-container" id="mainFilters">
-        <button onclick="setType('all', this)" class="active">All Anime</button>
-        <button onclick="setType('sub', this)">Hindi Subbed</button>
-        <button onclick="setType('dub', this)">Hindi Dubbed</button>
+        <button onclick="setType('all', this)" class="active">All</button>
+        <button onclick="setType('anime sub', this)">Anime (Sub)</button>
+        <button onclick="setType('anime dub', this)">Anime (Dub)</button>
+        <button onclick="setType('k-drama', this)">K-Dramas</button>
+        <button onclick="setType('movie', this)">Movies</button>
+        <button onclick="setType('series', this)">Web Series</button>
     </div>
 
-    <!-- MAIN ANIME GRID -->
+    <!-- MAIN GRID -->
     <main id="animeList" class="anime-list">
-        <h3 style="text-align: center; width: 100%; color: var(--primary);">Loading Anime...</h3>
+        <div class="loader-container">
+            <div class="loader"></div>
+            <h3 style="color:var(--primary);">Loading Content...</h3>
+        </div>
     </main>
-    
-    <!-- A-Z LIST VIEW -->
+
+    <!-- A-Z LIST VIEW SECTION -->
     <div id="azListView" class="az-list-view" style="display: none;">
-        <button class="back-to-home-btn" onclick="showHome()">⬅️ Back to Home</button>
-        <h2 id="azListTitle" style="color: var(--primary);"></h2>
+        <button class="back-to-home-btn" onclick="showHome()"><i class="fas fa-home"></i> Back to Home</button>
+        <h2 id="azListTitle" style="color: var(--primary); text-transform: uppercase;"></h2>
         <div id="az-alphabet-box" class="az-alphabet-box"></div>
         <div id="az-results" class="az-results">
-            <p style="color:#aaa;">Select an alphabet to see the list.</p>
+            <p style="color:#aaa; text-align:center;">Select an alphabet to see the list.</p>
         </div>
     </div>
 
-    <!-- FOOTER -->
+    <!-- FOOTER WITH PREMIUM BUTTON -->
     <div class="social-footer">
-        <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg">✈️ Telegram Channel</a>
-        <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc">💬 Join Group Chat</a>
+        <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
+        <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
+        <!-- YAHAN APNA PAID TELEGRAM GROUP LINK DAALEIN 👇 -->
+        <a href="https://t.me/YOUR_PAID_GROUP_LINK" target="_blank" class="btn-paid"><i class="fas fa-gem"></i> Premium Content</a>
     </div>
 
-    <!-- FIREBASE & JS SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-        // FIREBASE SETUP
         const app = initializeApp({
             apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
             authDomain: "asi-anime.firebaseapp.com",
@@ -231,12 +92,11 @@
         });
         const db = getFirestore(app);
 
-        let allAnime =[];
+        let allAnime = [];
         let currentType = "all";
-        let selectedGenres =[]; 
         let currentSearch = "";
 
-        // --- SIDEBAR LOGIC ---
+        // Sidebar logic
         window.openNav = () => {
             document.getElementById("sidebar").style.width = "280px";
             document.getElementById("overlay").style.display = "block";
@@ -245,8 +105,6 @@
             document.getElementById("sidebar").style.width = "0";
             document.getElementById("overlay").style.display = "none";
         }
-
-        // --- RETURN TO HOME SCREEN ---
         window.showHome = () => {
             document.getElementById("animeList").style.display = "grid";
             document.getElementById("mainFilters").style.display = "flex";
@@ -254,77 +112,40 @@
             applyFilter();
         }
 
-        // --- LOAD DATA FROM FIREBASE ---
         async function loadAnime() {
             try {
                 const snap = await getDocs(collection(db, "anime"));
-                allAnime =[];
+                allAnime = [];
                 snap.forEach(d => allAnime.push({ id: d.id, ...d.data() }));
                 
                 // Sort by Latest updated
                 allAnime.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-                
-                populateGenres();
                 applyFilter();
             } catch (e) {
-                console.error("Error loading anime:", e);
-                document.getElementById("animeList").innerHTML = "<h3 style='text-align:center;width:100%; color:red;'>Error Loading Anime!</h3>";
+                document.getElementById("animeList").innerHTML = "<h3 style='color:red; width:100%; text-align:center;'>Error Loading Data ⚠️</h3>";
             }
         }
         
-        // --- EXTRACT & SHOW GENRES IN SIDEBAR ---
-        function populateGenres() {
-            const genresSet = new Set();
-            allAnime.forEach(a => {
-                if (a.genre) {
-                    a.genre.replace(/,/g, ' ').split(/\s+/).forEach(g => {
-                        if (g.trim()) genresSet.add(g.trim().toLowerCase());
-                    });
-                }
-            });
-
-            const genreContainer = document.getElementById("genre-list-sidebar");
-            genreContainer.innerHTML = ''; 
-            
-            [...genresSet].sort().forEach(genre => {
-                 const label = document.createElement('label');
-                 
-                 const checkbox = document.createElement('input');
-                 checkbox.type = 'checkbox';
-                 checkbox.value = genre;
-                 
-                 const text = document.createElement('span');
-                 text.textContent = genre.charAt(0).toUpperCase() + genre.slice(1);
-                 
-                 label.appendChild(checkbox);
-                 label.appendChild(text);
-                 genreContainer.appendChild(label);
-            });
-        }
-        
-        // --- FILTER & SEARCH LOGIC ---
         function applyFilter() {
             let filtered = allAnime.filter(a => {
                 const nameStr = (a.name || "").toLowerCase();
-                const genreStr = (a.genre || "").toLowerCase();
+                const typeStr = (a.type || "").toLowerCase();
                 const searchStr = currentSearch.toLowerCase();
 
                 const nameMatch = nameStr.includes(searchStr);
-                const genreMatch = selectedGenres.length === 0 || selectedGenres.every(g => genreStr.includes(g));
-                const typeMatch = currentType === "all" || (a.type || "sub").toLowerCase() === currentType;
+                const typeMatch = currentType === "all" || typeStr === currentType;
                 
-                return nameMatch && genreMatch && typeMatch;
+                return nameMatch && typeMatch;
             });
             render(filtered);
         }
 
-        // --- RENDER CARDS TO SCREEN ---
         function render(list) {
             let box = document.getElementById("animeList");
             box.innerHTML = ""; 
 
             if (list.length === 0) {
-                box.innerHTML = "<h3 style='text-align:center;width:100%; color:#aaa; margin-top:50px;'>No Anime Found 😢</h3>";
+                box.innerHTML = "<h3 style='width:100%; text-align:center; color:#aaa; margin-top:40px;'>No Content Found 😢</h3>";
                 return;
             }
 
@@ -332,32 +153,24 @@
                 let card = document.createElement("div");
                 card.className = "anime-card";
                 
-                let imgSrc = a.image || "https://via.placeholder.com/200x250?text=No+Image";
-                let typeText = (a.type || "sub").toUpperCase();
-                let badgeColor = typeText === "DUB" ? "#ff4500" : "#00ff00"; // Orange for Dub, Green for sub
+                let typeText = (a.type || "Anime Sub").toUpperCase();
+                let badgeClass = "badge-sub";
+                if(typeText.includes("DUB")) badgeClass = "badge-dub";
+                else if(typeText.includes("K-DRAMA")) badgeClass = "badge-kdrama";
+                else if(typeText.includes("MOVIE")) badgeClass = "badge-movie";
 
                 card.innerHTML = `
-                    <div class="badge-type" style="color: ${badgeColor};">${typeText}</div>
-                    <img src="${imgSrc}" loading="lazy" alt="${a.name} Anime Poster">
+                    <div class="badge-type ${badgeClass}">${typeText}</div>
+                    <img src="${a.image}" loading="lazy" alt="${a.name}">
                     <div class="anime-info">
-                        <h4>${a.name || "Unknown"}</h4>
-                        <span class="genre-tag">${a.genre || "N/A"}</span>
+                        <h4>${a.name}</h4>
+                        <span class="genre-tag">${a.genre || "General"}</span>
                     </div>
                 `;
                 card.onclick = () => location.href = "detail.html?id=" + a.id;
                 box.appendChild(card);
             });
         }
-        
-        // --- EVENT LISTENERS ---
-        document.getElementById("applyGenreFilterBtn").onclick = () => {
-            selectedGenres =[]; 
-            const checkboxes = document.querySelectorAll('#genre-list-sidebar input[type="checkbox"]:checked');
-            checkboxes.forEach(cb => selectedGenres.push(cb.value));
-            
-            closeNav(); 
-            applyFilter(); 
-        };
 
         window.setType = (type, btn) => {
             currentType = type;
@@ -370,15 +183,15 @@
             currentSearch = e.target.value.trim();
             applyFilter(); 
         });
-        
-        // --- A-Z DIRECTORY LOGIC ---
+
+        // A-Z Directory Logic
         window.showAzList = (type) => {
             closeNav(); 
             document.getElementById("animeList").style.display = "none";
             document.getElementById("mainFilters").style.display = "none"; 
             document.getElementById("azListView").style.display = "block"; 
             
-            document.getElementById("azListTitle").textContent = type === 'sub' ? '📚 Hindi Sub (A-Z)' : '📚 Hindi Dub (A-Z)';
+            document.getElementById("azListTitle").innerHTML = `<i class="fas fa-list"></i> ${type} Directory`;
             
             const alphabetBox = document.getElementById("az-alphabet-box");
             alphabetBox.innerHTML = ''; 
@@ -386,12 +199,11 @@
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach(letter => {
                 let btn = document.createElement('button');
                 btn.textContent = letter;
-                // Passing 'this' object directly fixes the Old bug
                 btn.onclick = function() { renderAzResults(type, letter, this); };
                 alphabetBox.appendChild(btn);
             });
             
-            document.getElementById("az-results").innerHTML = "<p style='color:#aaa;'>Select an alphabet to see the list.</p>";
+            document.getElementById("az-results").innerHTML = "<p style='color:#aaa; text-align:center;'>Select an alphabet to see the list.</p>";
         };
         
         window.renderAzResults = (type, letter, clickedBtn) => {
@@ -402,24 +214,24 @@
             resultsBox.innerHTML = ''; 
             
             const filtered = allAnime
-                .filter(a => (a.type || "").toLowerCase() === type && (a.name || "").toUpperCase().startsWith(letter))
+                .filter(a => (a.type || "").toLowerCase() === type.toLowerCase() && (a.name || "").toUpperCase().startsWith(letter))
                 .sort((a,b) => (a.name || "").localeCompare(b.name || "")); 
             
             if(filtered.length === 0) {
-                resultsBox.innerHTML = '<p style="color:#aaa;">No anime found starting with this letter.</p>';
+                resultsBox.innerHTML = '<p style="color:#aaa; text-align:center;">No content found starting with this letter.</p>';
                 return;
             }
             
             filtered.forEach(a => {
                 let p = document.createElement('a');
                 p.className = 'az-result-item';
-                p.textContent = a.name;
+                p.innerHTML = `<i class="fas fa-play-circle" style="color:var(--primary); margin-right:10px;"></i> ${a.name}`;
                 p.href = `detail.html?id=${a.id}`;
                 resultsBox.appendChild(p);
             });
         };
 
-        // Start Fetching Data
+        // Start App
         loadAnime();
     </script>
 </body>
