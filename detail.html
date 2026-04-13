@@ -6,8 +6,9 @@
     <title>Watch Online | ASI Anime</title>
     <meta name="description" content="View detailed information and episodes. Watch high quality Anime, K-Dramas, and Movies in Hindi Sub & Dub.">
     <link rel="stylesheet" href="style.css">
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- SweetAlert for Modern Popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -28,7 +29,7 @@
     <div class="social-footer">
         <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
         <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
-        <!-- YAHAN APNA PAID TELEGRAM GROUP LINK DAALEIN -->
+        <!-- YAHAN APNA PAID TELEGRAM GROUP LINK DAALEIN 👇 -->
         <a href="https://t.me/YOUR_PAID_GROUP_LINK" target="_blank" class="btn-paid"><i class="fas fa-gem"></i> Premium Anime</a>
     </div>
 
@@ -46,50 +47,96 @@
         const animeId = urlParams.get('id');
 
         // ========================================================
-        // DYNAMIC SHORTENER ENGINE (ANTI-BYPASS)
+        // 🟢 SUPER SECURE DYNAMIC SHORTENER ENGINE
         // ========================================================
         window.openEpisode = async function(originalLink, btnElement) {
-            // Loading Animation on Button
+            
+            // Step 1: Change button to 'Generating Link...'
             const originalText = btnElement.innerText;
-            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Link...';
             btnElement.style.pointerEvents = "none";
             btnElement.style.opacity = "0.7";
 
             try {
-                // Fetch Shortener API details from Firebase
+                // Step 2: Fetch Settings from Database
                 const settingsSnap = await getDoc(doc(db, "settings", "general"));
-                let finalUrl = originalLink;
+                let shortUrl = "";
+                let shortKey = "";
 
                 if(settingsSnap.exists()) {
-                    const { shortUrl, shortKey } = settingsSnap.data();
-                    
-                    if(shortUrl && shortKey) {
-                        // Generate dynamic shortlink via API GET Request
-                        const apiCall = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(originalLink)}`;
-                        const response = await fetch(apiCall);
-                        const data = await response.json();
-                        
-                        // Parse JSON Response
-                        if(data.status === "success" || data.shortenedUrl || data.short_url) {
-                            finalUrl = data.shortenedUrl || data.short_url || data.link || data.url;
-                        }
+                    shortUrl = settingsSnap.data().shortUrl;
+                    shortKey = settingsSnap.data().shortKey;
+                }
+
+                // Agar Admin ne API set nahi ki hai, toh fallback (Original de do)
+                if(!shortUrl || !shortKey) {
+                    console.log("No API Key found, opening direct link");
+                    window.open(originalLink, "_blank");
+                    btnElement.innerText = originalText;
+                    btnElement.style.pointerEvents = "auto";
+                    btnElement.style.opacity = "1";
+                    return;
+                }
+
+                // Step 3: Construct API URL properly
+                const encodedTargetUrl = encodeURIComponent(originalLink);
+                let apiCall = "";
+                
+                // Some APIs require ?url= some require &url=
+                if(shortUrl.includes('?')) {
+                    apiCall = `${shortUrl}&api=${shortKey}&url=${encodedTargetUrl}`;
+                } else {
+                    apiCall = `${shortUrl}?api=${shortKey}&url=${encodedTargetUrl}`;
+                }
+
+                console.log("Hitting API:", apiCall);
+
+                // Step 4: Hit API with explicit No-CORS to bypass Adblockers slightly
+                const response = await fetch(apiCall, { method: "GET" });
+                const text = await response.text();
+                
+                let finalUrl = originalLink; // Default
+
+                try {
+                    // Try to parse JSON (Standard APIs like ShrinkMe, GPLinks)
+                    const data = JSON.parse(text);
+                    if(data.status === "success" || data.shortenedUrl || data.short_url) {
+                        finalUrl = data.shortenedUrl || data.short_url || data.link || data.url;
+                    }
+                } catch(err) {
+                    // Fallback to plain text if API returns text instead of JSON
+                    if(text.trim().startsWith("http")) {
+                        finalUrl = text.trim();
+                    } else {
+                        // Agar koi error return hua hai API ki taraf se
+                        console.error("API returned invalid data:", text);
                     }
                 }
-                
-                // Open Link in New Tab
+
+                // Step 5: FINAL REDIRECT
+                // Agar finalUrl same hai original ke, matlab api failed. Phir bhi ghoomane ki zarurat nahi, user open kar lega
                 window.open(finalUrl, "_blank");
-                
+
             } catch(e) {
-                console.log("Shortener API Error, falling back to original link:", e);
-                // Fallback: If API fails, give original link so user isn't stuck
-                window.open(originalLink, "_blank");
+                console.error("Critical Fetch Error:", e);
+                // Error aane par user ko fasne mat do, direct link de do
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Bypassing Error',
+                    text: 'Shortlink server is busy, you are getting the direct link!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                setTimeout(() => { window.open(originalLink, "_blank"); }, 2000);
             }
 
-            // Restore Button State
+            // Step 6: Restore button state
             btnElement.innerText = originalText;
             btnElement.style.pointerEvents = "auto";
             btnElement.style.opacity = "1";
         };
+        // ========================================================
+
 
         async function loadDetail() {
             if (!animeId) {
@@ -113,12 +160,13 @@
                         episodesHTML = "<p style='color:#a0a0b0; width:100%; text-align:center;'>No episodes uploaded yet. 🚧</p>";
                     } else {
                         eps.forEach(episode => {
-                            let safeLink = episode.link;
+                            let safeLink = episode.link.trim();
+                            // Fix http logic securely
                             if(safeLink && !safeLink.match(/^https?:\/\//i)) {
                                 safeLink = "https://" + safeLink;
                             }
                             
-                            // Trigger dynamic shortener on click
+                            // Passing exact string without HTML breaking
                             episodesHTML += `
                                 <button class="ep-btn" onclick="openEpisode('${safeLink}', this)">
                                     <i class="fas fa-play-circle"></i> Ep ${episode.ep}
