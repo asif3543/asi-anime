@@ -28,7 +28,6 @@
 <div class="admin-container">
     <h2 class="admin-title">🔥 ASI Admin Panel</h2>
 
-    <!-- LOGIN BOX -->
     <div class="box" id="loginBox">
         <h3 style="text-align:center;">Admin Login</h3>
         <input type="email" id="adminEmail" placeholder="Admin Email">
@@ -37,33 +36,30 @@
         <p id="loginError" style="color: red; text-align: center; margin-top: 10px;"></p>
     </div>
 
-    <!-- MAIN ADMIN PANEL -->
     <div id="adminPanel" style="display:none">
         <div style="text-align: right; margin-bottom: 20px;">
             <button id="logoutBtn" style="width: auto; background: #444;">Logout</button>
         </div>
 
-        <!-- SHORTENER SETTINGS BOX (WITH AUTO-CORRECTOR) -->
+        <!-- SHORTENER SETTINGS BOX -->
         <div class="box">
             <h3>🔗 Dynamic Shortener Settings</h3>
-            <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Paste Dashboard URL or Website Link, it will Auto-Correct into an API Endpoint.</p>
+            <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Aap Homepage ka URL daalo, API Endpoint khud set ho jayega.</p>
             <div class="grid-2">
-                <input id="shortApiUrl" placeholder="Dashboard/Site URL (e.g., gplinks.in)">
+                <input id="shortApiUrl" placeholder="Site URL (e.g., gplinks.in)">
                 <input id="shortApiKey" placeholder="Your API Token/Key">
             </div>
-            <button id="saveShortenerBtn">💾 Save Shortener Settings</button>
+            <button id="saveShortenerBtn" style="margin-bottom: 10px;">💾 Save & Test API</button>
+            <div id="apiTestResult" style="padding: 10px; background: #222; border-radius: 5px; font-size: 14px; text-align: center;">Status: Not Tested</div>
         </div>
 
-        <!-- ADD NEW CONTENT BOX -->
         <div class="box">
             <h3>🎬 Add New Content</h3>
             <input id="newName" placeholder="Name (e.g., Solo Leveling)">
-            
             <div class="grid-2">
                 <input id="newSeason" placeholder="Season (e.g., 1)">
                 <input id="newYear" type="number" placeholder="Year (e.g., 2024)">
             </div>
-
             <div class="grid-2">
                 <input id="newGenre" placeholder="Genre (e.g., Action, Magic)">
                 <select id="newStatus">
@@ -71,7 +67,6 @@
                     <option value="Completed">Completed</option>
                 </select>
             </div>
-
             <select id="newType">
                 <option value="Anime Sub">Anime (Hindi Sub)</option>
                 <option value="Anime Dub">Anime (Hindi Dub)</option>
@@ -79,34 +74,27 @@
                 <option value="Movie">Movie</option>
                 <option value="Series">Web Series</option>
             </select>
-
             <textarea id="newDesc" placeholder="Description"></textarea>
-            
             <button id="uploadImgBtn" type="button" style="background:#0088cc; margin-bottom:10px;">📸 Upload Poster</button>
             <img id="imgPreview" class="preview-img" style="display:none;">
-            
             <button id="addAnimeBtn">Save Content</button>
         </div>
 
-        <!-- MANAGE EPISODES BOX -->
         <div class="box">
             <h3>📺 Add & Manage Episodes</h3>
-            <input type="text" id="epSearch" placeholder="🔍 Search Content to add episode...">
+            <input type="text" id="epSearch" placeholder="🔍 Search Content...">
             <select id="animeSelect"><option value="">Select Content</option></select>
-
             <div class="grid-2">
                 <input id="epNum" type="number" placeholder="Ep No.">
                 <input id="epLink" placeholder="Paste ORIGINAL Link (GDrive/Bot)">
             </div>
             <button id="addEpBtn">Add Episode</button>
-
             <div id="existingEpisodesBox" style="display:none; margin-top: 20px;">
                 <h4 style="color: #ff4500;">Current Episodes</h4>
                 <div id="episodesContainer" class="ep-list"></div>
             </div>
         </div>
 
-        <!-- DELETE CONTENT BOX -->
         <div class="box">
             <h3>🗑️ Delete Content</h3>
             <input type="text" id="deleteSearch" placeholder="🔍 Search Content to Delete...">
@@ -126,7 +114,6 @@
         authDomain: "asi-anime.firebaseapp.com",
         projectId: "asi-anime"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
@@ -147,15 +134,14 @@
     });
 
     document.getElementById("loginBtn").onclick = async () => {
-        try { 
-            await signInWithEmailAndPassword(auth, document.getElementById("adminEmail").value, document.getElementById("adminPass").value); 
-        } catch (e) { document.getElementById("loginError").innerText = e.message; }
+        try { await signInWithEmailAndPassword(auth, document.getElementById("adminEmail").value, document.getElementById("adminPass").value); } 
+        catch (e) { document.getElementById("loginError").innerText = e.message; }
     };
     document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
-    // ========================================================
-    // 🔥 AUTO-CORRECT SHORTENER URL LOGIC
-    // ========================================================
+    // ==========================================
+    // 🔥 SHORTENER SAVE & LIVE TESTER
+    // ==========================================
     async function loadSettings() {
         const snap = await getDoc(doc(db, "settings", "general"));
         if(snap.exists()) {
@@ -167,29 +153,53 @@
     document.getElementById("saveShortenerBtn").onclick = async () => {
         let rawUrl = document.getElementById("shortApiUrl").value.trim();
         let rawKey = document.getElementById("shortApiKey").value.trim();
+        let statusBox = document.getElementById("apiTestResult");
 
-        if(!rawUrl || !rawKey) return alert("Fill Both Fields!");
+        if(!rawUrl || !rawKey) return alert("Please fill URL and Key!");
 
-        // The Magic Fix: Extract strictly the Origin + /api
-        // Agar aap gplinks.in/member daloge toh ye isko https://gplinks.in/api me convert kar lega.
-        let cleanApiUrl = rawUrl;
-        if (!rawUrl.startsWith("http")) rawUrl = "https://" + rawUrl;
+        // Auto Correct URL Format (Remove /member/dashboard and attach /api)
+        let cleanUrl = rawUrl.replace(/\/member.*/i, "").replace(/\/+$/, "");
+        if (!cleanUrl.startsWith("http")) cleanUrl = "https://" + cleanUrl;
+        if (!cleanUrl.endsWith("api")) cleanUrl += "/api";
+
+        document.getElementById("shortApiUrl").value = cleanUrl;
+        statusBox.innerHTML = "⏳ Testing API Connection...";
+        statusBox.style.color = "yellow";
+
+        // Save to Database first
+        await setDoc(doc(db, "settings", "general"), { shortUrl: cleanUrl, shortKey: rawKey }, { merge: true });
+
+        // Hit API to Test (Using Google as dummy target)
+        const testTarget = "https://google.com";
+        const testEndpoint = `https://api.allorigins.win/get?url=${encodeURIComponent(`${cleanUrl}?api=${rawKey}&url=${testTarget}`)}`;
 
         try {
-            let parsed = new URL(rawUrl);
-            cleanApiUrl = parsed.origin + "/api";
-        } catch(e) {}
+            const res = await fetch(testEndpoint);
+            const proxyData = await res.json();
+            const textResponse = proxyData.contents;
 
-        await setDoc(doc(db, "settings", "general"), {
-            shortUrl: cleanApiUrl,
-            shortKey: rawKey
-        }, { merge: true });
-        
-        document.getElementById("shortApiUrl").value = cleanApiUrl; // Input me bhi corrected show ho jayega
-        alert(`Saved! Bot will now use strictly: \n${cleanApiUrl} ✅`);
+            let isSuccess = false;
+            try {
+                let jsonResp = JSON.parse(textResponse);
+                if(jsonResp.status === "success" || jsonResp.shortenedUrl) isSuccess = true;
+            } catch(e) {
+                if(textResponse.trim().startsWith("http")) isSuccess = true;
+            }
+
+            if(isSuccess) {
+                statusBox.innerHTML = "✅ API Working Perfectly!";
+                statusBox.style.color = "lime";
+            } else {
+                statusBox.innerHTML = "❌ API Connected, but returned an Error. Check Key!";
+                statusBox.style.color = "red";
+            }
+        } catch(err) {
+            statusBox.innerHTML = "❌ Network Error! The URL might be wrong.";
+            statusBox.style.color = "red";
+        }
     };
-    // ========================================================
 
+    // Helper functions for content management
     function setupSearch(inputId, selectId) {
         document.getElementById(inputId).oninput = function(e) {
             const term = e.target.value.toLowerCase();
@@ -226,18 +236,14 @@
 
     document.getElementById("addAnimeBtn").onclick = async () => {
         const name = document.getElementById("newName").value.trim();
-        if(!name || !uploadedImage) return alert("Name and Image are required!");
+        if(!name || !uploadedImage) return alert("Name and Image required!");
         document.getElementById("addAnimeBtn").disabled = true;
 
         try {
             await addDoc(collection(db, "anime"), {
-                name: name,
-                season: document.getElementById("newSeason").value,
-                year: document.getElementById("newYear").value,
-                genre: document.getElementById("newGenre").value || "General",
-                type: document.getElementById("newType").value,
-                status: document.getElementById("newStatus").value,
-                description: document.getElementById("newDesc").value,
+                name: name, season: document.getElementById("newSeason").value, year: document.getElementById("newYear").value,
+                genre: document.getElementById("newGenre").value || "General", type: document.getElementById("newType").value,
+                status: document.getElementById("newStatus").value, description: document.getElementById("newDesc").value,
                 image: uploadedImage, episodes: [], updatedAt: Date.now()
             });
             alert("Saved! ✅"); location.reload();
@@ -246,8 +252,7 @@
 
     document.getElementById("animeSelect").onchange = (e) => {
         selectedAnimeId = e.target.value;
-        if(selectedAnimeId) fetchEpisodes();
-        else document.getElementById("existingEpisodesBox").style.display = "none";
+        if(selectedAnimeId) fetchEpisodes(); else document.getElementById("existingEpisodesBox").style.display = "none";
     };
 
     async function fetchEpisodes() {
@@ -262,27 +267,20 @@
     }
     
     window.delEp = async (ep, link) => {
-        if(confirm(`Delete Episode ${ep}?`)) {
-            await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayRemove({ ep, link }) });
-            fetchEpisodes();
-        }
+        if(confirm(`Delete Ep ${ep}?`)) { await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayRemove({ ep, link }) }); fetchEpisodes(); }
     };
 
     document.getElementById("addEpBtn").onclick = async () => {
         const epNum = document.getElementById("epNum").value;
         const link = document.getElementById("epLink").value.trim();
-        if(!selectedAnimeId || !epNum || !link) return alert("Fill Ep No. and Link!");
-
-        try {
-            await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayUnion({ ep: epNum, link: link }), updatedAt: Date.now()});
-            alert("Added! ✅"); document.getElementById("epLink").value = "";
-            document.getElementById("epNum").value = parseInt(epNum) + 1; fetchEpisodes();
-        } catch (err) { alert(err.message); }
+        if(!selectedAnimeId || !epNum || !link) return alert("Fill data!");
+        await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayUnion({ ep: epNum, link: link }), updatedAt: Date.now()});
+        alert("Added! ✅"); document.getElementById("epLink").value = ""; document.getElementById("epNum").value = parseInt(epNum) + 1; fetchEpisodes();
     };
 
     document.getElementById("deleteAnimeBtn").onclick = async () => {
         const id = document.getElementById("deleteSelect").value;
-        if(id && confirm("Delete completely?")) { await deleteDoc(doc(db, "anime", id)); alert("Deleted!"); loadList(); }
+        if(id && confirm("Delete?")) { await deleteDoc(doc(db, "anime", id)); alert("Deleted!"); loadList(); }
     };
 </script>
 </body>
