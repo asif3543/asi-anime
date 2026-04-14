@@ -9,47 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Global Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a1a;
-            color: #f0f0f0;
-        }
-        header {
-            background: #0f0f1a;
-            padding: 15px 30px;
-            border-bottom: 2px solid #ff6b35;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: white;
-            text-decoration: none;
-        }
-        .logo span {
-            color: #ff6b35;
-        }
-        .back-btn {
-            display: inline-block;
-            margin: 20px;
-            padding: 10px 20px;
-            background: #ff6b35;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: 0.3s;
-            font-weight: bold;
-        }
-        .back-btn:hover {
-            background: #ff5230;
-            transform: translateX(-5px);
-        }
+        /* Additional CSS to ensure proper styling */
         .detail-container {
             max-width: 1200px;
             margin: 30px auto;
@@ -65,7 +25,6 @@
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             object-fit: cover;
-            background: #2a2a3a;
         }
         .detail-info {
             flex: 1;
@@ -143,6 +102,20 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .back-btn {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background: #ff6b35;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .back-btn:hover {
+            background: #ff5230;
+            transform: translateX(-5px);
+        }
         .social-footer {
             text-align: center;
             margin: 40px 0 20px;
@@ -203,7 +176,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-        // Firebase Config (same as admin panel)
         const app = initializeApp({
             apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
             authDomain: "asi-anime.firebaseapp.com",
@@ -213,13 +185,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
 
-        // ========================================================
-        // 🔥 FINAL SHORTENER ENGINE (FIXED: response.ok + format=text)
-        // ========================================================
         window.openEpisode = async function(originalLink, btnElement) {
             const originalText = btnElement.innerHTML;
             
-            // Disable button & show loading spinner
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             btnElement.disabled = true;
 
@@ -240,45 +208,50 @@
                 let shortUrl = settingsSnap.data().shortUrl;
                 let shortKey = settingsSnap.data().shortKey;
                 
-                // Clean URL (remove /member, /dashboard, trailing slashes)
                 shortUrl = shortUrl.replace(/\/member.*/i, "").replace(/\/dashboard.*/i, "").replace(/\/$/, "");
                 if (!shortUrl.startsWith("http")) shortUrl = "https://" + shortUrl;
                 if (!shortUrl.endsWith("/api")) shortUrl += "/api";
                 
-                // Use &format=text to get plain URL response (avoids CORS & JSON issues)
                 const apiUrl = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(originalLink)}&format=text`;
-                
                 let finalShortLink = null;
 
-                // Direct fetch with response.ok check
                 try {
                     const response = await fetch(apiUrl, {
                         method: "GET",
                         headers: { "Accept": "text/plain" }
                     });
                     
-                    // ✅ CRITICAL FIX: Check if response is successful
-                    if (!response.ok) {
-                        throw new Error(`API returned ${response.status}: ${response.statusText}`);
-                    }
-                    
+                    if (!response.ok) throw new Error(`API returned ${response.status}`);
                     const textData = await response.text();
                     
                     if (textData && (textData.trim().startsWith("http://") || textData.trim().startsWith("https://"))) {
                         finalShortLink = textData.trim();
                     } else {
-                        throw new Error("API did not return a valid shortened URL");
+                        throw new Error("API did not return a valid URL");
                     }
                 } catch (e) {
-                    console.error("Shortener fetch error:", e);
-                    throw new Error("Shortener service failed: " + e.message);
+                    console.log("Direct fetch error:", e);
                 }
 
-                // Open the shortened link
+                // If Direct fails, Try Proxy (AllOrigins)
+                if (!finalShortLink) {
+                    try {
+                        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                        const pResponse = await fetch(proxyUrl);
+                        const pData = await pResponse.text();
+                        if (pData && (pData.trim().startsWith("http://") || pData.trim().startsWith("https://"))) {
+                            finalShortLink = pData.trim();
+                        }
+                    } catch(err2) {
+                        console.log("Proxy also failed.");
+                    }
+                }
+
+                // REDIRECT (Bypass completely blocked!)
                 if (finalShortLink && finalShortLink.startsWith('http')) {
                     window.open(finalShortLink, "_blank");
                 } else {
-                    throw new Error("Invalid short link generated");
+                    throw new Error("Shortener Server Failed to Generate Link.");
                 }
                 
             } catch (error) {
@@ -286,7 +259,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Ad-Link Generation Failed',
-                    text: error.message || 'Unable to generate link. Please check your internet or try again later.',
+                    text: error.message || 'Unable to generate link. The shortener API server may be blocked.',
                     confirmButtonColor: '#ff6b35'
                 });
             }
@@ -300,7 +273,7 @@
         }
 
         // ========================================================
-        // 📺 LOAD ANIME DETAILS (WITH FALLBACKS & EMPTY EPISODE HANDLING)
+        // 📺 LOAD ANIME DETAILS
         // ========================================================
         async function loadDetail() {
             if (!animeId) {
@@ -314,16 +287,14 @@
                 if (docSnap.exists()) {
                     const a = docSnap.data();
                     
-                    // ✅ FIX 1: Image fallback and onerror handling
-                    const imgSrc = a.image && a.image.trim() !== "" ? a.image : "https://via.placeholder.com/280x400?text=No+Image+Available";
+                    const imgSrc = a.image && a.image.trim() !== "" ? a.image : "https://via.placeholder.com/280x400?text=No+Image";
                     const typeText = a.type ? a.type.toUpperCase() : "ANIME";
                     
-                    let episodes = a.episodes || [];
+                    let episodes = a.episodes ||[];
                     episodes.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
                     
                     let episodesHTML = "";
                     
-                    // ✅ FIX 2: Handle empty episodes gracefully
                     if (episodes.length === 0) {
                         episodesHTML = `<p style="color:#a0a0b0; width:100%; text-align:center; padding:20px;">📭 No episodes uploaded yet. Stay tuned!</p>`;
                     } else {
@@ -332,8 +303,6 @@
                             if (safeLink && !safeLink.match(/^https?:\/\//i)) { 
                                 safeLink = "https://" + safeLink; 
                             }
-                            
-                            // Escape single quotes in link to avoid breaking onclick
                             safeLink = safeLink.replace(/'/g, "\\'");
                             
                             episodesHTML += `
@@ -344,7 +313,7 @@
                         });
                     }
                     
-                    // Build the full detail page
+                    // Render HTML
                     document.getElementById("detailBox").innerHTML = `
                         <div class="detail-container">
                             <img src="${imgSrc}" 
@@ -382,10 +351,10 @@
             }
         }
         
-        // Simple XSS protection
+        // 🔥 CRITICAL FIX: Ensure 'str' is converted to String to prevent .replace() crash if data is a number (e.g., Year)
         function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/[&<>]/g, function(m) {
                 if (m === '&') return '&amp;';
                 if (m === '<') return '&lt;';
                 if (m === '>') return '&gt;';
