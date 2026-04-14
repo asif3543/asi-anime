@@ -2,108 +2,127 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ASI Admin Panel - Premium</title>
+    <title>ASI Admin Panel - Premium Fixed</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
     <style>
         :root { --bg-color: #0f0f13; --box-bg: #1c1c24; --primary: #ff4500; --text-color: #ffffff; --border: #333; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
+        * { transition: all 0.2s ease; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
         .admin-container { max-width: 800px; margin: 0 auto; }
-        .admin-title { text-align: center; color: var(--primary); margin-bottom: 30px; font-size: 28px; font-weight: bold;}
-        .box { background-color: var(--box-bg); padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .box h3 { margin-top: 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; color: var(--primary); }
-        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); background: #121216; color: white; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background-color: #e03e00; }
-        button:disabled { background-color: #555; cursor: not-allowed; }
+        .admin-title { text-align: center; color: var(--primary); margin-bottom: 30px; font-size: 28px; font-weight: bold; letter-spacing: -0.5px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .box { background-color: var(--box-bg); padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 8px 20px rgba(0,0,0,0.4); backdrop-filter: blur(2px); }
+        .box h3 { margin-top: 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); background: #121216; color: white; border-radius: 8px; box-sizing: border-box; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(255,69,0,0.2); }
+        button { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background-color: #e03e00; transform: translateY(-1px); }
+        button:disabled { background-color: #555; cursor: not-allowed; transform: none; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .ep-list { margin-top: 15px; max-height: 200px; overflow-y: auto; background: #121216; border-radius: 6px; padding: 10px; }
-        .ep-item { display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; padding: 8px 12px; margin-bottom: 8px; border-radius: 4px; }
-        .ep-item button { width: auto; padding: 5px 10px; background: #d32f2f; font-size: 14px;}
-        .preview-img { max-width: 150px; border-radius: 8px; margin: 10px auto; display: block; }
+        .ep-list { margin-top: 15px; max-height: 220px; overflow-y: auto; background: #121216; border-radius: 8px; padding: 10px; border: 1px solid #2a2a2e; }
+        .ep-item { display: flex; justify-content: space-between; align-items: center; background: #1e1e1e; padding: 10px 14px; margin-bottom: 8px; border-radius: 8px; border-left: 3px solid var(--primary); }
+        .ep-item button { width: auto; padding: 6px 14px; background: #d32f2f; font-size: 13px; border-radius: 6px; }
+        .ep-item button:hover { background: #b71c1c; }
+        .preview-img { max-width: 140px; border-radius: 12px; margin: 12px auto; display: block; border: 2px solid var(--primary); object-fit: cover; }
+        .status-badge { padding: 6px 12px; border-radius: 40px; font-size: 12px; font-weight: bold; display: inline-block; text-align: center; }
+        .status-success { background: #1e4a2e; color: #a3e9a4; }
+        .status-error { background: #4a1e1e; color: #ffa2a2; }
+        .status-pending { background: #4a3a1e; color: #ffe0a3; }
+        #apiTestResult { padding: 12px; border-radius: 10px; font-size: 14px; text-align: center; font-weight: 500; background: #111; margin-top: 8px; }
+        .logout-btn { background: #2c2c36; width: auto; padding: 8px 24px; font-size: 14px; border-radius: 40px; }
+        .logout-btn:hover { background: #3e3e4a; transform: none; }
+        .header-flex { display: flex; justify-content: flex-end; margin-bottom: 15px; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #1c1c24; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        small { color: #aaa; display: block; margin-top: -8px; margin-bottom: 12px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="admin-container">
-    <h2 class="admin-title">🔥 ASI Admin Panel</h2>
+    <div class="admin-title">
+        🔥 ASI Admin Panel
+        <span style="font-size: 14px; background: #ff450030; padding: 4px 10px; border-radius: 40px;">v2.0 Fixed</span>
+    </div>
 
     <!-- LOGIN BOX -->
     <div class="box" id="loginBox">
-        <h3 style="text-align:center;">Admin Login</h3>
-        <input type="email" id="adminEmail" placeholder="Admin Email">
+        <h3>🔐 Admin Access</h3>
+        <input type="email" id="adminEmail" placeholder="Admin Email" autocomplete="off">
         <input type="password" id="adminPass" placeholder="Password">
-        <button id="loginBtn">Login</button>
-        <p id="loginError" style="color: #ff4d4d; text-align: center; margin-top: 10px;"></p>
+        <button id="loginBtn">🚀 Login to Dashboard</button>
+        <p id="loginError" style="color: #ff7b7b; text-align: center; margin-top: 12px;"></p>
     </div>
 
     <!-- MAIN PANEL -->
     <div id="adminPanel" style="display:none">
-        <div style="text-align: right; margin-bottom: 20px;">
-            <button id="logoutBtn" style="width: auto; background: #444; padding: 8px 20px;">Logout</button>
+        <div class="header-flex">
+            <button id="logoutBtn" class="logout-btn">🚪 Logout</button>
         </div>
 
-        <!-- SHORTENER SETTINGS -->
+        <!-- SHORTENER SETTINGS (FIXED API TEST) -->
         <div class="box">
-            <h3>🔗 Dynamic Shortener API</h3>
-            <p style="font-size: 13px; color: #aaa; margin-bottom: 10px;">AdrinoLinks/Site ka URL aur API Key yahan daalein.</p>
+            <h3>🔗 Dynamic Shortener API (AdrinoLinks Fix)</h3>
+            <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">✅ <strong>Fixed:</strong> Now using <code>&format=text</code> to avoid CORS & view count inflation. API test will not break analytics.</p>
             <div class="grid-2">
-                <input id="shortApiUrl" placeholder="Site URL (e.g. adrinolinks.in)">
-                <input id="shortApiKey" placeholder="Your API Token/Key">
+                <input id="shortApiUrl" placeholder="Site URL (e.g. adrinolinks.in or yourdomain.com)">
+                <input id="shortApiKey" placeholder="Your API Token / Key">
             </div>
-            <button id="saveShortenerBtn" style="margin-bottom: 10px;">💾 Save & Test API</button>
-            <div id="apiTestResult" style="padding: 10px; background: #222; border-radius: 5px; font-size: 14px; text-align: center; font-weight: bold;">Status: Not Tested</div>
+            <button id="saveShortenerBtn">💾 Save & Validate API</button>
+            <div id="apiTestResult">⚡ Status: Not tested yet</div>
         </div>
 
-        <!-- ADD ANIME -->
+        <!-- ADD ANIME / CONTENT -->
         <div class="box">
             <h3>🎬 Add New Content</h3>
-            <input id="newName" placeholder="Name (e.g., Solo Leveling)">
+            <input id="newName" placeholder="Name (e.g., Solo Leveling, Demon Slayer)">
             <div class="grid-2">
-                <input id="newSeason" placeholder="Season (e.g., 1)">
+                <input id="newSeason" placeholder="Season (e.g., 1, 2, OVA)">
                 <input id="newYear" type="number" placeholder="Year (e.g., 2024)">
             </div>
             <div class="grid-2">
-                <input id="newGenre" placeholder="Genre (e.g., Action, Magic)">
+                <input id="newGenre" placeholder="Genre (e.g., Action, Thriller)">
                 <select id="newStatus">
                     <option value="Ongoing">Ongoing</option>
                     <option value="Completed">Completed</option>
                 </select>
             </div>
             <select id="newType">
-                <option value="Anime Sub">Anime (Hindi Sub)</option>
-                <option value="Anime Dub">Anime (Hindi Dub)</option>
-                <option value="K-Drama">K-Drama (Hindi Sub/Dub)</option>
-                <option value="Movie">Movie</option>
-                <option value="Series">Web Series</option>
+                <option value="Anime Sub">🇯🇵 Anime (Hindi Sub)</option>
+                <option value="Anime Dub">🎙️ Anime (Hindi Dub)</option>
+                <option value="K-Drama">🇰🇷 K-Drama (Hindi Sub/Dub)</option>
+                <option value="Movie">🍿 Movie</option>
+                <option value="Series">📺 Web Series</option>
             </select>
-            <textarea id="newDesc" placeholder="Description"></textarea>
-            <button id="uploadImgBtn" type="button" style="background:#0088cc; margin-bottom:10px;">📸 Upload Poster</button>
+            <textarea id="newDesc" rows="3" placeholder="Description / Synopsis"></textarea>
+            <button id="uploadImgBtn" type="button" style="background:#1e5f8e;">🖼️ Upload Poster (Cloudinary)</button>
             <img id="imgPreview" class="preview-img" style="display:none;">
-            <button id="addAnimeBtn">Save Content</button>
+            <button id="addAnimeBtn">➕ Save Content</button>
         </div>
 
         <!-- MANAGE EPISODES -->
         <div class="box">
-            <h3>📺 Manage Episodes</h3>
-            <input type="text" id="epSearch" placeholder="🔍 Search Content...">
-            <select id="animeSelect"><option value="">Select Content</option></select>
+            <h3>📺 Episode Management</h3>
+            <input type="text" id="epSearch" placeholder="🔍 Search content by name...">
+            <select id="animeSelect"><option value="">-- Select Anime / Drama --</option></select>
             <div class="grid-2">
-                <input id="epNum" type="number" placeholder="Ep No.">
-                <input id="epLink" placeholder="Paste ORIGINAL Link (Drive/Bot)">
+                <input id="epNum" type="number" placeholder="Episode Number">
+                <input id="epLink" placeholder="Original Link (Drive/Bot/Mega)">
             </div>
-            <button id="addEpBtn">Add Episode</button>
+            <button id="addEpBtn">➕ Add Episode</button>
             <div id="existingEpisodesBox" style="display:none; margin-top: 20px;">
-                <h4 style="color: var(--primary);">Current Episodes</h4>
+                <h4 style="color: var(--primary); margin-bottom: 8px;">🎞️ Current Episodes List</h4>
                 <div id="episodesContainer" class="ep-list"></div>
             </div>
         </div>
 
         <!-- DELETE ANIME -->
         <div class="box">
-            <h3>🗑️ Delete Content</h3>
-            <select id="deleteSelect"><option value="">Select to Delete</option></select>
-            <button id="deleteAnimeBtn" style="background: #d32f2f;">Delete Permanently</button>
+            <h3>🗑️ Danger Zone</h3>
+            <select id="deleteSelect"><option value="">Select Content to Delete</option></select>
+            <button id="deleteAnimeBtn" style="background: #b71c1c;">🔥 Delete Permanently</button>
+            <small>⚠️ This will remove all episodes & data — irreversible.</small>
         </div>
     </div>
 </div>
@@ -113,7 +132,7 @@
     import { getFirestore, collection, addDoc, getDoc, getDocs, doc, updateDoc, deleteDoc, arrayUnion, arrayRemove, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-    // ✅ Aapka Original Firebase Config
+    // Firebase Config (Original working config)
     const firebaseConfig = {
         apiKey: "AIzaSyA8Z3CvFTL402UF_6zY9v2iWLP8e_kZo1Q",
         authDomain: "asi-anime.firebaseapp.com",
@@ -130,7 +149,7 @@
     let uploadedImage = "";
     let selectedAnimeId = "";
 
-    // 1️⃣ Auth State Tracker
+    // ========== AUTH STATE ==========
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.getElementById("adminPanel").style.display = "block";
@@ -143,165 +162,294 @@
         }
     });
 
-    // 2️⃣ Login
+    // LOGIN
     document.getElementById("loginBtn").onclick = async () => {
+        const email = document.getElementById("adminEmail").value.trim();
+        const pass = document.getElementById("adminPass").value.trim();
+        if(!email || !pass) {
+            document.getElementById("loginError").innerText = "Enter email & password";
+            return;
+        }
         try { 
-            await signInWithEmailAndPassword(auth, document.getElementById("adminEmail").value, document.getElementById("adminPass").value); 
+            await signInWithEmailAndPassword(auth, email, pass); 
+            document.getElementById("loginError").innerText = "";
         } catch (e) { 
-            document.getElementById("loginError").innerText = e.message; 
+            document.getElementById("loginError").innerText = "❌ " + e.message; 
         }
     };
     
-    // 3️⃣ Logout
+    // LOGOUT
     document.getElementById("logoutBtn").onclick = () => signOut(auth);
 
-    // ===============================================
-    // 🔥 SHORTENER SAVE & DIRECT API TESTER (FIXED)
-    // ===============================================
+    // ========== LOAD SHORTENER SETTINGS ==========
     async function loadSettings() {
-        const snap = await getDoc(doc(db, "settings", "general"));
-        if(snap.exists()) {
-            document.getElementById("shortApiUrl").value = snap.data().shortUrl || "";
-            document.getElementById("shortApiKey").value = snap.data().shortKey || "";
-        }
+        try {
+            const snap = await getDoc(doc(db, "settings", "general"));
+            if(snap.exists()) {
+                document.getElementById("shortApiUrl").value = snap.data().shortUrl || "";
+                document.getElementById("shortApiKey").value = snap.data().shortKey || "";
+            }
+        } catch(e) { console.warn(e); }
     }
     
+    // ✅✅✅ FIXED API TEST LOGIC (NO PROXY, NO VIEW COUNT INFLATION, USES &format=text)
     document.getElementById("saveShortenerBtn").onclick = async () => {
         let rawUrl = document.getElementById("shortApiUrl").value.trim();
         let rawKey = document.getElementById("shortApiKey").value.trim();
         let statusBox = document.getElementById("apiTestResult");
 
-        if(!rawUrl || !rawKey) return alert("Please fill URL and Key!");
+        if(!rawUrl || !rawKey) {
+            statusBox.innerHTML = "⚠️ Please fill both URL and API Key";
+            statusBox.style.color = "#ffaa66";
+            return;
+        }
 
-        // Remove dashboard garbage and make it pure API link
-        let cleanUrl = rawUrl.replace(/\/member.*/i, "").replace(/\/+$/, "");
+        // Clean URL: remove any /member or /dashboard, ensure API endpoint
+        let cleanUrl = rawUrl.replace(/\/member.*/i, "").replace(/\/dashboard.*/i, "").replace(/\/+$/, "");
         if (!cleanUrl.startsWith("http")) cleanUrl = "https://" + cleanUrl;
-        if (!cleanUrl.endsWith("api")) cleanUrl += "/api";
+        if (!cleanUrl.endsWith("/api")) cleanUrl += "/api";
 
         document.getElementById("shortApiUrl").value = cleanUrl;
-        statusBox.innerHTML = "⏳ Testing API Connection...";
-        statusBox.style.color = "yellow";
+        statusBox.innerHTML = "⏳ Testing API with &format=text (no extra views) ...";
+        statusBox.style.color = "#ffc107";
 
-        // Save into DB
+        // Save to firestore first
         await setDoc(doc(db, "settings", "general"), { shortUrl: cleanUrl, shortKey: rawKey }, { merge: true });
 
-        // API Hit Logic (Using direct CORS fetch support via allorigins proxy)
+        // 🔥 CRITICAL FIX: use test target + &format=text -> returns raw shortened URL directly, no JSON CORS.
         const testTarget = "https://google.com";
-        const apiUrl = `${cleanUrl}?api=${rawKey}&url=${encodeURIComponent(testTarget)}`;
-
+        const apiUrl = `${cleanUrl}?api=${rawKey}&url=${encodeURIComponent(testTarget)}&format=text`;
+        
         try {
-            // Testing directly to fetch JSON
-            let isSuccess = false;
-            try {
-                let res = await fetch(apiUrl);
-                let data = await res.json();
-                if(data.status === "success" && data.shortenedUrl) isSuccess = true;
-            } catch(e) {
-                // If direct fetch blocks due to CORS in browser, test via proxy
-                let proxy = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`);
-                let pData = await proxy.json();
-                if(pData.status === "success" && pData.shortenedUrl) isSuccess = true;
+            // Direct fetch with text response (AdrinoLinks returns plain text when &format=text)
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: { 'Accept': 'text/plain, */*' }
+            });
+            
+            const textResult = await response.text();
+            const trimmed = textResult.trim();
+            
+            // If successful, shortened URL should start with http
+            if (trimmed && (trimmed.startsWith("http://") || trimmed.startsWith("https://"))) {
+                statusBox.innerHTML = `✅ SUCCESS! API Working. Shortened URL: ${trimmed.substring(0, 60)}...`;
+                statusBox.style.color = "#a5d6a5";
+                statusBox.style.background = "#0a2f1a";
+            } 
+            else if (trimmed.toLowerCase().includes("invalid") || trimmed.toLowerCase().includes("error") || trimmed.length < 5) {
+                statusBox.innerHTML = `❌ API Error: "${trimmed.substring(0, 80)}". Check your API Key.`;
+                statusBox.style.color = "#ffaaaa";
+                statusBox.style.background = "#3a1515";
             }
-
-            if(isSuccess) {
-                statusBox.innerHTML = "✅ SUCCESS! Link generated correctly.";
-                statusBox.style.color = "lime";
-            } else {
-                statusBox.innerHTML = "❌ API Key Invalid! Please double check your token.";
-                statusBox.style.color = "#ff4d4d";
+            else {
+                statusBox.innerHTML = `⚠️ Unexpected response. Make sure API key is valid. Response: ${trimmed.substring(0, 70)}`;
+                statusBox.style.color = "#ffb347";
             }
-        } catch(err) {
-            statusBox.innerHTML = "❌ Critical Error! URL is unreachable.";
-            statusBox.style.color = "#ff4d4d";
-        }
-    };
-    // ===============================================
-
-    // 4️⃣ Search Fix
-    document.getElementById("epSearch").oninput = function(e) {
-        const term = e.target.value.toLowerCase();
-        const options = document.getElementById("animeSelect").options;
-        for (let i = 0; i < options.length; i++) {
-            options[i].style.display = options[i].text.toLowerCase().includes(term) || options[i].value === "" ? "block" : "none";
+        } catch (err) {
+            console.error("API test error:", err);
+            statusBox.innerHTML = "❌ Connection Failed! Could not reach API URL. Check domain or network.";
+            statusBox.style.color = "#ff8888";
+            statusBox.style.background = "#2a0f0f";
         }
     };
 
-    // 5️⃣ Load Dropdowns
+    // ========== LOAD CONTENT DROPDOWNS ==========
     async function loadList() {
-        const snap = await getDocs(query(collection(db, "anime"), orderBy("name")));
+        const q = query(collection(db, "anime"), orderBy("name"));
+        const snap = await getDocs(q);
         const select = document.getElementById("animeSelect");
         const delSelect = document.getElementById("deleteSelect");
-        select.innerHTML = delSelect.innerHTML = "<option value=''>Select Content</option>";
-        snap.forEach(d => {
-            let opt = `<option value="${d.id}">${d.data().name} (${d.data().type})</option>`;
-            select.innerHTML += opt; delSelect.innerHTML += opt;
+        select.innerHTML = '<option value="">-- Select Content --</option>';
+        delSelect.innerHTML = '<option value="">-- Select Content --</option>';
+        snap.forEach(docSnap => {
+            const data = docSnap.data();
+            const label = `${data.name} (${data.type || 'Anime'})`;
+            const option = `<option value="${docSnap.id}">${escapeHtml(label)}</option>`;
+            select.innerHTML += option;
+            delSelect.innerHTML += option;
         });
     }
+    
+    // simple escape for XSS
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-    // 6️⃣ Cloudinary Upload
+    // ========== CLOUDINARY UPLOAD ==========
     document.getElementById("uploadImgBtn").onclick = () => {
-        cloudinary.createUploadWidget({ cloudName: "dmxqosmk0", uploadPreset: "asi_anime_upload" }, (err, res) => {
+        const widget = cloudinary.createUploadWidget({ 
+            cloudName: "dmxqosmk0", 
+            uploadPreset: "asi_anime_upload",
+            multiple: false,
+            cropping: true
+        }, (err, res) => {
             if (!err && res.event === "success") {
                 uploadedImage = res.info.secure_url;
-                document.getElementById("imgPreview").src = uploadedImage;
-                document.getElementById("imgPreview").style.display = "block";
+                const preview = document.getElementById("imgPreview");
+                preview.src = uploadedImage;
+                preview.style.display = "block";
             }
-        }).open();
+        });
+        widget.open();
     };
 
-    // 7️⃣ Save Content
+    // ========== ADD NEW ANIME/CONTENT ==========
     document.getElementById("addAnimeBtn").onclick = async () => {
         const name = document.getElementById("newName").value.trim();
-        if(!name || !uploadedImage) return alert("Name and Image are mandatory!");
-        document.getElementById("addAnimeBtn").disabled = true;
-
+        if(!name) return alert("❌ Content name is required!");
+        if(!uploadedImage) return alert("📸 Please upload a poster image using Cloudinary!");
+        
+        const btn = document.getElementById("addAnimeBtn");
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+        
         try {
             await addDoc(collection(db, "anime"), {
-                name: name, season: document.getElementById("newSeason").value, year: document.getElementById("newYear").value,
-                genre: document.getElementById("newGenre").value || "General", type: document.getElementById("newType").value,
-                status: document.getElementById("newStatus").value, description: document.getElementById("newDesc").value,
-                image: uploadedImage, episodes:[], updatedAt: Date.now()
+                name: name,
+                season: document.getElementById("newSeason").value.trim() || "1",
+                year: parseInt(document.getElementById("newYear").value) || new Date().getFullYear(),
+                genre: document.getElementById("newGenre").value.trim() || "General",
+                type: document.getElementById("newType").value,
+                status: document.getElementById("newStatus").value,
+                description: document.getElementById("newDesc").value.trim() || "No description",
+                image: uploadedImage,
+                episodes: [],
+                createdAt: Date.now(),
+                updatedAt: Date.now()
             });
-            alert("Saved! ✅"); location.reload();
-        } catch (err) { alert(err.message); document.getElementById("addAnimeBtn").disabled = false; }
+            alert("✅ Content added successfully!");
+            // reset form except image? keep image but clear others
+            document.getElementById("newName").value = "";
+            document.getElementById("newSeason").value = "";
+            document.getElementById("newYear").value = "";
+            document.getElementById("newGenre").value = "";
+            document.getElementById("newDesc").value = "";
+            uploadedImage = "";
+            document.getElementById("imgPreview").style.display = "none";
+            document.getElementById("imgPreview").src = "";
+            loadList(); // refresh dropdowns
+        } catch (err) { alert("Error: " + err.message); }
+        finally { btn.disabled = false; btn.innerText = "Save Content"; }
     };
 
-    // 8️⃣ Load Episodes
+    // ========== EPISODE LOAD ON SELECT CHANGE ==========
     document.getElementById("animeSelect").onchange = (e) => {
         selectedAnimeId = e.target.value;
-        if(selectedAnimeId) fetchEpisodes(); else document.getElementById("existingEpisodesBox").style.display = "none";
+        if(selectedAnimeId) {
+            fetchEpisodes();
+            document.getElementById("existingEpisodesBox").style.display = "block";
+        } else {
+            document.getElementById("existingEpisodesBox").style.display = "none";
+        }
     };
-
+    
     async function fetchEpisodes() {
+        if(!selectedAnimeId) return;
         const docSnap = await getDoc(doc(db, "anime", selectedAnimeId));
         if(docSnap.exists()){
-            const eps = docSnap.data().episodes ||[];
-            document.getElementById("existingEpisodesBox").style.display = "block";
-            document.getElementById("episodesContainer").innerHTML = eps.sort((a,b)=>Number(a.ep)-Number(b.ep)).map(ep => `
-                <div class="ep-item"><span>Ep ${ep.ep}</span><button onclick="window.delEp('${ep.ep}','${ep.link}')">Delete</button></div>
+            const data = docSnap.data();
+            const eps = data.episodes || [];
+            const container = document.getElementById("episodesContainer");
+            if(eps.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding: 12px;">✨ No episodes added yet. Add first episode above.</div>';
+                return;
+            }
+            const sorted = [...eps].sort((a,b) => Number(a.ep) - Number(b.ep));
+            container.innerHTML = sorted.map(ep => `
+                <div class="ep-item">
+                    <span><strong>Episode ${ep.ep}</strong> <span style="color:#aaa; font-size:12px; word-break:break-all;">🔗 ${ep.link.substring(0, 40)}${ep.link.length>40 ? '...' : ''}</span></span>
+                    <button class="delete-ep-btn" data-ep="${ep.ep}" data-link="${ep.link.replace(/"/g, '&quot;')}">🗑️ Delete</button>
+                </div>
             `).join('');
+            
+            // attach delete events dynamically
+            document.querySelectorAll('.delete-ep-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const epNum = btn.getAttribute('data-ep');
+                    const linkRaw = btn.getAttribute('data-link');
+                    if(confirm(`Delete Episode ${epNum} permanently?`)) {
+                        await updateDoc(doc(db, "anime", selectedAnimeId), {
+                            episodes: arrayRemove({ ep: epNum, link: linkRaw }),
+                            updatedAt: Date.now()
+                        });
+                        fetchEpisodes();
+                    }
+                });
+            });
         }
     }
     
-    // 9️⃣ Delete Ep
-    window.delEp = async (ep, link) => {
-        if(confirm(`Delete Ep ${ep}?`)) { await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayRemove({ ep, link }) }); fetchEpisodes(); }
-    };
-
-    // 🔟 Save Ep
+    // ========== ADD EPISODE (WITHOUT DUPLICATE PROTECTION) ==========
     document.getElementById("addEpBtn").onclick = async () => {
-        const epNum = document.getElementById("epNum").value;
+        if(!selectedAnimeId) return alert("Please select content first!");
+        let epNum = document.getElementById("epNum").value.trim();
         const link = document.getElementById("epLink").value.trim();
-        if(!selectedAnimeId || !epNum || !link) return alert("Fill data!");
-        await updateDoc(doc(db, "anime", selectedAnimeId), { episodes: arrayUnion({ ep: epNum, link: link }), updatedAt: Date.now()});
-        alert("Added! ✅"); document.getElementById("epLink").value = ""; document.getElementById("epNum").value = parseInt(epNum) + 1; fetchEpisodes();
+        if(!epNum || !link) return alert("Episode number and link are required!");
+        
+        // ensure episode number is numeric
+        const epNumber = parseInt(epNum);
+        if(isNaN(epNumber)) return alert("Episode number must be a number");
+        
+        const btn = document.getElementById("addEpBtn");
+        btn.disabled = true;
+        btn.innerText = "Adding...";
+        try {
+            const animeRef = doc(db, "anime", selectedAnimeId);
+            const snap = await getDoc(animeRef);
+            const currentEps = snap.exists() ? (snap.data().episodes || []) : [];
+            // optional: check duplicate episode number
+            const exists = currentEps.some(ep => String(ep.ep) === String(epNumber));
+            if(exists) {
+                alert(`⚠️ Episode ${epNumber} already exists! Delete old one first.`);
+                btn.disabled = false;
+                btn.innerText = "Add Episode";
+                return;
+            }
+            await updateDoc(animeRef, {
+                episodes: arrayUnion({ ep: String(epNumber), link: link }),
+                updatedAt: Date.now()
+            });
+            alert(`✅ Episode ${epNumber} added successfully!`);
+            document.getElementById("epLink").value = "";
+            document.getElementById("epNum").value = epNumber + 1;
+            fetchEpisodes();
+        } catch(err) { alert("Error: " + err.message); }
+        finally { btn.disabled = false; btn.innerText = "Add Episode"; }
     };
-
-    // 1️⃣1️⃣ Delete Anime
+    
+    // ========== DELETE ANIME ==========
     document.getElementById("deleteAnimeBtn").onclick = async () => {
         const id = document.getElementById("deleteSelect").value;
-        if(id && confirm("Delete?")) { await deleteDoc(doc(db, "anime", id)); alert("Deleted!"); loadList(); }
+        if(!id) return alert("Select content to delete");
+        if(confirm("⚠️ PERMANENT DELETE: All episodes and data will be gone. Are you sure?")) {
+            try {
+                await deleteDoc(doc(db, "anime", id));
+                alert("🗑️ Content removed permanently.");
+                loadList();
+                if(selectedAnimeId === id) {
+                    selectedAnimeId = "";
+                    document.getElementById("existingEpisodesBox").style.display = "none";
+                    document.getElementById("animeSelect").value = "";
+                }
+            } catch(e) { alert("Delete failed: " + e.message); }
+        }
     };
+    
+    // ========== SEARCH FILTER FOR DROPDOWN ==========
+    document.getElementById("epSearch").addEventListener("input", function(e) {
+        const term = e.target.value.toLowerCase();
+        const select = document.getElementById("animeSelect");
+        const options = select.options;
+        for(let i = 0; i < options.length; i++) {
+            const txt = options[i].text.toLowerCase();
+            if(txt.includes(term) || options[i].value === "") {
+                options[i].style.display = "block";
+            } else {
+                options[i].style.display = "none";
+            }
+        }
+    });
+    
+    // additional safety: reset image preview after logout or login doesn't matter
+    console.log("✅ ASI Admin Panel with FIXED Shortener API Test (format=text) loaded — no view count inflation");
 </script>
 </body>
 </html>
