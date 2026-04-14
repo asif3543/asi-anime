@@ -1,36 +1,3 @@
-Bhai, mujhe problem ekdum clearly samajh aa gayi hai!
-
-Views Count Kyu Nahi Ho Rahe The? (Asal Reason):
-Aapke is purane code mein ek bahut bada "Loophole" (galti) tha. Code mein likha tha:
-
-code
-JavaScript
-download
-content_copy
-expand_less
-catch (error) {
-    window.open(originalLink, "_blank"); // <-- Ye Bypassing ki sabse badi jad thi!
-}
-
-Iska matlab hai, agar AdrinoLinks ka server thoda sa bhi slow hota ya Browser (CORS) use rok deta, toh bot chup-chaap error catch karke user ko Seedha GDrive/Bot ka link de deta tha. User maze se anime dekh leta tha, bina AdrinoLinks par gaye! Isiliye aapko 1 bhi view nahi mil raha tha aur saari links bypass ho rahi thi!
-
-Maine Ab Kya Kiya Hai? (100% Guaranteed Fix):
-
-Bypass ka Raasta Hamesha ke liye Band (Strict Mode): Ab agar AdrinoLinks down hoga ya network error aayega, toh user ko samne Error Popup aayega, lekin usko Direct Link kisi bhi haal mein nahi milegi. (Isse aapki mehnat zaya nahi jayegi aur views 100% bachenge).
-
-Text Format API: Maine API ke aage &format=text laga diya hai. JSON parsing ka error jo pehle aa raha tha, ab wo bilkul khatam ho jayega.
-
-Double Proxy System: codetabs aur allorigins dono proxy lagayi hain jo AdrinoLinks ke Cloudflare ko bypass kar dengi.
-
-Bas is PURE CODE ko apni detail.html se replace kar do. Bypassing permanently band! 🚀
-
-100% FIXED & SECURE detail.html
-code
-Html
-play_circle
-download
-content_copy
-expand_less
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -220,7 +187,7 @@ expand_less
         const animeId = urlParams.get('id');
 
         // ========================================================
-        // 🔥 ULTIMATE STRICT SHORTENER ENGINE (NO BYPASSING)
+        // 🔥 ULTIMATE STRICT SHORTENER ENGINE (NO PROXY - DIRECT FETCH)
         // ========================================================
         window.openEpisode = async function(originalLink, btnElement) {
             const originalText = btnElement.innerHTML;
@@ -250,29 +217,20 @@ expand_less
                 
                 let finalShortLink = null;
 
-                // 3 Layers of Fetching (To beat AdrinoLinks Cloudflare)
-                const proxyList =[
-                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(apiUrl)}`, // Proxy 1 (Most reliable)
-                    `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`,       // Proxy 2
-                    apiUrl // Direct Fallback
-                ];
+                // Direct fetch (NO PROXY — required for views count)
+                try {
+                    const response = await fetch(apiUrl);
+                    const textData = await response.text();
 
-                for (let testUrl of proxyList) {
-                    try {
-                        const response = await fetch(testUrl);
-                        const textData = await response.text();
-                        
-                        // Check if textData is actually a URL
-                        if (textData && textData.trim().match(/^https?:\/\/[^\s]+$/i)) {
-                            finalShortLink = textData.trim();
-                            break; // Stop looking, we found the link!
-                        }
-                    } catch (e) {
-                        console.log(`Failed to fetch from ${testUrl}, trying next...`);
+                    if (textData && textData.trim().match(/^https?:\/\/[^\s]+$/i)) {
+                        finalShortLink = textData.trim();
                     }
+
+                } catch (e) {
+                    console.log("Direct fetch failed:", e);
                 }
-                
-                // 🛑 STRICT LOGIC: Link open karo tabhi jab Ad-link ban chuki ho!
+
+                // Open link
                 if (finalShortLink && finalShortLink.startsWith('http')) {
                     window.open(finalShortLink, "_blank");
                 } else {
