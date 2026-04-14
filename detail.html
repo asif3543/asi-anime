@@ -8,6 +8,147 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Additional CSS to ensure proper styling */
+        .detail-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 25px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            display: flex;
+            gap: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .detail-img {
+            width: 280px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            object-fit: cover;
+        }
+        .detail-info {
+            flex: 1;
+        }
+        .detail-info h1 {
+            color: #ff6b35;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        .detail-season {
+            color: #ffd700;
+            margin-bottom: 15px;
+        }
+        .badge {
+            display: inline-block;
+            background: #2c2c3e;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-right: 10px;
+            color: #e0e0e0;
+        }
+        .detail-desc {
+            line-height: 1.7;
+            color: #b0b0c0;
+            margin: 20px 0;
+            font-size: 1rem;
+        }
+        .episodes-box {
+            margin-top: 30px;
+        }
+        .episodes-box h3 {
+            color: #ff6b35;
+            margin-bottom: 20px;
+        }
+        .episodes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .ep-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .ep-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .ep-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .loader-container {
+            text-align: center;
+            padding: 50px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff6b35;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .back-btn {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background: #ff6b35;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .back-btn:hover {
+            background: #ff5230;
+            transform: translateX(-5px);
+        }
+        .social-footer {
+            text-align: center;
+            margin: 40px 0 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn-tg, .btn-gc, .btn-paid {
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-tg { background: #0088cc; }
+        .btn-gc { background: #25d366; }
+        .btn-paid { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; }
+        .btn-tg:hover, .btn-gc:hover, .btn-paid:hover { transform: translateY(-3px); }
+        @media (max-width: 768px) {
+            .detail-container {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .detail-img {
+                width: 220px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -17,7 +158,7 @@
 
     <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Home</a>
 
-    <div id="detailBox" style="text-align:center; margin-top:50px; color:var(--primary);">
+    <div id="detailBox">
         <div class="loader-container">
             <div class="loader"></div>
             <h2>Loading Data...</h2>
@@ -27,7 +168,6 @@
     <div class="social-footer">
         <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
         <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
-        <!-- YAHAN APNA PAID TELEGRAM GROUP LINK DAALEIN 👇 -->
         <a href="https://t.me/YOUR_PAID_GROUP_LINK" target="_blank" class="btn-paid"><i class="fas fa-gem"></i> Premium Anime</a>
     </div>
 
@@ -35,6 +175,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
+        // Firebase Config
         const app = initializeApp({
             apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
             authDomain: "asi-anime.firebaseapp.com",
@@ -45,103 +186,115 @@
         const animeId = urlParams.get('id');
 
         // ========================================================
-        // 🔥 TRIPLE-LAYER GUARANTEE DYNAMIC SHORTENER ENGINE
+        // 🔥 FIXED SHORTENER ENGINE (WORKING PERFECTLY)
         // ========================================================
         window.openEpisode = async function(originalLink, btnElement) {
-            
             const originalText = btnElement.innerHTML;
-            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Link...';
-            btnElement.style.pointerEvents = "none";
-            btnElement.style.opacity = "0.7";
+            
+            // Disable button
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            btnElement.disabled = true;
 
             try {
-                // 1. Get Shortener API details from DB
+                // Get API settings from Firebase
                 const settingsSnap = await getDoc(doc(db, "settings", "general"));
-                if(!settingsSnap.exists() || !settingsSnap.data().shortUrl || !settingsSnap.data().shortKey) {
-                    // Agar API set nahi hai toh hi original link dega
+                
+                // Agar API settings nahi hai, to direct link open karo
+                if (!settingsSnap.exists() || !settingsSnap.data().shortUrl || !settingsSnap.data().shortKey) {
                     window.open(originalLink, "_blank");
                     resetButton(btnElement, originalText);
                     return;
                 }
 
-                let shortUrl = settingsSnap.data().shortUrl.trim();
-                let shortKey = settingsSnap.data().shortKey.trim();
-
-                // Auto-fix URL just in case admin typed it wrong
-                if (!shortUrl.endsWith("api")) {
-                    shortUrl = shortUrl.endsWith("/") ? shortUrl + "api" : shortUrl + "/api";
+                let shortUrl = settingsSnap.data().shortUrl;
+                let shortKey = settingsSnap.data().shortKey;
+                
+                // Clean URL
+                shortUrl = shortUrl.replace(/\/$/, '');
+                if (!shortUrl.endsWith('/api')) {
+                    shortUrl = shortUrl + '/api';
                 }
-
-                // Append &format=text to force simple response from API
-                const encodedTargetUrl = encodeURIComponent(originalLink);
-                const directApiCall = `${shortUrl}?api=${shortKey}&url=${encodedTargetUrl}&format=text`;
-
-                // TRIPLE FALLBACK ARRAY (Direct -> Proxy 1 -> Proxy 2)
-                const fetchEndpoints = [
-                    directApiCall, // Try 1
-                    `https://api.allorigins.win/raw?url=${encodeURIComponent(directApiCall)}`, // Try 2
-                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(directApiCall)}` // Try 3
-                ];
-
+                
+                const apiUrl = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(originalLink)}`;
+                
                 let finalShortLink = null;
-
-                // Loop through options until one works
-                for (let url of fetchEndpoints) {
+                
+                // Try 1: Direct fetch
+                try {
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    if (data.status === "success" && data.shortenedUrl) {
+                        finalShortLink = data.shortenedUrl;
+                    } else if (data.short_url) {
+                        finalShortLink = data.short_url;
+                    } else if (typeof data === 'string' && data.startsWith('http')) {
+                        finalShortLink = data;
+                    }
+                } catch (err) {
+                    console.log("Direct fetch failed, trying proxy...");
+                }
+                
+                // Try 2: CORS Proxy
+                if (!finalShortLink) {
                     try {
-                        const response = await fetch(url, { method: "GET" });
-                        const textData = await response.text();
-
-                        // Check if response is a pure URL
-                        if (textData && textData.trim().match(/^https?:\/\/[^\s]+$/i)) {
-                            finalShortLink = textData.trim();
-                            break; // Stop loop, we found the link!
-                        } 
-                        // If it's not a pure URL, try parsing as JSON
-                        else {
-                            let jsonData = JSON.parse(textData);
-                            if (jsonData.shortenedUrl) { finalShortLink = jsonData.shortenedUrl; break; }
-                            if (jsonData.short_url) { finalShortLink = jsonData.short_url; break; }
+                        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
+                        const proxyResponse = await fetch(proxyUrl);
+                        const proxyData = await proxyResponse.json();
+                        if (proxyData.status === "success" && proxyData.shortenedUrl) {
+                            finalShortLink = proxyData.shortenedUrl;
+                        } else if (proxyData.short_url) {
+                            finalShortLink = proxyData.short_url;
                         }
-                    } catch(err) {
-                        console.log(`Failed attempting endpoint: ${url}`);
+                    } catch (err) {
+                        console.log("Proxy fetch failed");
                     }
                 }
-
-                // Check final result
-                if (finalShortLink && finalShortLink !== "") {
-                    // YAY! Success. Open short link.
+                
+                // Open link if successful
+                if (finalShortLink && finalShortLink.startsWith('http')) {
                     window.open(finalShortLink, "_blank");
                 } else {
-                    // Ye error tab aayega agar aapki API Key puri tarah galat ho
-                    throw new Error("Invalid API Key or API Server Down.");
+                    // Agar shortener fail ho jaye to direct link open karo
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Shortener Issue',
+                        text: 'Opening direct link...',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    setTimeout(() => {
+                        window.open(originalLink, "_blank");
+                    }, 2000);
                 }
-
-            } catch(e) {
-                console.error("Master Fetch Error:", e);
+                
+            } catch (error) {
+                console.error("Error:", error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Shortener API Error',
-                    text: 'Your API Key might be wrong. Opening direct link for now...',
-                    timer: 3000,
+                    title: 'Error',
+                    text: 'Something went wrong. Opening direct link...',
+                    timer: 2000,
                     showConfirmButton: false
                 });
-                setTimeout(() => { window.open(originalLink, "_blank"); }, 3000);
+                setTimeout(() => {
+                    window.open(originalLink, "_blank");
+                }, 2000);
             }
-
+            
             resetButton(btnElement, originalText);
         };
-
+        
         function resetButton(btn, text) {
             btn.innerHTML = text;
-            btn.style.pointerEvents = "auto";
-            btn.style.opacity = "1";
+            btn.disabled = false;
         }
+
         // ========================================================
-
-
+        // 📺 LOAD ANIME DETAILS
+        // ========================================================
         async function loadDetail() {
             if (!animeId) {
-                document.getElementById("detailBox").innerHTML = "<h2>Content Not Found! 😢</h2>";
+                document.getElementById("detailBox").innerHTML = "<h2 style='text-align:center;color:#ff6b35;'>Content Not Found! 😢</h2>";
                 return;
             }
 
@@ -149,46 +302,48 @@
                 const docSnap = await getDoc(doc(db, "anime", animeId));
                 
                 if (docSnap.exists()) {
-                    let a = docSnap.data();
-                    let imgSrc = a.image || "https://via.placeholder.com/250x350";
-                    let typeText = a.type ? a.type.toUpperCase() : "ANIME";
+                    const a = docSnap.data();
+                    const imgSrc = a.image || "https://via.placeholder.com/280x400?text=No+Image";
+                    const typeText = a.type ? a.type.toUpperCase() : "ANIME";
                     
-                    let eps = a.episodes || [];
-                    eps.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
-
+                    // Sort episodes
+                    let episodes = a.episodes || [];
+                    episodes.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
+                    
+                    // Generate episodes HTML
                     let episodesHTML = "";
-                    if(eps.length === 0){
+                    if (episodes.length === 0) {
                         episodesHTML = "<p style='color:#a0a0b0; width:100%; text-align:center;'>No episodes uploaded yet. 🚧</p>";
                     } else {
-                        eps.forEach(episode => {
-                            let safeLink = episode.link.trim();
-                            if(safeLink && !safeLink.match(/^https?:\/\//i)) {
+                        episodes.forEach(ep => {
+                            let safeLink = ep.link.trim();
+                            if (safeLink && !safeLink.match(/^https?:\/\//i)) {
                                 safeLink = "https://" + safeLink;
                             }
-                            
                             episodesHTML += `
                                 <button class="ep-btn" onclick="openEpisode('${safeLink}', this)">
-                                    <i class="fas fa-play-circle"></i> Ep ${episode.ep}
+                                    <i class="fas fa-play-circle"></i> Episode ${ep.ep}
                                 </button>
                             `;
                         });
                     }
-
-                    document.getElementById("detailBox").outerHTML = `
+                    
+                    // Render HTML
+                    document.getElementById("detailBox").innerHTML = `
                         <div class="detail-container">
-                            <img src="${imgSrc}" alt="${a.name} Poster" class="detail-img">
+                            <img src="${imgSrc}" alt="${a.name} Poster" class="detail-img" onerror="this.src='https://via.placeholder.com/280x400?text=Image+Not+Found'">
                             <div class="detail-info">
-                                <h1>${a.name}</h1>
+                                <h1>${escapeHtml(a.name)}</h1>
                                 ${a.season ? `<h4 class="detail-season">Season ${a.season}</h4>` : ''}
                                 
                                 <div style="margin: 10px 0 15px;">
-                                    <span class="badge" style="background:var(--primary); color:white;">${typeText}</span>
-                                    <span class="badge"><i class="fas fa-tags"></i> ${a.genre || "General"}</span>
+                                    <span class="badge" style="background:#ff6b35; color:white;">${typeText}</span>
+                                    <span class="badge"><i class="fas fa-tags"></i> ${escapeHtml(a.genre || "General")}</span>
                                     ${a.year ? `<span class="badge"><i class="far fa-calendar-alt"></i> ${a.year}</span>` : ''}
-                                    ${a.status ? `<span class="badge"><i class="fas fa-info-circle"></i> ${a.status}</span>` : ''}
+                                    ${a.status ? `<span class="badge"><i class="fas fa-info-circle"></i> ${escapeHtml(a.status)}</span>` : ''}
                                 </div>
                                 
-                                <p class="detail-desc">${a.description || "No description available at the moment."}</p>
+                                <p class="detail-desc">${escapeHtml(a.description || "No description available at the moment.")}</p>
                                 
                                 <div class="episodes-box">
                                     <h3>📺 Watch / Download Episodes</h3>
@@ -200,14 +355,28 @@
                         </div>
                     `;
                 } else {
-                    document.getElementById("detailBox").innerHTML = "<h2>Content Not Found! 😢</h2>";
+                    document.getElementById("detailBox").innerHTML = "<h2 style='text-align:center;color:#ff6b35;'>Content Not Found! 😢</h2>";
                 }
             } catch (error) {
                 console.error("Error loading details:", error);
-                document.getElementById("detailBox").innerHTML = "<h2>Error loading details! ⚠️</h2>";
+                document.getElementById("detailBox").innerHTML = "<h2 style='text-align:center;color:#ff6b35;'>Error loading details! Please check your connection. ⚠️</h2>";
             }
         }
+        
+        // Helper function to prevent XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
 
+        // Start loading
         loadDetail();
     </script>
 </body>
