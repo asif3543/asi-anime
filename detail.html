@@ -187,7 +187,7 @@
         const animeId = urlParams.get('id');
 
         // ========================================================
-        // 🔥 ULTIMATE STRICT SHORTENER ENGINE (NO PROXY - DIRECT FETCH)
+        // 🔥 FINAL SHORTENER ENGINE (DIRECT FETCH - NO PROXY)
         // ========================================================
         window.openEpisode = async function(originalLink, btnElement) {
             const originalText = btnElement.innerHTML;
@@ -219,10 +219,15 @@
 
                 // Direct fetch (NO PROXY — required for views count)
                 try {
-                    const response = await fetch(apiUrl);
+                    const response = await fetch(apiUrl, {
+                        method: "GET",
+                        headers: {
+                            "Accept": "text/plain"
+                        }
+                    });
                     const textData = await response.text();
 
-                    if (textData && textData.trim().match(/^https?:\/\/[^\s]+$/i)) {
+                    if (textData && textData.trim().startsWith("http")) {
                         finalShortLink = textData.trim();
                     }
 
