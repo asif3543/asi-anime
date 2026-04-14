@@ -9,7 +9,47 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Additional CSS to ensure proper styling */
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            color: #f0f0f0;
+        }
+        header {
+            background: #0f0f1a;
+            padding: 15px 30px;
+            border-bottom: 2px solid #ff6b35;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .logo span {
+            color: #ff6b35;
+        }
+        .back-btn {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background: #ff6b35;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+        .back-btn:hover {
+            background: #ff5230;
+            transform: translateX(-5px);
+        }
         .detail-container {
             max-width: 1200px;
             margin: 30px auto;
@@ -25,6 +65,7 @@
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             object-fit: cover;
+            background: #2a2a3a;
         }
         .detail-info {
             flex: 1;
@@ -83,6 +124,7 @@
         .ep-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
         .loader-container {
             text-align: center;
@@ -100,20 +142,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        .back-btn {
-            display: inline-block;
-            margin: 20px;
-            padding: 10px 20px;
-            background: #ff6b35;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: 0.3s;
-        }
-        .back-btn:hover {
-            background: #ff5230;
-            transform: translateX(-5px);
         }
         .social-footer {
             text-align: center;
@@ -168,7 +196,6 @@
     <div class="social-footer">
         <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
         <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
-        <!-- YAHAN PAID LINK AAYEGI -->
         <a href="https://t.me/YOUR_PAID_GROUP_LINK" target="_blank" class="btn-paid"><i class="fas fa-gem"></i> Premium Anime</a>
     </div>
 
@@ -176,7 +203,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-        // Firebase Config
+        // Firebase Config (same as admin panel)
         const app = initializeApp({
             apiKey: "AIzaSyA8Z3CvFTL402UF_6y9v1iWLP8e_kZo1Q",
             authDomain: "asi-anime.firebaseapp.com",
@@ -187,12 +214,12 @@
         const animeId = urlParams.get('id');
 
         // ========================================================
-        // 🔥 FINAL SHORTENER ENGINE (DIRECT FETCH - NO PROXY)
+        // 🔥 FINAL SHORTENER ENGINE (FIXED: response.ok + format=text)
         // ========================================================
         window.openEpisode = async function(originalLink, btnElement) {
             const originalText = btnElement.innerHTML;
             
-            // Disable button
+            // Disable button & show loading spinner
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             btnElement.disabled = true;
 
@@ -200,7 +227,12 @@
                 const settingsSnap = await getDoc(doc(db, "settings", "general"));
                 
                 if (!settingsSnap.exists() || !settingsSnap.data().shortUrl || !settingsSnap.data().shortKey) {
-                    Swal.fire({ icon: 'error', title: 'Admin Error', text: 'Shortener API not configured in Admin Panel.' });
+                    Swal.fire({ 
+                        icon: 'error', 
+                        title: 'Configuration Missing', 
+                        text: 'Shortener API is not configured by admin. Contact support.',
+                        confirmButtonColor: '#ff6b35'
+                    });
                     resetButton(btnElement, originalText);
                     return;
                 }
@@ -208,48 +240,53 @@
                 let shortUrl = settingsSnap.data().shortUrl;
                 let shortKey = settingsSnap.data().shortKey;
                 
-                // Cleanup URL in case admin pasted full dashboard link
-                shortUrl = shortUrl.replace(/\/member.*/i, "").replace(/\/$/, "");
-                if (!shortUrl.endsWith('api')) shortUrl += '/api';
+                // Clean URL (remove /member, /dashboard, trailing slashes)
+                shortUrl = shortUrl.replace(/\/member.*/i, "").replace(/\/dashboard.*/i, "").replace(/\/$/, "");
+                if (!shortUrl.startsWith("http")) shortUrl = "https://" + shortUrl;
+                if (!shortUrl.endsWith("/api")) shortUrl += "/api";
                 
-                // We use &format=text to strictly return plain URL instead of buggy JSON
+                // Use &format=text to get plain URL response (avoids CORS & JSON issues)
                 const apiUrl = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(originalLink)}&format=text`;
                 
                 let finalShortLink = null;
 
-                // Direct fetch (NO PROXY — required for views count)
+                // Direct fetch with response.ok check
                 try {
                     const response = await fetch(apiUrl, {
                         method: "GET",
-                        headers: {
-                            "Accept": "text/plain"
-                        }
+                        headers: { "Accept": "text/plain" }
                     });
-                    const textData = await response.text();
-
-                    if (textData && textData.trim().startsWith("http")) {
-                        finalShortLink = textData.trim();
+                    
+                    // ✅ CRITICAL FIX: Check if response is successful
+                    if (!response.ok) {
+                        throw new Error(`API returned ${response.status}: ${response.statusText}`);
                     }
-
+                    
+                    const textData = await response.text();
+                    
+                    if (textData && (textData.trim().startsWith("http://") || textData.trim().startsWith("https://"))) {
+                        finalShortLink = textData.trim();
+                    } else {
+                        throw new Error("API did not return a valid shortened URL");
+                    }
                 } catch (e) {
-                    console.log("Direct fetch failed:", e);
+                    console.error("Shortener fetch error:", e);
+                    throw new Error("Shortener service failed: " + e.message);
                 }
 
-                // Open link
+                // Open the shortened link
                 if (finalShortLink && finalShortLink.startsWith('http')) {
                     window.open(finalShortLink, "_blank");
                 } else {
-                    // YAHAN BYPASS HOTI THI. AB NAHI HOGI! Seedha Error Dikhayega.
-                    throw new Error("API completely rejected the request.");
+                    throw new Error("Invalid short link generated");
                 }
                 
             } catch (error) {
-                console.error("Secure Engine Blocked Error:", error);
-                // Sirf error dikhao, direct video galti se bhi mat dena
+                console.error("Secure Engine Error:", error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Shortener Blocked',
-                    text: 'Unable to generate Ad-Link. AdrinoLinks server might be down or API key is invalid.',
+                    title: 'Ad-Link Generation Failed',
+                    text: error.message || 'Unable to generate link. Please check your internet or try again later.',
                     confirmButtonColor: '#ff6b35'
                 });
             }
@@ -263,7 +300,7 @@
         }
 
         // ========================================================
-        // 📺 LOAD ANIME DETAILS
+        // 📺 LOAD ANIME DETAILS (WITH FALLBACKS & EMPTY EPISODE HANDLING)
         // ========================================================
         async function loadDetail() {
             if (!animeId) {
@@ -276,19 +313,28 @@
                 
                 if (docSnap.exists()) {
                     const a = docSnap.data();
-                    const imgSrc = a.image || "https://via.placeholder.com/280x400?text=No+Image";
+                    
+                    // ✅ FIX 1: Image fallback and onerror handling
+                    const imgSrc = a.image && a.image.trim() !== "" ? a.image : "https://via.placeholder.com/280x400?text=No+Image+Available";
                     const typeText = a.type ? a.type.toUpperCase() : "ANIME";
                     
-                    let episodes = a.episodes ||[];
+                    let episodes = a.episodes || [];
                     episodes.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
                     
                     let episodesHTML = "";
+                    
+                    // ✅ FIX 2: Handle empty episodes gracefully
                     if (episodes.length === 0) {
-                        episodesHTML = "<p style='color:#a0a0b0; width:100%; text-align:center;'>No episodes uploaded yet. 🚧</p>";
+                        episodesHTML = `<p style="color:#a0a0b0; width:100%; text-align:center; padding:20px;">📭 No episodes uploaded yet. Stay tuned!</p>`;
                     } else {
                         episodes.forEach(ep => {
                             let safeLink = ep.link.trim();
-                            if (safeLink && !safeLink.match(/^https?:\/\//i)) { safeLink = "https://" + safeLink; }
+                            if (safeLink && !safeLink.match(/^https?:\/\//i)) { 
+                                safeLink = "https://" + safeLink; 
+                            }
+                            
+                            // Escape single quotes in link to avoid breaking onclick
+                            safeLink = safeLink.replace(/'/g, "\\'");
                             
                             episodesHTML += `
                                 <button class="ep-btn" onclick="openEpisode('${safeLink}', this)">
@@ -298,17 +344,21 @@
                         });
                     }
                     
+                    // Build the full detail page
                     document.getElementById("detailBox").innerHTML = `
                         <div class="detail-container">
-                            <img src="${imgSrc}" alt="${a.name} Poster" class="detail-img" onerror="this.src='https://via.placeholder.com/280x400?text=Image+Not+Found'">
+                            <img src="${imgSrc}" 
+                                 alt="${escapeHtml(a.name)} Poster" 
+                                 class="detail-img" 
+                                 onerror="this.src='https://via.placeholder.com/280x400?text=Image+Error'">
                             <div class="detail-info">
                                 <h1>${escapeHtml(a.name)}</h1>
-                                ${a.season ? `<h4 class="detail-season">Season ${a.season}</h4>` : ''}
+                                ${a.season ? `<h4 class="detail-season">📀 Season ${escapeHtml(a.season)}</h4>` : ''}
                                 
                                 <div style="margin: 10px 0 15px;">
-                                    <span class="badge" style="background:#ff6b35; color:white;">${typeText}</span>
+                                    <span class="badge" style="background:#ff6b35; color:white;">${escapeHtml(typeText)}</span>
                                     <span class="badge"><i class="fas fa-tags"></i> ${escapeHtml(a.genre || "General")}</span>
-                                    ${a.year ? `<span class="badge"><i class="far fa-calendar-alt"></i> ${a.year}</span>` : ''}
+                                    ${a.year ? `<span class="badge"><i class="far fa-calendar-alt"></i> ${escapeHtml(a.year)}</span>` : ''}
                                     ${a.status ? `<span class="badge"><i class="fas fa-info-circle"></i> ${escapeHtml(a.status)}</span>` : ''}
                                 </div>
                                 
@@ -328,10 +378,11 @@
                 }
             } catch (error) {
                 console.error("Error loading details:", error);
-                document.getElementById("detailBox").innerHTML = "<h2 style='text-align:center;color:#ff6b35;'>Error loading details! Please check your connection. ⚠️</h2>";
+                document.getElementById("detailBox").innerHTML = "<h2 style='text-align:center;color:#ff6b35;'>⚠️ Error loading details! Please check your connection.</h2>";
             }
         }
         
+        // Simple XSS protection
         function escapeHtml(str) {
             if (!str) return '';
             return str.replace(/[&<>]/g, function(m) {
@@ -339,11 +390,10 @@
                 if (m === '<') return '&lt;';
                 if (m === '>') return '&gt;';
                 return m;
-            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-                return c;
             });
         }
 
+        // Start loading
         loadDetail();
     </script>
 </body>
