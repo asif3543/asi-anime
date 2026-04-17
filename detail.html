@@ -68,20 +68,14 @@
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
 
-        // 🔥 URL BYPASS FUNCTION: Har click par Naya Link banke short hoga 
+        // 🔥 URL BYPASS FUNCTION: To force shortener to treat it as a NEW link for View Counting
         function makeUniqueUrl(original) {
+            // Using '#' instead of '&' so Telegram bot's Python parameter parsing does NOT break.
+            // Shortener servers will see this as a unique URL, generating a fresh link each time.
             let hashIndex = original.indexOf('#');
-            let hash = "";
-            let base = original;
-            
-            if (hashIndex !== -1) {
-                hash = original.substring(hashIndex);
-                base = original.substring(0, hashIndex);
-            }
-            
-            let separator = base.includes('?') ? '&' : '?';
-            let uniqueParam = "asi_uid=" + Date.now() + Math.floor(Math.random() * 1000);
-            return base + separator + uniqueParam + hash;
+            let base = hashIndex !== -1 ? original.substring(0, hashIndex) : original;
+            let uniqueParam = "#asi_uid_" + Date.now() + Math.floor(Math.random() * 1000);
+            return base + uniqueParam;
         }
 
         window.openEpisode = async function(originalLink, btnElement) {
@@ -93,8 +87,9 @@
                 const settingsSnap = await getDoc(doc(db, "settings", "general"));
                 const data = settingsSnap.exists() ? settingsSnap.data() : null;
                 
-                let apis = data ? (data.shorteners || []) : [];
+                let apis = data ? (data.shorteners ||[]) :[];
                 
+                // Fallback support for single shortener setup
                 if(apis.length === 0 && data && data.shortUrl && data.shortKey) {
                     apis.push({url: data.shortUrl, key: data.shortKey});
                 }
@@ -105,18 +100,24 @@
                     return;
                 }
 
-                // 🔄 Randomly select 1 shortener
+                // 🔄 Randomly select 1 shortener to maximize unique views across accounts
                 const randomShortener = apis[Math.floor(Math.random() * apis.length)];
+                
                 let shortUrl = randomShortener.url;
+                shortUrl = shortUrl.replace(/\/member.*/i, "").replace(/\/dashboard.*/i, "").replace(/\/$/, "");
+                if (!shortUrl.startsWith("http")) shortUrl = "https://" + shortUrl;
+                if (!shortUrl.endsWith("/api")) shortUrl += "/api";
+                
                 let shortKey = randomShortener.key;
 
-                // 🚀 Apply unique bypass
+                // 🚀 Apply unique bypass fragment to trick shortener cache
                 let bypassedUniqueLink = makeUniqueUrl(originalLink);
                 
                 const apiUrl = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(bypassedUniqueLink)}&format=text`;
                 let finalShortLink = null;
 
                 try {
+                    // Try direct fetch
                     const response = await fetch(apiUrl, { method: "GET", headers: { "Accept": "text/plain" } });
                     if (response.ok) {
                         const textData = await response.text();
@@ -124,28 +125,35 @@
                             finalShortLink = textData.trim();
                         }
                     }
-                } catch (e) { console.log("Direct fetch error:", e); }
+                } catch (e) { 
+                    console.log("Direct fetch block by browser. Trying proxy."); 
+                }
 
                 if (!finalShortLink) {
                     try {
+                        // Fallback to AllOrigins Raw proxy
                         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
                         const pResponse = await fetch(proxyUrl);
                         const pData = await pResponse.text();
                         if (pData && (pData.trim().startsWith("http://") || pData.trim().startsWith("https://"))) {
                             finalShortLink = pData.trim();
                         }
-                    } catch(err2) { console.log("Proxy failed."); }
+                    } catch(err2) { 
+                        console.log("Proxy fetch failed."); 
+                    }
                 }
 
                 if (finalShortLink && finalShortLink.startsWith('http')) {
+                    // Success: Open Ad Link
                     window.open(finalShortLink, "_blank");
                 } else {
+                    // Fail: Server is down or API Key is wrong
                     throw new Error("Shortener Server Failed to Generate Link.");
                 }
                 
             } catch (error) {
                 console.error("Link Gen Error:", error);
-                Swal.fire({ icon: 'error', title: 'Generation Failed', text: 'Ad network error. Please try again.', confirmButtonColor: '#ff6b35' });
+                Swal.fire({ icon: 'error', title: 'Generation Failed', text: 'Shortener API Error or Blocked. Contact admin.', confirmButtonColor: '#ff6b35' });
             }
             
             resetButton(btnElement, originalText);
