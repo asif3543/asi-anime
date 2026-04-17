@@ -212,7 +212,7 @@
             const snap = await getDoc(doc(db, "settings", "general"));
             if(snap.exists()) {
                 const data = snap.data();
-                let apis = data.shorteners || [];
+                let apis = data.shorteners ||[];
                 
                 // Puraane data ko array me dalne ke liye support
                 if(apis.length === 0 && data.shortUrl && data.shortKey) {
@@ -232,7 +232,7 @@
         statusBox.innerHTML = "⏳ Saving & Checking Account(s)...";
         statusBox.style.color = "#ffc107";
 
-        let shortenersToSave = [];
+        let shortenersToSave =[];
 
         for(let i = 1; i <= 3; i++) {
             let rawUrl = document.getElementById(`s${i}Url`).value.trim();
@@ -338,7 +338,7 @@
                 status: document.getElementById("newStatus").value,
                 description: document.getElementById("newDesc").value.trim() || "No description",
                 image: uploadedImage,
-                episodes: [],
+                episodes:[],
                 createdAt: Date.now(),
                 updatedAt: Date.now()
             });
@@ -372,7 +372,7 @@
         const docSnap = await getDoc(doc(db, "anime", selectedAnimeId));
         if(docSnap.exists()){
             const data = docSnap.data();
-            const eps = data.episodes || [];
+            const eps = data.episodes ||[];
             const container = document.getElementById("episodesContainer");
             if(eps.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding: 12px;">✨ No episodes added yet. Add first episode above.</div>';
@@ -403,13 +403,14 @@
         }
     }
     
-    // ========== ADD EPISODE ==========
+    // ========== ADD EPISODE (WITHOUT DUPLICATE PROTECTION) ==========
     document.getElementById("addEpBtn").onclick = async () => {
         if(!selectedAnimeId) return alert("Please select content first!");
         let epNum = document.getElementById("epNum").value.trim();
         const link = document.getElementById("epLink").value.trim();
         if(!epNum || !link) return alert("Episode number and link are required!");
         
+        // ensure episode number is numeric
         const epNumber = parseInt(epNum);
         if(isNaN(epNumber)) return alert("Episode number must be a number");
         
@@ -419,7 +420,7 @@
         try {
             const animeRef = doc(db, "anime", selectedAnimeId);
             const snap = await getDoc(animeRef);
-            const currentEps = snap.exists() ? (snap.data().episodes || []) : [];
+            const currentEps = snap.exists() ? (snap.data().episodes || []) :[];
             
             const exists = currentEps.some(ep => String(ep.ep) === String(epNumber));
             if(exists) {
