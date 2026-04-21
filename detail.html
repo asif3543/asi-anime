@@ -1,4 +1,4 @@
-                <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -52,6 +52,7 @@
     <div class="social-footer">
         <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
         <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
+        <!-- YAHAN PAID LINK AAYEGI -->
         <a href="https://t.me/YOUR_PAID_GROUP_LINK" target="_blank" class="btn-paid"><i class="fas fa-gem"></i> Premium Anime</a>
     </div>
 
@@ -68,7 +69,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
 
-        // 🔥 URL BYPASS FUNCTION: Har request ko ekdum NAYA banata hai (Added Back!)
+        // 🔥 URL BYPASS FUNCTION: Har click par Naya Link banke short hoga 
         function makeUniqueUrl(original) {
             let hashIndex = original.indexOf('#');
             let hash = "";
@@ -84,33 +85,18 @@
             return base + separator + uniqueParam + hash;
         }
 
-        // 🟢 PROPER LINK OPENER (Solves 'Direct/Bot Traffic' issues)
-        function openSecurely(url) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.target = '_blank';
-            a.rel = 'referrer'; // Referrer bhejna compulsory hai views count ke liye
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        // ========================================================
-        // 🚀 BULLETPROOF SHORTENER ENGINE
-        // ========================================================
-        window.openEpisode = async function(originalLink, btnElement, epIndex) {
+        window.openEpisode = async function(originalLink, btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             btnElement.disabled = true;
 
             try {
-                // Fetch APIs from database
                 const settingsSnap = await getDoc(doc(db, "settings", "general"));
                 const data = settingsSnap.exists() ? settingsSnap.data() : null;
                 
                 let apis = data ? (data.shorteners || []) :[];
                 
-                // Single config fallback check
+                // Fallback incase array format fails (Uses old variables)
                 if(apis.length === 0 && data && data.shortUrl && data.shortKey) {
                     apis.push({url: data.shortUrl, key: data.shortKey});
                 }
@@ -121,59 +107,53 @@
                     return;
                 }
 
-                // 🔄 Multi-Shortener Rotation Logic (Depends on Episode Number/Index)
-                const selectedAccount = apis[epIndex % apis.length];
-                let shortUrl = selectedAccount.url;
-                let shortKey = selectedAccount.key;
+                // 🔄 Sequence Rotation - Picks sequentially to guarantee varied networks (YBX Strategy)
+                const storedIdx = parseInt(localStorage.getItem('shortIdx') || '0');
+                const randomShortener = apis[storedIdx % apis.length];
+                localStorage.setItem('shortIdx', storedIdx + 1);
 
-                shortUrl = shortUrl.replace(/\/member.*/i, "").replace(/\/dashboard.*/i, "").replace(/\/$/, "");
-                if (!shortUrl.startsWith("http")) shortUrl = "https://" + shortUrl;
-                if (!shortUrl.endsWith("/api")) shortUrl += "/api";
+                let shortUrl = randomShortener.url;
+                let shortKey = randomShortener.key;
 
-                // 🚀 Apply unique bypass (This fixes the major View Caching issue!)
+                // 🚀 Apply unique bypass (This tricks Shortener cache)
                 let bypassedUniqueLink = makeUniqueUrl(originalLink);
                 
-                // &format=text prevents JSON parsing issues
                 const apiUrl = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(bypassedUniqueLink)}&format=text`;
                 let finalShortLink = null;
 
+                // LAYER 1: Direct Request
                 try {
-                    // fetch block me 'cache: no-store' add kiya taaki browser same episode ki purani api call repeat na kare
-                    const response = await fetch(apiUrl, { method: "GET", headers: { "Accept": "text/plain" }, cache: "no-store" });
+                    const response = await fetch(apiUrl, { method: "GET", headers: { "Accept": "text/plain" } });
                     if (response.ok) {
                         const textData = await response.text();
                         if (textData && (textData.trim().startsWith("http://") || textData.trim().startsWith("https://"))) {
                             finalShortLink = textData.trim();
                         }
                     }
-                } catch (e) { 
-                    console.log("Direct fetch error:", e); 
-                }
+                } catch (e) { console.log("Direct fetch error:", e); }
 
-                // Try Proxy if Direct Fetch is Blocked by AdrinoLinks Cloudflare
+                // LAYER 2: Proxy Fallback
                 if (!finalShortLink) {
                     try {
                         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-                        const pResponse = await fetch(proxyUrl, { cache: "no-store" });
+                        const pResponse = await fetch(proxyUrl);
                         const pData = await pResponse.text();
                         if (pData && (pData.trim().startsWith("http://") || pData.trim().startsWith("https://"))) {
                             finalShortLink = pData.trim();
                         }
-                    } catch(err2) { 
-                        console.log("Proxy failed."); 
-                    }
+                    } catch(err2) { console.log("Proxy failed."); }
                 }
 
-                // Redirect only if proper URL was generated
+                // 🚀 FINAL REDIRECT (Secured from bypass)
                 if (finalShortLink && finalShortLink.startsWith('http')) {
-                    openSecurely(finalShortLink); // Proper click function call
+                    window.open(finalShortLink, "_blank");
                 } else {
                     throw new Error("Shortener Server Failed to Generate Link.");
                 }
                 
             } catch (error) {
                 console.error("Link Gen Error:", error);
-                Swal.fire({ icon: 'error', title: 'Generation Failed', text: 'Ad network error. Server might be down or API key invalid. Please contact Admin.', confirmButtonColor: '#ff6b35' });
+                Swal.fire({ icon: 'error', title: 'Generation Failed', text: 'Ad network is busy. Please try again later.', confirmButtonColor: '#ff6b35' });
             }
             
             resetButton(btnElement, originalText);
@@ -202,13 +182,11 @@
                     if (episodes.length === 0) {
                         episodesHTML = `<p style="color:#a0a0b0; width:100%; text-align:center;">📭 No episodes uploaded yet.</p>`;
                     } else {
-                        // Pass idx so Multi-shortener can rotate sequentially
-                        episodes.forEach((ep, idx) => {
+                        episodes.forEach((ep) => {
                             let safeLink = ep.link.trim();
                             if (safeLink && !safeLink.match(/^https?:\/\//i)) { safeLink = "https://" + safeLink; }
                             safeLink = safeLink.replace(/'/g, "\\'");
-                            
-                            episodesHTML += `<button class="ep-btn" onclick="openEpisode('${safeLink}', this, ${idx})"><i class="fas fa-play-circle"></i> Episode ${ep.ep}</button>`;
+                            episodesHTML += `<button class="ep-btn" onclick="openEpisode('${safeLink}', this)"><i class="fas fa-play-circle"></i> Episode ${ep.ep}</button>`;
                         });
                     }
                     
