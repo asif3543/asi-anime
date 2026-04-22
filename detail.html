@@ -52,7 +52,6 @@
     <div class="social-footer">
         <a href="https://t.me/hindisubinganime" target="_blank" class="btn-tg"><i class="fab fa-telegram"></i> Free Channel</a>
         <a href="https://t.me/hindisubanime_q" target="_blank" class="btn-gc"><i class="fas fa-comments"></i> Group</a>
-        <!-- Paid link yahan change karein -->
         <a href="https://t.me/YOUR_PAID_GROUP_LINK" target="_blank" class="btn-paid"><i class="fas fa-gem"></i> Premium Anime</a>
     </div>
 
@@ -69,7 +68,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
 
-        // 🔥 URL BYPASS FUNCTION: Har click par naya unique link generate karega
         function makeUniqueUrl(original) {
             const hashIndex = original.indexOf('#');
             let hash = "";
@@ -83,7 +81,6 @@
             return base + separator + uniqueParam + hash;
         }
 
-        // 🛡️ HTML Escaping functions
         function escapeHtml(str) {
             if (str === null || str === undefined) return '';
             return String(str).replace(/[&<>]/g, function(m) {
@@ -103,7 +100,9 @@
                              .replace(/'/g, '&#39;');
         }
 
-        // 🌐 Global openEpisode function (ab event delegation se call hogi)
+        // ========================================================
+        // 🔥 ULTIMATE SHORTENER ENGINE (Human Click View Fix)
+        // ========================================================
         window.openEpisode = async function(originalLink, btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
@@ -113,9 +112,8 @@
                 const settingsSnap = await getDoc(doc(db, "settings", "general"));
                 const data = settingsSnap.exists() ? settingsSnap.data() : null;
                 
-                let apis = data ? (data.shorteners || []) : [];
+                let apis = data ? (data.shorteners || []) :[];
                 
-                // Fallback agar purana format use ho raha hai
                 if (apis.length === 0 && data && data.shortUrl && data.shortKey) {
                     apis.push({ url: data.shortUrl, key: data.shortKey });
                 }
@@ -126,13 +124,11 @@
                     return;
                 }
 
-                // 🌀 Safer Rotation Index (NaN se bachav)
+                // Sequence Rotation Fix
                 let rawIdx = localStorage.getItem('shortIdx');
                 let storedIdx = 0;
                 if (rawIdx && !isNaN(parseInt(rawIdx))) {
                     storedIdx = parseInt(rawIdx);
-                } else {
-                    storedIdx = 0;
                 }
                 const randomShortener = apis[storedIdx % apis.length];
                 localStorage.setItem('shortIdx', storedIdx + 1);
@@ -140,13 +136,11 @@
                 const shortUrl = randomShortener.url;
                 const shortKey = randomShortener.key;
 
-                // 🚀 Bypass ke liye unique URL
                 const bypassedUniqueLink = makeUniqueUrl(originalLink);
-                
                 const apiUrl = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(bypassedUniqueLink)}&format=text`;
                 let finalShortLink = null;
 
-                // LAYER 1: Direct request
+                // LAYER 1: Direct Request
                 try {
                     const response = await fetch(apiUrl, { method: "GET", headers: { "Accept": "text/plain" } });
                     if (response.ok) {
@@ -156,10 +150,10 @@
                         }
                     }
                 } catch (e) {
-                    console.warn("Direct shortener fetch error:", e);
+                    console.warn("Direct fetch error:", e);
                 }
 
-                // LAYER 2: Proxy fallback
+                // LAYER 2: Proxy Fallback
                 if (!finalShortLink) {
                     try {
                         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
@@ -173,8 +167,15 @@
                     }
                 }
 
+                // 🟢 FINAL REDIRECT USING REAL ANCHOR TAG (SOLVES THE 0 VIEWS ISSUE)
                 if (finalShortLink && finalShortLink.startsWith('http')) {
-                    window.open(finalShortLink, "_blank");
+                    const linkTrigger = document.createElement('a');
+                    linkTrigger.href = finalShortLink;
+                    linkTrigger.target = '_blank';
+                    linkTrigger.rel = 'noopener'; // 🔥 FIX: 'noreferrer' removed so referrer passes for views counting
+                    document.body.appendChild(linkTrigger);
+                    linkTrigger.click();
+                    document.body.removeChild(linkTrigger);
                 } else {
                     throw new Error("Shortener server returned invalid response.");
                 }
@@ -192,7 +193,9 @@
             btn.disabled = false;
         }
 
-        // 📋 Data load karein
+        // ========================================================
+        // 📺 CONTENT RENDERING SYSTEM
+        // ========================================================
         async function loadDetail() {
             if (!animeId) {
                 document.getElementById("detailBox").innerHTML = "<h2 style='text-align:center;color:#ff6b35;'>❌ ID nahi mili!</h2>";
@@ -216,7 +219,6 @@
                         episodesHTML = `<p style="color:#a0a0b0; width:100%; text-align:center;">📭 Abhi koi episode upload nahi hua.</p>`;
                     } else {
                         episodes.forEach((ep) => {
-                            // data-link attribute mein original link store karte hain (safely escaped)
                             const escapedLink = escapeAttr(ep.link);
                             const escapedEp = escapeHtml(ep.ep);
                             episodesHTML += `<button class="ep-btn" data-link="${escapedLink}"><i class="fas fa-play-circle"></i> Episode ${escapedEp}</button>`;
@@ -252,7 +254,7 @@
             }
         }
 
-        // 🖱️ Event delegation for episode buttons (onclick attribute se chhutkara)
+        // 🖱️ Event delegation for episode buttons
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.ep-btn');
             if (btn && btn.dataset.link) {
