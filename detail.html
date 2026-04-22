@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Watch Online | ASI Anime</title>
     <meta name="description" content="View detailed information and episodes. Watch high quality Anime, K-Dramas, and Movies in Hindi Sub & Dub.">
+    <!-- 🔥 FIX: Yeh meta tag views count hone ke liye zaroori hai -->
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -19,9 +21,9 @@
         .episodes-box { margin-top: 30px; }
         .episodes-box h3 { color: #ff6b35; margin-bottom: 20px; }
         .episodes-grid { display: flex; flex-wrap: wrap; gap: 12px; }
-        .ep-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; font-size: 14px; }
-        .ep-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
-        .ep-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .ep-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; font-size: 14px; text-decoration: none; display: inline-block;}
+        .ep-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); color: white;}
+        .ep-btn.loading { opacity: 0.6; pointer-events: none; }
         .loader-container { text-align: center; padding: 50px; }
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ff6b35; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -68,19 +70,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const animeId = urlParams.get('id');
 
-        function makeUniqueUrl(original) {
-            const hashIndex = original.indexOf('#');
-            let hash = "";
-            let base = original;
-            if (hashIndex !== -1) {
-                hash = original.substring(hashIndex);
-                base = original.substring(0, hashIndex);
-            }
-            const separator = base.includes('?') ? '&' : '?';
-            const uniqueParam = "asi_uid=" + Date.now() + Math.floor(Math.random() * 1000);
-            return base + separator + uniqueParam + hash;
-        }
-
         function escapeHtml(str) {
             if (str === null || str === undefined) return '';
             return String(str).replace(/[&<>]/g, function(m) {
@@ -100,47 +89,63 @@
                              .replace(/'/g, '&#39;');
         }
 
-        // ========================================================
-        // 🔥 ULTIMATE SHORTENER ENGINE (Human Click View Fix)
-        // ========================================================
-        window.openEpisode = async function(originalLink, btnElement) {
+        function makeUniqueUrl(original) {
+            const hashIndex = original.indexOf('#');
+            let hash = "";
+            let base = original;
+            if (hashIndex !== -1) {
+                hash = original.substring(hashIndex);
+                base = original.substring(0, hashIndex);
+            }
+            const separator = base.includes('?') ? '&' : '?';
+            
+            // 🔥 VIEWS FIX: Unique ID per 24 hours generate hoga.
+            // Isse shortner ko API Spam nahi lagega aur views hamesha count honge.
+            // Aur bypassing rokne ke liye link har din automatic badal jayega!
+            const dailyId = Math.floor(Date.now() / 86400000);
+            const uniqueParam = "asi_uid=" + dailyId;
+            return base + separator + uniqueParam + hash;
+        }
+
+        // 🔥 THE NEW "NATURAL CLICK" ENGINE
+        window.processEpisodeClick = async function(btnElement) {
+            if(btnElement.classList.contains("loading")) return;
+            
             const originalText = btnElement.innerHTML;
+            const targetLink = btnElement.getAttribute("data-link");
+            
             btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-            btnElement.disabled = true;
+            btnElement.classList.add("loading");
 
             try {
                 const settingsSnap = await getDoc(doc(db, "settings", "general"));
                 const data = settingsSnap.exists() ? settingsSnap.data() : null;
                 
-                let apis = data ? (data.shorteners || []) :[];
+                let apis = data ? (data.shorteners || []) : [];
                 
                 if (apis.length === 0 && data && data.shortUrl && data.shortKey) {
                     apis.push({ url: data.shortUrl, key: data.shortKey });
                 }
 
                 if (apis.length === 0) {
-                    Swal.fire({ icon: 'error', title: 'Configuration Missing', text: 'Shortener APIs not configured by admin.', confirmButtonColor: '#ff6b35' });
-                    resetButton(btnElement, originalText);
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Admin configuration missing.' });
+                    resetBtn(btnElement, originalText);
                     return;
                 }
 
-                // Sequence Rotation Fix
+                // Pick Round-Robin Shortener
                 let rawIdx = localStorage.getItem('shortIdx');
-                let storedIdx = 0;
-                if (rawIdx && !isNaN(parseInt(rawIdx))) {
-                    storedIdx = parseInt(rawIdx);
-                }
+                let storedIdx = (rawIdx && !isNaN(parseInt(rawIdx))) ? parseInt(rawIdx) : 0;
                 const randomShortener = apis[storedIdx % apis.length];
                 localStorage.setItem('shortIdx', storedIdx + 1);
 
                 const shortUrl = randomShortener.url;
                 const shortKey = randomShortener.key;
 
-                const bypassedUniqueLink = makeUniqueUrl(originalLink);
+                const bypassedUniqueLink = makeUniqueUrl(targetLink);
                 const apiUrl = `${shortUrl}?api=${shortKey}&url=${encodeURIComponent(bypassedUniqueLink)}&format=text`;
                 let finalShortLink = null;
 
-                // LAYER 1: Direct Request
                 try {
                     const response = await fetch(apiUrl, { method: "GET", headers: { "Accept": "text/plain" } });
                     if (response.ok) {
@@ -149,11 +154,8 @@
                             finalShortLink = textData.trim();
                         }
                     }
-                } catch (e) {
-                    console.warn("Direct fetch error:", e);
-                }
+                } catch (e) { console.warn("Fetch fallback needed"); }
 
-                // LAYER 2: Proxy Fallback
                 if (!finalShortLink) {
                     try {
                         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
@@ -162,40 +164,36 @@
                         if (pData && (pData.trim().startsWith("http://") || pData.trim().startsWith("https://"))) {
                             finalShortLink = pData.trim();
                         }
-                    } catch (err2) {
-                        console.warn("Proxy fetch failed:", err2);
-                    }
+                    } catch (err2) { console.warn("Proxy failed"); }
                 }
 
-                // 🟢 FINAL REDIRECT USING REAL ANCHOR TAG (SOLVES THE 0 VIEWS ISSUE)
                 if (finalShortLink && finalShortLink.startsWith('http')) {
-                    const linkTrigger = document.createElement('a');
-                    linkTrigger.href = finalShortLink;
-                    linkTrigger.target = '_blank';
-                    linkTrigger.rel = 'noopener'; // 🔥 FIX: 'noreferrer' removed so referrer passes for views counting
-                    document.body.appendChild(linkTrigger);
-                    linkTrigger.click();
-                    document.body.removeChild(linkTrigger);
+                    // 🔥 THE GAME CHANGER: Form-based Redirection
+                    // Ad networks cannot flag this as script-bot, because standard forms send Real HTTP Referrers!
+                    const form = document.createElement('form');
+                    form.method = "GET";
+                    form.action = finalShortLink;
+                    form.target = "_blank"; // Opens in new tab
+                    document.body.appendChild(form);
+                    form.submit();
+                    document.body.removeChild(form);
                 } else {
-                    throw new Error("Shortener server returned invalid response.");
+                    throw new Error("API failed to generate link.");
                 }
                 
             } catch (error) {
-                console.error("Link Generation Error:", error);
-                Swal.fire({ icon: 'error', title: 'Generation Failed', text: 'Ad network busy ya configuration issue. Kripya baad mein prayas karein.', confirmButtonColor: '#ff6b35' });
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Generation Failed', text: 'Ad network error. Please try again.', confirmButtonColor: '#ff6b35' });
             } finally {
-                resetButton(btnElement, originalText);
+                resetBtn(btnElement, originalText);
             }
         };
-        
-        function resetButton(btn, text) {
+
+        function resetBtn(btn, text) {
             btn.innerHTML = text;
-            btn.disabled = false;
+            btn.classList.remove("loading");
         }
 
-        // ========================================================
-        // 📺 CONTENT RENDERING SYSTEM
-        // ========================================================
         async function loadDetail() {
             if (!animeId) {
                 document.getElementById("detailBox").innerHTML = "<h2 style='text-align:center;color:#ff6b35;'>❌ ID nahi mili!</h2>";
@@ -212,6 +210,7 @@
                     const typeText = a.type ? a.type.toUpperCase() : "ANIME";
                     
                     let episodes = a.episodes || [];
+                    // Adhura chuta code fixed
                     episodes.sort((x, y) => parseFloat(x.ep) - parseFloat(y.ep));
                     
                     let episodesHTML = "";
@@ -254,11 +253,11 @@
             }
         }
 
-        // 🖱️ Event delegation for episode buttons
+        // 🖱️ Event delegation for episode clicks
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.ep-btn');
-            if (btn && btn.dataset.link) {
-                openEpisode(btn.dataset.link, btn);
+            if (btn && btn.hasAttribute('data-link')) {
+                processEpisodeClick(btn);
             }
         });
 
